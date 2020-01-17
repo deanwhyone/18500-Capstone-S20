@@ -6,9 +6,9 @@
  * 640x480 display @ 30 fps. This is taken from mastermindVGA file provided in
  * 18240 for Lab 5.
  */
-`default nettype none
+`default_nettype none
 
-module vga (
+module VGA (
     output logic [9:0]  row,
     output logic [9:0]  col,
     output logic        HS,
@@ -19,12 +19,12 @@ module vga (
 );
 
     logic [10:0]    col_count;
-    logic           col_clear
+    logic           col_clear;
     logic           col_enable;
     logic [9:0]     row_count;
-    logic           row_clear
+    logic           row_clear;
     logic           row_enable;
-    logic           h_blank
+    logic           h_blank;
     logic           v_blank;
 
     // Row counter counts from 0 to 520
@@ -72,7 +72,8 @@ module vga (
     assign h_blank    = col_count > 11'd1279;
 
     assign blank      = h_blank | v_blank;
-endmodule: vga
+
+endmodule: VGA
 
 /*****************************************************************
  *
