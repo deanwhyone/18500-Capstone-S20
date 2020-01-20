@@ -45,27 +45,76 @@ module VGA_testpattern (
     always_comb begin
         LEDR                    = 18'd0;
         {VGA_R, VGA_G, VGA_B}   = {8'd32, 8'd32, 8'd32};
-        // default to generating test pattern
-        if (VGA_row < 10'd240) begin
-            if ((VGA_col < 10'd160) ||
-                (VGA_col >= 10'd320 && VGA_col < 10'd480)) begin
-                VGA_R = 8'd255;
+        if (SW[17]) begin
+            // prototyping the tetris game screen
+            // border color
+            if (VGA_row > 55 && VGA_row < 465 &&
+                VGA_col > 235 && VGA_col < 405) begin
+                {VGA_R, VGA_G, VGA_B}   = {8'd20, 8'd100, 8'd80};
             end
-
-            if (VGA_col < 10'd320) begin
-                VGA_G = 8'd255;
+            // grid
+            if (VGA_row > 60 && VGA_row < 460 &&
+                VGA_col > 240 && VGA_col < 400) begin
+                {VGA_R, VGA_G, VGA_B}   = 24'h0;
+                if (VGA_col[3:0] == 4'd0) begin
+                    {VGA_R, VGA_G, VGA_B}   = {8'd32, 8'd32, 8'd32};
+                end
+                if ((VGA_row % 20) == 32'd0) begin
+                    {VGA_R, VGA_G, VGA_B}   = {8'd32, 8'd32, 8'd32};
+                end
             end
+            // light up individual tiles
+            // there are 200 tiles (10 wide, 20 tall)
+            // 7 colors - SW[16:14]
+            // color coordinate - x = SW[13:10], y = SW[9:5]
+            if (VGA_row > (60 + 20*SW[9:5]) && VGA_row < (80 + 20*SW[9:5]) &&
+                VGA_col > (240 + 16*SW[13:10]) &&
+                VGA_col < (256 + 16*SW[13:10])) begin
+                case (SW[16:14])
+                    3'd0: begin
+                        {VGA_R, VGA_G, VGA_B}   = 24'h00fdff;
+                    end
+                    3'd1: begin
+                        {VGA_R, VGA_G, VGA_B}   = 24'hffff00;
+                    end
+                    3'd2: begin
+                        {VGA_R, VGA_G, VGA_B}   = 24'hff00ff;
+                    end
+                    3'd3: begin
+                        {VGA_R, VGA_G, VGA_B}   = 24'h0000ff;
+                    end
+                    3'd4: begin
+                        {VGA_R, VGA_G, VGA_B}   = 24'hff8000;
+                    end
+                    3'd5: begin
+                        {VGA_R, VGA_G, VGA_B}   = 24'h00ff00;
+                    end
+                    3'd6: begin
+                        {VGA_R, VGA_G, VGA_B}   = 24'hff0000;
+                    end
+                    default: {VGA_R, VGA_G, VGA_B}   = 24'h0;
+                endcase
+            end
+        end else begin
+            // default to generating test pattern
+            if (VGA_row < 10'd240) begin
+                if ((VGA_col < 10'd160) ||
+                    (VGA_col >= 10'd320 && VGA_col < 10'd480)) begin
+                    VGA_R = 8'd255;
+                end
 
-            if ((VGA_col < 10'd80) ||
-                (VGA_col >= 10'd160 && VGA_col < 10'd240) ||
-                (VGA_col >= 10'd320 && VGA_col < 10'd400) ||
-                (VGA_col >= 10'd480 && VGA_col < 10'd560)) begin
-                VGA_B = 8'd255;
+                if (VGA_col < 10'd320) begin
+                    VGA_G = 8'd255;
+                end
+
+                if ((VGA_col < 10'd80) ||
+                    (VGA_col >= 10'd160 && VGA_col < 10'd240) ||
+                    (VGA_col >= 10'd320 && VGA_col < 10'd400) ||
+                    (VGA_col >= 10'd480 && VGA_col < 10'd560)) begin
+                    VGA_B = 8'd255;
+                end
             end
         end
-        // if (SW[17]) begin // prototyping the tetris game screen
-
-        // end
     end
 
     // VGA module
