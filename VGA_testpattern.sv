@@ -2,7 +2,8 @@
  * 18500 Capstone S20
  * Eric Chen, Alton Olsen, Deanyone Su
  *
- * This generates a static test pattern for VGA.
+ * This generates a static test pattern for VGA. Also uses switches to
+ * individually light up each tile in the playfield with options for color.
  */
  `default_nettype none
 
