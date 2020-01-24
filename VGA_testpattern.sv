@@ -5,7 +5,7 @@
  * This generates a static test pattern for VGA. Also uses switches to
  * individually light up each tile in the playfield with options for color.
  */
- `default_nettype none
+`default_nettype none
 
 module VGA_testpattern (
     input  logic        CLOCK_50,

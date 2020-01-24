@@ -5,7 +5,7 @@
  * This package contains useful constants intended to inform the boundaries
  * and sizes of various elements on the display
  */
- `default_nettype none
+`default_nettype none
 
 package DisplayPkg;
     parameter VGA_WIDTH                 = 640;

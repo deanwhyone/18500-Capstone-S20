@@ -7,7 +7,7 @@
  * testbench.
  */
 
- `default_nettype none
+`default_nettype none
 
 module PPD_testbench
     import DisplayPkg::*;
