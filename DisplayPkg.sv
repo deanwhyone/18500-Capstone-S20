@@ -16,8 +16,8 @@ package DisplayPkg;
 
     parameter PLAYFIELD_HSTART          = 240;
     parameter PLAYFIELD_HEND            = 400;
-    parameter PLAYFIELD_VSTART          = 20;
-    parameter PLAYFIELD_VEND            = 420;
+    parameter PLAYFIELD_VSTART          = 60;
+    parameter PLAYFIELD_VEND            = 460;
 
     parameter TILE_WIDTH                =
         (PLAYFIELD_HEND - PLAYFIELD_HSTART) / PLAYFIELD_COLS;

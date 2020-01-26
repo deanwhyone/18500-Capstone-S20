@@ -56,7 +56,7 @@ module PPD_testbench
         if (SW[17]) begin
             // prototyping the tetris game screen
             // border color
-            if (VGA_row >= 15 && VGA_row < 425 &&
+            if (VGA_row >= 55 && VGA_row < 465 &&
                 VGA_col >= 235 && VGA_col < 405) begin
                 {VGA_R, VGA_G, VGA_B}   = {8'd20, 8'd100, 8'd80};
             end
