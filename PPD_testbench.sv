@@ -40,7 +40,7 @@ module PPD_testbench
     logic [ 9:0]    VGA_col;
     logic           VGA_BLANK;
 
-    tile_type_t     tile_type           [PLAYFIELD_DIM_Y][PLAYFIELD_DIM_X];
+    tile_type_t     tile_type           [PLAYFIELD_ROWS][PLAYFIELD_COLS];
     logic [23:0]    ppd_output_color;
     logic           ppd_active;
 
@@ -88,8 +88,8 @@ module PPD_testbench
 
     // set tile_type to drive pattern into playfield
     always_comb begin
-        for (int i = 0; i < PLAYFIELD_DIM_Y; i++) begin
-            for (int j = 0; j < PLAYFIELD_DIM_X; j++) begin
+        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+            for (int j = 0; j < PLAYFIELD_COLS; j++) begin
                 case ((i + j) % 8)
                     0:  tile_type[i][j] = BLANK;
                     1:  tile_type[i][j] = I;
