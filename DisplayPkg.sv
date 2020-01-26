@@ -11,8 +11,8 @@ package DisplayPkg;
     parameter VGA_WIDTH                 = 640;
     parameter VGA_HEIGHT                = 480;
 
-    parameter PLAYFIELD_DIM_X           = 10;
-    parameter PLAYFIELD_DIM_Y           = 20;
+    parameter PLAYFIELD_COLS            = 10;
+    parameter PLAYFIELD_ROWS            = 20;
 
     parameter PLAYFIELD_HSTART          = 240;
     parameter PLAYFIELD_HEND            = 400;
@@ -20,9 +20,9 @@ package DisplayPkg;
     parameter PLAYFIELD_VEND            = 420;
 
     parameter TILE_WIDTH                =
-        (PLAYFIELD_HEND - PLAYFIELD_HSTART) / PLAYFIELD_DIM_X;
+        (PLAYFIELD_HEND - PLAYFIELD_HSTART) / PLAYFIELD_COLS;
     parameter TILE_HEIGHT               =
-        (PLAYFIELD_VEND - PLAYFIELD_VSTART) / PLAYFIELD_DIM_Y;
+        (PLAYFIELD_VEND - PLAYFIELD_VSTART) / PLAYFIELD_ROWS;
 
     parameter BG_COLOR                  = 24'h10_1010;
     parameter TILE_COLOR                = 24'h00_0000;

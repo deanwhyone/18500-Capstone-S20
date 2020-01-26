@@ -16,7 +16,7 @@ module PlayfieldPixelDriver
     input  logic [ 9:0] VGA_row,
     input  logic [ 9:0] VGA_col,
 
-    input  tile_type_t  tile_type       [PLAYFIELD_DIM_Y][PLAYFIELD_DIM_X],
+    input  tile_type_t  tile_type       [PLAYFIELD_ROWS][PLAYFIELD_COLS],
 
     output logic [23:0] output_color,
     output logic        active
@@ -26,8 +26,8 @@ module PlayfieldPixelDriver
         output_color    = 24'd0;
         active          = 1'b0;
         // colorize tiles based on input
-        for (int i = 0; i < PLAYFIELD_DIM_Y; i++) begin
-            for (int j = 0; j < PLAYFIELD_DIM_X; j++) begin
+        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+            for (int j = 0; j < PLAYFIELD_COLS; j++) begin
                 if (VGA_row >= (PLAYFIELD_VSTART + TILE_HEIGHT * i) &&
                     VGA_row < (PLAYFIELD_VSTART + TILE_HEIGHT * (i + 1)) &&
                     VGA_col >= (PLAYFIELD_HSTART + TILE_WIDTH * j) &&
