@@ -35,8 +35,10 @@ package DisplayPkg;
     parameter TETROMINO_S_COLOR         = 24'h00_ff00;
     parameter TETROMINO_Z_COLOR         = 24'hff_0000;
 
-    typedef enum logic [2:0] {
+    typedef enum logic [3:0] {
         BLANK,
+        GARBAGE,
+        GHOST,
         I,
         O,
         T,
