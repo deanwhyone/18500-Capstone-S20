@@ -15,7 +15,6 @@
  *      T, J, L, S, Z
  * the top left corner of the tile
  *      I, O
- *
  */
 `default_nettype none
 
