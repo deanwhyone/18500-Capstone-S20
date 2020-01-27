@@ -29,8 +29,8 @@ package DisplayPkg;
     parameter TILE_HEIGHT               =
         (PLAYFIELD_VEND - PLAYFIELD_VSTART) / PLAYFIELD_ROWS;
 
-    parameter BG_COLOR                  = 24'h10_1010;
-    parameter BORDER_COLOR              = 24'hff_00ff;
+    parameter BG_COLOR                  = 24'h40_4040;
+    parameter BORDER_COLOR              = 24'hff_ffff;
     parameter TILE_BLANK_COLOR          = 24'h00_0000;
     parameter TILE_GARBAGE_COLOR        = 24'haa_aaaa;
     parameter TILE_GHOST_COLOR          = 24'h80_8080;

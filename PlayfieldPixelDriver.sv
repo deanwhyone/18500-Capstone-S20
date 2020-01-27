@@ -23,8 +23,9 @@ module PlayfieldPixelDriver
 );
 
     always_comb begin
-        output_color    = 24'd0;
-        active          = 1'b0;
+        // default inactive and blank output
+        active = 1'b0;
+        output_color = TILE_BLANK_COLOR;
         // colorize tiles based on input
         for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
             for (int j = 0; j < PLAYFIELD_COLS; j++) begin
