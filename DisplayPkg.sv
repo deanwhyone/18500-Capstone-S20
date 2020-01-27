@@ -25,8 +25,9 @@ package DisplayPkg;
         (PLAYFIELD_VEND - PLAYFIELD_VSTART) / PLAYFIELD_ROWS;
 
     parameter BG_COLOR                  = 24'h10_1010;
-    parameter TILE_COLOR                = 24'h00_0000;
-    parameter GRID_COLOR                = 24'h20_2020;
+    parameter TILE_BLANK_COLOR          = 24'h00_0000;
+    parameter TILE_GARBAGE_COLOR        = 24'haa_aaaa;
+    parameter TILE_GHOST_COLOR          = 24'h80_8080;
     parameter TETROMINO_I_COLOR         = 24'h00_fdff;
     parameter TETROMINO_O_COLOR         = 24'hff_ff00;
     parameter TETROMINO_T_COLOR         = 24'hff_00ff;

@@ -10,7 +10,8 @@
 `default_nettype none
 
 module PPD_testbench
-    import DisplayPkg::*;
+    import  DisplayPkg::*,
+            GamePkg::*;
 (
     input  logic        CLOCK_50,
 
@@ -43,6 +44,10 @@ module PPD_testbench
     tile_type_t     tile_type           [PLAYFIELD_ROWS][PLAYFIELD_COLS];
     logic [23:0]    ppd_output_color;
     logic           ppd_active;
+
+    tile_type_t     ftr_type_gen;
+    logic [ 4:0]    ftr_tile_rows       [4];
+    logic [ 4:0]    ftr_tile_cols       [4];
 
     // synchronizer chains
     always_ff @ (posedge clk) begin
@@ -88,22 +93,44 @@ module PPD_testbench
 
     // set tile_type to drive pattern into playfield
     always_comb begin
+        // default to empty playfield
         for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
             for (int j = 0; j < PLAYFIELD_COLS; j++) begin
-                case ((i + j) % 8)
-                    0:  tile_type[i][j] = BLANK;
-                    1:  tile_type[i][j] = I;
-                    2:  tile_type[i][j] = O;
-                    3:  tile_type[i][j] = T;
-                    4:  tile_type[i][j] = J;
-                    5:  tile_type[i][j] = L;
-                    6:  tile_type[i][j] = S;
-                    7:  tile_type[i][j] = Z;
-                endcase
+                tile_type[i][j] = BLANK;
             end
         end
-
+        if (SW[16]) begin
+            for (int i = 0; i < 4; i++) begin
+                tile_type[ftr_tile_rows[i]][ftr_tile_cols[i]] = ftr_type_gen;
+            end
+        end else begin
+            for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                for (int j = 0; j < PLAYFIELD_COLS; j++) begin
+                    case ((i + j) % 8)
+                        0:  tile_type[i][j] = BLANK;
+                        1:  tile_type[i][j] = I;
+                        2:  tile_type[i][j] = O;
+                        3:  tile_type[i][j] = T;
+                        4:  tile_type[i][j] = J;
+                        5:  tile_type[i][j] = L;
+                        6:  tile_type[i][j] = S;
+                        7:  tile_type[i][j] = Z;
+                    endcase
+                end
+            end
+        end
     end
+
+    // FTR module
+    FallingTetrominoRender ftr_inst (
+        .origin_row             (SW[4:0]),
+        .origin_col             (SW[9:5]),
+        .falling_type_in        (tile_type_t'(SW[13:10])),
+        .falling_orientation    (orientation_t'(SW[15:14])),
+        .falling_type_out       (ftr_type_gen),
+        .tile_row               (ftr_tile_rows),
+        .tile_col               (ftr_tile_cols)
+    );
 
     // PPD module
     PlayfieldPixelDriver ppd_inst (

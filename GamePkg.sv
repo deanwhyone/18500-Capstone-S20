@@ -9,6 +9,14 @@
 `default_nettype none
 
 package GamePkg;
+    // tetromino orientations
+    typedef enum logic [1:0] {
+        ORIENTATION_0,  // spawn state
+        ORIENTATION_R,  // right rotation from spawn state
+        ORIENTATION_2,  // double rotation from spawn state
+        ORIENTATION_L   // left rotation from spawn state
+    } orientation_t;
+
     // kick tables
     parameter TEST_POSITIONS = 5;
 
