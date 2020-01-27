@@ -7,6 +7,9 @@
  */
 `default_nettype none
 
+`ifndef DISPLAY_PKG_READ
+`define DISPLAY_PKG_READ
+
 package DisplayPkg;
     parameter VGA_WIDTH                 = 640;
     parameter VGA_HEIGHT                = 480;
@@ -56,3 +59,5 @@ package DisplayPkg;
     } tile_type_t;
 
 endpackage // DisplayPkg
+
+`endif

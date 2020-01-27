@@ -8,6 +8,9 @@
  */
 `default_nettype none
 
+`ifndef GAME_PKG_READ
+`define GAME_PKG_READ
+
 package GamePkg;
     // tetromino orientations
     typedef enum logic [1:0] {
@@ -56,3 +59,5 @@ package GamePkg;
     parameter integer WK_I_0L [TEST_POSITIONS][2] =
         '{'{0, 0}, '{-1, 0}, '{2, 0}, '{-1, 2}, '{2, -1}};
 endpackage // GamePkg
+
+`endif
