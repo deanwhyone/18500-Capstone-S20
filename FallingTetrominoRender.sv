@@ -32,7 +32,7 @@ module FallingTetrominoRender
     output logic [ 4:0]     tile_col            [4]
 );
     always_comb begin
-        unique case (falling_type_in) // has default
+        case (falling_type_in) // has default
             I: begin
                 falling_type_out = I;
                 unique case (falling_orientation)

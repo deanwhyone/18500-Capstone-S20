@@ -33,8 +33,7 @@ module PlayfieldPixelDriver
                     VGA_col >= (PLAYFIELD_HSTART + TILE_WIDTH * j) &&
                     VGA_col < (PLAYFIELD_HSTART + TILE_WIDTH * (j + 1))) begin
                     active = 1'b1;
-                    unique case (tile_type[i][j])
-                        BLANK:      output_color = TILE_BLANK_COLOR;
+                    case (tile_type[i][j])
                         GARBAGE:    output_color = TILE_GARBAGE_COLOR;
                         GHOST:      output_color = TILE_GHOST_COLOR;
                         I:          output_color = TETROMINO_I_COLOR;
@@ -44,6 +43,7 @@ module PlayfieldPixelDriver
                         L:          output_color = TETROMINO_L_COLOR;
                         S:          output_color = TETROMINO_S_COLOR;
                         Z:          output_color = TETROMINO_Z_COLOR;
+                        default:    output_color = TILE_BLANK_COLOR;
                     endcase
                 end
             end

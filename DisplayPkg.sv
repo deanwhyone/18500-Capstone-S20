@@ -19,12 +19,18 @@ package DisplayPkg;
     parameter PLAYFIELD_VSTART          = 60;
     parameter PLAYFIELD_VEND            = 460;
 
+    parameter BORDER_HSTART          = PLAYFIELD_HSTART - 5;
+    parameter BORDER_HEND            = PLAYFIELD_HEND + 5;
+    parameter BORDER_VSTART          = PLAYFIELD_VSTART - 5;
+    parameter BORDER_VEND            = PLAYFIELD_VEND + 5;
+
     parameter TILE_WIDTH                =
         (PLAYFIELD_HEND - PLAYFIELD_HSTART) / PLAYFIELD_COLS;
     parameter TILE_HEIGHT               =
         (PLAYFIELD_VEND - PLAYFIELD_VSTART) / PLAYFIELD_ROWS;
 
     parameter BG_COLOR                  = 24'h10_1010;
+    parameter BORDER_COLOR              = 24'hff_00ff;
     parameter TILE_BLANK_COLOR          = 24'h00_0000;
     parameter TILE_GARBAGE_COLOR        = 24'haa_aaaa;
     parameter TILE_GHOST_COLOR          = 24'h80_8080;
