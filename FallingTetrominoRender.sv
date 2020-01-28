@@ -34,7 +34,7 @@ module FallingTetrominoRender
         case (falling_type_in) // has default
             I: begin
                 falling_type_out = I;
-                unique case (falling_orientation)
+                case (falling_orientation)
                     ORIENTATION_0: begin
                         for (logic [4:0] i = 5'd0; i < 5'd4; i++) begin
                             tile_row[i] = origin_row - 5'd1;
@@ -70,7 +70,7 @@ module FallingTetrominoRender
             end
             T: begin
                 falling_type_out = T;
-                unique case (falling_orientation)
+                case (falling_orientation)
                     ORIENTATION_0: begin
                         tile_row[0] = origin_row;
                         tile_col[0] = origin_col;
@@ -127,7 +127,7 @@ module FallingTetrominoRender
             end
             J: begin
                 falling_type_out = J;
-                unique case (falling_orientation)
+                case (falling_orientation)
                     ORIENTATION_0: begin
                         tile_row[0] = origin_row;
                         tile_col[0] = origin_col;
@@ -184,7 +184,7 @@ module FallingTetrominoRender
             end
             L: begin
                 falling_type_out = L;
-                unique case (falling_orientation)
+                case (falling_orientation)
                     ORIENTATION_0: begin
                         tile_row[0] = origin_row;
                         tile_col[0] = origin_col;
@@ -242,7 +242,7 @@ module FallingTetrominoRender
             end
             S: begin
                 falling_type_out = S;
-                unique case (falling_orientation)
+                case (falling_orientation)
                     ORIENTATION_0: begin
                         tile_row[0] = origin_row;
                         tile_col[0] = origin_col;
@@ -299,7 +299,7 @@ module FallingTetrominoRender
             end
             Z: begin
                 falling_type_out = Z;
-                unique case (falling_orientation)
+                case (falling_orientation)
                     ORIENTATION_0: begin
                         tile_row[0] = origin_row;
                         tile_col[0] = origin_col;
