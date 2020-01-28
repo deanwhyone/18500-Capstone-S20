@@ -3,10 +3,11 @@
  * Eric Chen, Alton Olsen, Deanyone Su
  *
  * This uses the Playfield Pixel Driver (PPD) to drive the individual tiles in
- * the Tetris playfield. Background and borders are still managed by the
+ * the Tetris playfield. Also can enable the Falling Tile Render (FTR) to render
+ * a tetromino in the playfield, using switches to control which tetromino and
+ * its orientation and position. Background and borders are still managed by the
  * testbench.
  */
-
 `default_nettype none
 
 module PPD_testbench

@@ -24,7 +24,7 @@ module ActionStateUpdate
     input  logic [ 4:0]                 origin_col,
     input  tile_type_t                  falling_type_in,
     input  orientation_t                falling_orientation,
-    input  logic [PLAYFIELD_COLS][ 3:0] locked_state    [PLAYFIELD_ROWS],
+    input  logic [PLAYFIELD_COLS-1:0][ 3:0] locked_state    [PLAYFIELD_ROWS],
 
     output logic [ 4:0]                 rotate_R_row,
     output logic [ 4:0]                 rotate_R_col,
@@ -103,6 +103,7 @@ module ActionStateUpdate
     always_comb begin
         hard_drop_orientation   = falling_orientation;
         hard_drop_col           = origin_col;
+        hard_drop_row = origin_row;
         // figuring out what row to hard drop the tetromino to
         case (falling_type_in)
             I: begin
@@ -119,7 +120,7 @@ module ActionStateUpdate
                         end
                     end
                     ORIENTATION_R: begin
-                        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                        for (int i = 2; i < PLAYFIELD_ROWS - 1; i++) begin
                             if (orientation_t'(locked_state[i - 2][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
@@ -141,7 +142,7 @@ module ActionStateUpdate
                         end
                     end
                     ORIENTATION_L: begin
-                        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                        for (int i = 2; i < PLAYFIELD_ROWS - 1; i++) begin
                             if (orientation_t'(locked_state[i - 2][hard_drop_col - 5'd1]) == BLANK &&
                                 orientation_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
                                 orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
@@ -153,7 +154,7 @@ module ActionStateUpdate
                 endcase
             end
             O: begin
-                for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                for (int i = 1; i < PLAYFIELD_ROWS; i++) begin
                     if (orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
                         orientation_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
                         orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
@@ -166,7 +167,7 @@ module ActionStateUpdate
             T: begin
                 case (hard_drop_orientation)
                     ORIENTATION_0: begin
-                        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                        for (int i = 1; i < PLAYFIELD_ROWS; i++) begin
                             if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
                                 orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
@@ -177,7 +178,7 @@ module ActionStateUpdate
                         end
                     end
                     ORIENTATION_R: begin
-                        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                        for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
                             if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
@@ -188,7 +189,7 @@ module ActionStateUpdate
                         end
                     end
                     ORIENTATION_2: begin
-                        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                        for (int i = 0; i < PLAYFIELD_ROWS - 1; i++) begin
                             if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
                                 orientation_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
@@ -199,9 +200,9 @@ module ActionStateUpdate
                         end
                     end
                     ORIENTATION_L: begin
-                        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                        for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
                             if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i-1][hard_drop_col]) == BLANK &&
+                                orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
                                 orientation_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
 
@@ -214,7 +215,7 @@ module ActionStateUpdate
             J: begin
                 case (hard_drop_orientation)
                     ORIENTATION_0: begin
-                        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                        for (int i = 1; i < PLAYFIELD_ROWS; i++) begin
                             if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
                                 orientation_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
@@ -225,7 +226,7 @@ module ActionStateUpdate
                         end
                     end
                     ORIENTATION_R: begin
-                        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                        for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
                             if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i - 1][hard_drop_col + 5'd1]) == BLANK &&
@@ -236,7 +237,7 @@ module ActionStateUpdate
                         end
                     end
                     ORIENTATION_2: begin
-                        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                        for (int i = 0; i < PLAYFIELD_ROWS - 1; i++) begin
                             if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
                                 orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
@@ -247,7 +248,7 @@ module ActionStateUpdate
                         end
                     end
                     ORIENTATION_L: begin
-                        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                        for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
                             if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
@@ -262,7 +263,7 @@ module ActionStateUpdate
             L: begin
                 case (hard_drop_orientation)
                     ORIENTATION_0: begin
-                        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                        for (int i = 1; i < PLAYFIELD_ROWS; i++) begin
                             if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
                                 orientation_t'(locked_state[i - 1][hard_drop_col + 5'd1]) == BLANK &&
@@ -273,7 +274,7 @@ module ActionStateUpdate
                         end
                     end
                     ORIENTATION_R: begin
-                        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                        for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
                             if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i + 1][hard_drop_col + 5'd1]) == BLANK &&
@@ -284,7 +285,7 @@ module ActionStateUpdate
                         end
                     end
                     ORIENTATION_2: begin
-                        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                        for (int i = 0; i < PLAYFIELD_ROWS - 1; i++) begin
                             if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
                                 orientation_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK &&
@@ -295,7 +296,7 @@ module ActionStateUpdate
                         end
                     end
                     ORIENTATION_L: begin
-                        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                        for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
                             if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
@@ -310,7 +311,7 @@ module ActionStateUpdate
             S: begin
                 case (hard_drop_orientation)
                     ORIENTATION_0: begin
-                        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                        for (int i = 1; i < PLAYFIELD_ROWS; i++) begin
                             if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
                                 orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
@@ -321,7 +322,7 @@ module ActionStateUpdate
                         end
                     end
                     ORIENTATION_R: begin
-                        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                        for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
                             if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
@@ -332,7 +333,7 @@ module ActionStateUpdate
                         end
                     end
                     ORIENTATION_2: begin
-                        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                        for (int i = 0; i < PLAYFIELD_ROWS - 1; i++) begin
                             if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
                                 orientation_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
@@ -343,7 +344,7 @@ module ActionStateUpdate
                         end
                     end
                     ORIENTATION_L: begin
-                        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                        for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
                             if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
@@ -358,7 +359,7 @@ module ActionStateUpdate
             Z: begin
                 case (hard_drop_orientation)
                     ORIENTATION_0: begin
-                        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                        for (int i = 1; i < PLAYFIELD_ROWS; i++) begin
                             if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
                                 orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
@@ -369,7 +370,7 @@ module ActionStateUpdate
                         end
                     end
                     ORIENTATION_R: begin
-                        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                        for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
                             if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i - 1][hard_drop_col + 5'd1]) == BLANK &&
@@ -380,7 +381,7 @@ module ActionStateUpdate
                         end
                     end
                     ORIENTATION_2: begin
-                        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                        for (int i = 0; i < PLAYFIELD_ROWS - 1; i++) begin
                             if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
                                 orientation_t'(locked_state[i + 1][hard_drop_col + 5'd1]) == BLANK &&
@@ -391,7 +392,7 @@ module ActionStateUpdate
                         end
                     end
                     ORIENTATION_L: begin
-                        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                        for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
                             if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK &&
