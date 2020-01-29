@@ -1,5 +1,7 @@
 `default_nettype none
 
+// simple readmem testbench
+
 module readmemh_tb;
   logic [7:0] memory [0:255];
 
