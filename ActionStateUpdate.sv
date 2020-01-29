@@ -72,9 +72,9 @@ module ActionStateUpdate
         rotate_L_col = origin_col;
         case (falling_orientation)
             ORIENTATION_0: rotate_L_orientation = ORIENTATION_L;
-            ORIENTATION_R: rotate_L_orientation = ORIENTATION_2;
+            ORIENTATION_R: rotate_L_orientation = ORIENTATION_0;
             ORIENTATION_2: rotate_L_orientation = ORIENTATION_R;
-            ORIENTATION_L: rotate_L_orientation = ORIENTATION_0;
+            ORIENTATION_L: rotate_L_orientation = ORIENTATION_2;
         endcase
     end
 
