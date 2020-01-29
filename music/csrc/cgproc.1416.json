@@ -1,0 +1,42 @@
+{
+    "Modules": {
+        "...MASTER...": {},
+        "std": {},
+        "readmemh_tb": {
+            "Compiled": "Yes",
+            "Compiled Times": 2
+        }
+    },
+    "CompUnits": {
+        "amcQw_d": {
+            "archive": "archive.1/_1416_archive_1.a",
+            "mod": "...MASTER...",
+            "out": "amcQw_d.o",
+            "bytes": 7336,
+            "mode": 4
+        },
+        "Izm3E_d": {
+            "archive": "archive.1/_1416_archive_1.a",
+            "mod": "readmemh_tb",
+            "out": "Izm3E_d.o",
+            "bytes": 8289,
+            "mode": 4
+        }
+    },
+    "ObjArchives": [
+        {
+            "archive": "archive.1/_1416_archive_1.a",
+            "size": 15625,
+            "objects": [
+                [
+                    "amcQw_d.o",
+                    7336
+                ],
+                [
+                    "Izm3E_d.o",
+                    8289
+                ]
+            ]
+        }
+    ]
+}
