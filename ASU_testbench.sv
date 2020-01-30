@@ -193,6 +193,8 @@ module ASU_testbench
     logic [ 4:0]    hard_drop_col_new;
     orientation_t   hard_drop_orientation_new;
 
+    logic [ 4:0]    ghost_rows          [4];
+    logic [ 4:0]    ghost_cols          [4];
 
     // synchronizer chains
     always_ff @ (posedge clk) begin
@@ -358,7 +360,8 @@ module ASU_testbench
         end
         if (SW[15]) begin
             for (int i = 0; i < 4; i++) begin
-                tile_type[ftr_tile_rows[i]][ftr_tile_cols[i]] = ftr_type_gen;
+                tile_type[ftr_tile_rows[i]][ftr_tile_cols[i]]   = ftr_type_gen;
+                tile_type[ghost_rows[i]][ghost_cols[i]]         = TILE_GARBAGE_COLOR;
             end
         end else begin
             for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
@@ -383,6 +386,20 @@ module ASU_testbench
         for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
             locked_state[i] = '{PLAYFIELD_COLS{tile_type_t'(BLANK)}};
         end
+        locked_state[19][2] = TETROMINO_J_COLOR;
+        locked_state[20][2] = TETROMINO_J_COLOR;
+        locked_state[20][3] = TETROMINO_J_COLOR;
+        locked_state[20][4] = TETROMINO_J_COLOR;
+
+        locked_state[18][7] = TETROMINO_S_COLOR;
+        locked_state[18][8] = TETROMINO_S_COLOR;
+        locked_state[19][6] = TETROMINO_S_COLOR;
+        locked_state[19][7] = TETROMINO_S_COLOR;
+
+        locked_state[19][8] = TETROMINO_L_COLOR;
+        locked_state[20][6] = TETROMINO_L_COLOR;
+        locked_state[20][7] = TETROMINO_L_COLOR;
+        locked_state[20][8] = TETROMINO_L_COLOR;
     end
 
     // figure out which update value to use update state
@@ -480,12 +497,12 @@ module ASU_testbench
         .hard_drop_row          (hard_drop_row_new),
         .hard_drop_col          (hard_drop_col_new),
         .hard_drop_orientation  (hard_drop_orientation_new),
-        .ghost_rows             (),
-        .ghost_cols             ()
+        .ghost_rows             (ghost_rows),
+        .ghost_cols             (ghost_cols)
     );
 
     // FTR module
-    FallingTetrominoRender ftr_inst (
+    FallingTetrominoRender ftr_active_inst (
         .origin_row             (origin_row),
         .origin_col             (origin_col),
         .falling_type_in        (tile_type_t'(SW[13:10])),
