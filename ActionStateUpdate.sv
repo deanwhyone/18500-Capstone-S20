@@ -24,7 +24,7 @@ module ActionStateUpdate
     input  logic [ 4:0]                 origin_col,
     input  tile_type_t                  falling_type_in,
     input  orientation_t                falling_orientation,
-    input  logic [PLAYFIELD_COLS-1:0][ 3:0] locked_state    [PLAYFIELD_ROWS],
+    input  logic [ 3:0] locked_state    [PLAYFIELD_ROWS][PLAYFIELD_COLS],
 
     output logic [ 4:0]                 rotate_R_row,
     output logic [ 4:0]                 rotate_R_col,
@@ -103,7 +103,7 @@ module ActionStateUpdate
     always_comb begin
         hard_drop_orientation   = falling_orientation;
         hard_drop_col           = origin_col;
-        hard_drop_row = origin_row;
+        hard_drop_row           = origin_row;
         // figuring out what row to hard drop the tetromino to
         case (falling_type_in)
             I: begin
@@ -126,7 +126,7 @@ module ActionStateUpdate
                                 orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
                                 orientation_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
 
-                                hard_drop_row = i[4:0] - 5'd1;
+                                hard_drop_row = i[4:0];
                             end
                         end
                     end
@@ -147,7 +147,7 @@ module ActionStateUpdate
                                 orientation_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
                                 orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
                                 orientation_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK) begin
-                                hard_drop_row = i[4:0] - 5'd1;
+                                hard_drop_row = i[4:0];
                             end
                         end
                     end
