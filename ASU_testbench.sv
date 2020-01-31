@@ -15,87 +15,6 @@
  */
 `default_nettype none
 
-/**
- * Latches and stores values of WIDTH bits and initializes to RESET_VAL.
- *
- * This register uses an asynchronous active-low reset and a synchronous
- * active-high clear. Upon clear or reset, the value of the register becomes
- * RESET_VAL.
- *
- * Parameters:
- *  - WIDTH         The number of bits that the register holds.
- *  - RESET_VAL     The value that the register holds after a reset.
- *
- * Inputs:
- *  - clk           The clock to use for the register.
- *  - rst_l         An active-low asynchronous reset.
- *  - clear         An active-high synchronous reset.
- *  - en            Indicates whether or not to load the register.
- *  - D             The input to the register.
- *
- * Outputs:
- *  - Q             The latched output from the register.
- **/
-module register
-   #(parameter                      WIDTH=0,
-     parameter logic [WIDTH-1:0]    RESET_VAL='b0)
-    (input  logic               clk, en, rst_l, clear,
-     input  logic [WIDTH-1:0]   D,
-     output logic [WIDTH-1:0]   Q);
-
-     always_ff @(posedge clk, negedge rst_l) begin
-         if (!rst_l)
-             Q <= RESET_VAL;
-         else if (clear)
-             Q <= RESET_VAL;
-         else if (en)
-             Q <= D;
-     end
-
-endmodule // register
-
-/**
- * Counts by INC per enabled clock edge.
- *
- * This counter can be loaded, and increments in INC if enabled. Counter always
- * resets to 0, can be "reset" to other values via D input.
- *
- * Parameters:
- *  - WIDTH         The number of bits that the counter holds.
- *  - INC           The value that the counter increments by, default 1.
- *
- * Inputs:
- *  - clk           The clock to use for the counter.
- *  - rst_l         An active-low asynchronous reset.
- *  - en            Indicates whether or not to load the counter.
- *  - D             The input to the counter.
- *  - load          Indicates whether value should come from D input
- *  - up            Indicates if counter should count up (1) or down (0)
- *
- * Outputs:
- *  - Q             The latched output from the counter.
- **/
-module counter
-    # (parameter WIDTH = 8, INC = 1)
-    (input logic [WIDTH - 1:0] D,
-     input logic clk, en, rst_l, load, up,
-     output logic [WIDTH - 1:0] Q);
-
-    always_ff @ (posedge clk, negedge rst_l) begin
-        if (~rst_l)
-            Q <= {WIDTH{1'b0}};
-        else if (load)
-            Q <= D;
-        else if (en)
-            if (up)
-                Q <= Q + INC;
-            else
-                Q <= Q - INC;
-        else
-            Q <= Q;
-    end
-endmodule // counter
-
 module ASU_testbench
     import  DisplayPkg::*,
             GamePkg::*;
@@ -173,7 +92,7 @@ module ASU_testbench
     orientation_t   falling_orientation;
     orientation_t   falling_orientation_update;
 
-    logic [PLAYFIELD_COLS-1:0][ 3:0] locked_state    [PLAYFIELD_ROWS];
+    logic [ 3:0]    locked_state        [PLAYFIELD_ROWS][PLAYFIELD_COLS];
     logic [ 4:0]    rotate_R_row_new;
     logic [ 4:0]    rotate_R_col_new;
     orientation_t   rotate_R_orientation_new;
@@ -352,16 +271,18 @@ module ASU_testbench
 
     // set tile_type to drive pattern into playfield
     always_comb begin
-        // default to empty playfield
+        // default to locked state rendering into playfield
         for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
             for (int j = 0; j < PLAYFIELD_COLS; j++) begin
-                tile_type[i][j] = BLANK;
+                tile_type[i][j] = tile_type_t'(locked_state[i][j]);
             end
         end
         if (SW[15]) begin
             for (int i = 0; i < 4; i++) begin
+                tile_type[ghost_rows[i]][ghost_cols[i]]         = GHOST;
+            end
+            for (int i = 0; i < 4; i++) begin
                 tile_type[ftr_tile_rows[i]][ftr_tile_cols[i]]   = ftr_type_gen;
-                tile_type[ghost_rows[i]][ghost_cols[i]]         = TILE_GARBAGE_COLOR;
             end
         end else begin
             for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
@@ -381,25 +302,25 @@ module ASU_testbench
         end
     end
 
-    // generate empty locked state
+    // generate locked state
     always_comb begin
         for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
-            locked_state[i] = '{PLAYFIELD_COLS{tile_type_t'(BLANK)}};
+            locked_state[i] = '{PLAYFIELD_COLS{BLANK}};
         end
-        locked_state[19][2] = TETROMINO_J_COLOR;
-        locked_state[20][2] = TETROMINO_J_COLOR;
-        locked_state[20][3] = TETROMINO_J_COLOR;
-        locked_state[20][4] = TETROMINO_J_COLOR;
+        locked_state[18][2] = J;
+        locked_state[19][2] = J;
+        locked_state[19][3] = J;
+        locked_state[19][4] = J;
 
-        locked_state[18][7] = TETROMINO_S_COLOR;
-        locked_state[18][8] = TETROMINO_S_COLOR;
-        locked_state[19][6] = TETROMINO_S_COLOR;
-        locked_state[19][7] = TETROMINO_S_COLOR;
+        locked_state[17][7] = S;
+        locked_state[17][8] = S;
+        locked_state[18][6] = S;
+        locked_state[18][7] = S;
 
-        locked_state[19][8] = TETROMINO_L_COLOR;
-        locked_state[20][6] = TETROMINO_L_COLOR;
-        locked_state[20][7] = TETROMINO_L_COLOR;
-        locked_state[20][8] = TETROMINO_L_COLOR;
+        locked_state[18][8] = L;
+        locked_state[19][6] = L;
+        locked_state[19][7] = L;
+        locked_state[19][8] = L;
     end
 
     // figure out which update value to use update state

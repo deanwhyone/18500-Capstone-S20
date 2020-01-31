@@ -105,15 +105,15 @@ module ActionStateUpdate
         hard_drop_col           = origin_col;
         hard_drop_row           = origin_row;
         // figuring out what row to hard drop the tetromino to
-        case (falling_type_in)
+        unique case (falling_type_in)
             I: begin
                 case (hard_drop_orientation)
                     ORIENTATION_0: begin
                         for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
-                            if (orientation_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col - 5'd2]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col - 5'd2]) == BLANK) begin
 
                                 hard_drop_row = i[4:0] + 5'd1;
                             end
@@ -121,10 +121,10 @@ module ActionStateUpdate
                     end
                     ORIENTATION_R: begin
                         for (int i = 2; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (orientation_t'(locked_state[i - 2][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i - 2][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
                             end
@@ -132,10 +132,10 @@ module ActionStateUpdate
                     end
                     ORIENTATION_2: begin
                         for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
-                            if (orientation_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col - 5'd2]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col - 5'd2]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
                             end
@@ -143,10 +143,10 @@ module ActionStateUpdate
                     end
                     ORIENTATION_L: begin
                         for (int i = 2; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (orientation_t'(locked_state[i - 2][hard_drop_col - 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i - 2][hard_drop_col - 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK) begin
                                 hard_drop_row = i[4:0];
                             end
                         end
@@ -155,10 +155,10 @@ module ActionStateUpdate
             end
             O: begin
                 for (int i = 1; i < PLAYFIELD_ROWS; i++) begin
-                    if (orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                        orientation_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
-                        orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                        orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK) begin
+                    if (tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                        tile_type_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
+                        tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                        tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK) begin
 
                         hard_drop_row = i[4:0];
                     end
@@ -168,10 +168,10 @@ module ActionStateUpdate
                 case (hard_drop_orientation)
                     ORIENTATION_0: begin
                         for (int i = 1; i < PLAYFIELD_ROWS; i++) begin
-                            if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
                             end
@@ -179,10 +179,10 @@ module ActionStateUpdate
                     end
                     ORIENTATION_R: begin
                         for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
                             end
@@ -190,10 +190,10 @@ module ActionStateUpdate
                     end
                     ORIENTATION_2: begin
                         for (int i = 0; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
                             end
@@ -201,10 +201,10 @@ module ActionStateUpdate
                     end
                     ORIENTATION_L: begin
                         for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
                             end
@@ -216,10 +216,10 @@ module ActionStateUpdate
                 case (hard_drop_orientation)
                     ORIENTATION_0: begin
                         for (int i = 1; i < PLAYFIELD_ROWS; i++) begin
-                            if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
                             end
@@ -227,10 +227,10 @@ module ActionStateUpdate
                     end
                     ORIENTATION_R: begin
                         for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i - 1][hard_drop_col + 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i - 1][hard_drop_col + 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
                             end
@@ -238,10 +238,10 @@ module ActionStateUpdate
                     end
                     ORIENTATION_2: begin
                         for (int i = 0; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i + 1][hard_drop_col + 5'd1]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i + 1][hard_drop_col + 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
                             end
@@ -249,10 +249,10 @@ module ActionStateUpdate
                     end
                     ORIENTATION_L: begin
                         for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
                             end
@@ -264,10 +264,10 @@ module ActionStateUpdate
                 case (hard_drop_orientation)
                     ORIENTATION_0: begin
                         for (int i = 1; i < PLAYFIELD_ROWS; i++) begin
-                            if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i - 1][hard_drop_col + 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i - 1][hard_drop_col + 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
                             end
@@ -275,10 +275,10 @@ module ActionStateUpdate
                     end
                     ORIENTATION_R: begin
                         for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i + 1][hard_drop_col + 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i + 1][hard_drop_col + 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
                             end
@@ -286,10 +286,10 @@ module ActionStateUpdate
                     end
                     ORIENTATION_2: begin
                         for (int i = 0; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
                             end
@@ -297,10 +297,10 @@ module ActionStateUpdate
                     end
                     ORIENTATION_L: begin
                         for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
                             end
@@ -312,10 +312,10 @@ module ActionStateUpdate
                 case (hard_drop_orientation)
                     ORIENTATION_0: begin
                         for (int i = 1; i < PLAYFIELD_ROWS; i++) begin
-                            if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i - 1][hard_drop_col + 5'd1]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i - 1][hard_drop_col + 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
                             end
@@ -323,10 +323,10 @@ module ActionStateUpdate
                     end
                     ORIENTATION_R: begin
                         for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i + 1][hard_drop_col + 5'd1]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i + 1][hard_drop_col + 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
                             end
@@ -334,10 +334,10 @@ module ActionStateUpdate
                     end
                     ORIENTATION_2: begin
                         for (int i = 0; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
                             end
@@ -345,10 +345,10 @@ module ActionStateUpdate
                     end
                     ORIENTATION_L: begin
                         for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
                             end
@@ -360,10 +360,10 @@ module ActionStateUpdate
                 case (hard_drop_orientation)
                     ORIENTATION_0: begin
                         for (int i = 1; i < PLAYFIELD_ROWS; i++) begin
-                            if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
                             end
@@ -371,10 +371,10 @@ module ActionStateUpdate
                     end
                     ORIENTATION_R: begin
                         for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i - 1][hard_drop_col + 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i - 1][hard_drop_col + 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
                             end
@@ -382,10 +382,10 @@ module ActionStateUpdate
                     end
                     ORIENTATION_2: begin
                         for (int i = 0; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i + 1][hard_drop_col + 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i + 1][hard_drop_col + 5'd1]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i + 1][hard_drop_col + 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
                             end
@@ -393,10 +393,10 @@ module ActionStateUpdate
                     end
                     ORIENTATION_L: begin
                         for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (orientation_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
-                                orientation_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK &&
-                                orientation_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK) begin
+                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
+                                tile_type_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK &&
+                                tile_type_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
                             end
@@ -404,7 +404,6 @@ module ActionStateUpdate
                     end
                 endcase
             end
-            default:            hard_drop_row = origin_row;
         endcase
     end
 
