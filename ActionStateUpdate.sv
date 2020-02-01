@@ -116,7 +116,7 @@ module ActionStateUpdate
                                 tile_type_t'(locked_state[i][hard_drop_col - 5'd2]) == BLANK) begin
 
                                 hard_drop_row = i[4:0] + 5'd1;
-                            end
+                            end else break;
                         end
                     end
                     ORIENTATION_R: begin
@@ -127,7 +127,7 @@ module ActionStateUpdate
                                 tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
-                            end
+                            end else break;
                         end
                     end
                     ORIENTATION_2: begin
@@ -138,7 +138,7 @@ module ActionStateUpdate
                                 tile_type_t'(locked_state[i][hard_drop_col - 5'd2]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
-                            end
+                            end else break;
                         end
                     end
                     ORIENTATION_L: begin
@@ -148,7 +148,7 @@ module ActionStateUpdate
                                 tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
                                 tile_type_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK) begin
                                 hard_drop_row = i[4:0];
-                            end
+                            end else break;
                         end
                     end
                 endcase
@@ -161,7 +161,7 @@ module ActionStateUpdate
                         tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK) begin
 
                         hard_drop_row = i[4:0];
-                    end
+                    end else break;
                 end
             end
             T: begin
@@ -174,7 +174,7 @@ module ActionStateUpdate
                                 tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
-                            end
+                            end else break;
                         end
                     end
                     ORIENTATION_R: begin
@@ -185,7 +185,7 @@ module ActionStateUpdate
                                 tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
-                            end
+                            end else break;
                         end
                     end
                     ORIENTATION_2: begin
@@ -196,7 +196,7 @@ module ActionStateUpdate
                                 tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
-                            end
+                            end else break;
                         end
                     end
                     ORIENTATION_L: begin
@@ -207,7 +207,7 @@ module ActionStateUpdate
                                 tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
-                            end
+                            end else break;
                         end
                     end
                 endcase
@@ -222,7 +222,7 @@ module ActionStateUpdate
                                 tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
-                            end
+                            end else break;
                         end
                     end
                     ORIENTATION_R: begin
@@ -244,7 +244,7 @@ module ActionStateUpdate
                                 tile_type_t'(locked_state[i + 1][hard_drop_col + 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
-                            end
+                            end else break;
                         end
                     end
                     ORIENTATION_L: begin
@@ -255,7 +255,7 @@ module ActionStateUpdate
                                 tile_type_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
-                            end
+                            end else break;
                         end
                     end
                 endcase
@@ -270,7 +270,7 @@ module ActionStateUpdate
                                 tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
-                            end
+                            end else break;
                         end
                     end
                     ORIENTATION_R: begin
@@ -281,7 +281,7 @@ module ActionStateUpdate
                                 tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
-                            end
+                            end else break;
                         end
                     end
                     ORIENTATION_2: begin
@@ -292,7 +292,7 @@ module ActionStateUpdate
                                 tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
-                            end
+                            end else break;
                         end
                     end
                     ORIENTATION_L: begin
@@ -303,7 +303,7 @@ module ActionStateUpdate
                                 tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
-                            end
+                            end else break;
                         end
                     end
                 endcase
@@ -318,7 +318,7 @@ module ActionStateUpdate
                                 tile_type_t'(locked_state[i - 1][hard_drop_col + 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
-                            end
+                            end else break;
                         end
                     end
                     ORIENTATION_R: begin
@@ -329,7 +329,7 @@ module ActionStateUpdate
                                 tile_type_t'(locked_state[i + 1][hard_drop_col + 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
-                            end
+                            end else break;
                         end
                     end
                     ORIENTATION_2: begin
@@ -340,7 +340,7 @@ module ActionStateUpdate
                                 tile_type_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
-                            end
+                            end else break;
                         end
                     end
                     ORIENTATION_L: begin
@@ -351,7 +351,7 @@ module ActionStateUpdate
                                 tile_type_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
-                            end
+                            end else break;
                         end
                     end
                 endcase
@@ -366,7 +366,7 @@ module ActionStateUpdate
                                 tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
-                            end
+                            end else break;
                         end
                     end
                     ORIENTATION_R: begin
@@ -377,7 +377,7 @@ module ActionStateUpdate
                                 tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
-                            end
+                            end else break;
                         end
                     end
                     ORIENTATION_2: begin
@@ -388,7 +388,7 @@ module ActionStateUpdate
                                 tile_type_t'(locked_state[i + 1][hard_drop_col + 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
-                            end
+                            end else break;
                         end
                     end
                     ORIENTATION_L: begin
@@ -399,7 +399,7 @@ module ActionStateUpdate
                                 tile_type_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK) begin
 
                                 hard_drop_row = i[4:0];
-                            end
+                            end else break;
                         end
                     end
                 endcase
