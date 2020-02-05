@@ -58,6 +58,13 @@ package GamePkg;
         '{'{0, 0}, '{1, 0}, '{-2, 0}, '{1, 2}, '{-2, -1}};
     parameter integer WK_I_0L [TEST_POSITIONS][2] =
         '{'{0, 0}, '{-1, 0}, '{2, 0}, '{-1, -2}, '{2, 1}};
+
+    parameter logic [30:0] SEEDS [4] = '{31'h5eed_cafe,
+                                         31'h0b57_ac1e,
+                                         31'h0dec_0de5,
+                                         31'h0ca5_cade};
+
+    parameter NEXT_PIECES_COUNT         = 6;
 endpackage // GamePkg
 
 `endif
