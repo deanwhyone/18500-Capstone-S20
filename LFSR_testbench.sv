@@ -4,6 +4,9 @@
  *
  * This module tests a LFSR. Here particularly it is to be tested against the
  * 31-bit maximal LFSR, developed for our Tetris implementation.
+ *
+ * Using multiple instances of the LFSR to generate a select signal to indicate
+ * which tetromino is to be generated.
  */
 `default_nettype none
 
