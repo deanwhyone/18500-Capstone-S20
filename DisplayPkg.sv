@@ -14,23 +14,31 @@ package DisplayPkg;
     parameter VGA_WIDTH                 = 640;
     parameter VGA_HEIGHT                = 480;
 
-    parameter PLAYFIELD_COLS            = 10;
     parameter PLAYFIELD_ROWS            = 20;
+    parameter PLAYFIELD_COLS            = 10;
 
     parameter PLAYFIELD_HSTART          = 240;
     parameter PLAYFIELD_HEND            = 400;
     parameter PLAYFIELD_VSTART          = 60;
     parameter PLAYFIELD_VEND            = 460;
 
-    parameter BORDER_HSTART          = PLAYFIELD_HSTART - 5;
-    parameter BORDER_HEND            = PLAYFIELD_HEND + 5;
-    parameter BORDER_VSTART          = PLAYFIELD_VSTART - 5;
-    parameter BORDER_VEND            = PLAYFIELD_VEND + 5;
-
     parameter TILE_WIDTH                =
         (PLAYFIELD_HEND - PLAYFIELD_HSTART) / PLAYFIELD_COLS;
     parameter TILE_HEIGHT               =
         (PLAYFIELD_VEND - PLAYFIELD_VSTART) / PLAYFIELD_ROWS;
+
+    parameter NEXT_ROWS                 = 19;
+    parameter NEXT_COLS                 = 6;
+
+    parameter NEXT_HSTART               = PLAYFIELD_HEND + 5;
+    parameter NEXT_HEND                 = NEXT_HSTART + NEXT_COLS * TILE_WIDTH;
+    parameter NEXT_VSTART               = PLAYFIELD_VSTART;
+    parameter NEXT_VEND                 = NEXT_VSTART + NEXT_ROWS * TILE_HEIGHT;
+
+    parameter BORDER_HSTART             = PLAYFIELD_HSTART - 5;
+    parameter BORDER_HEND               = PLAYFIELD_HEND + 5;
+    parameter BORDER_VSTART             = PLAYFIELD_VSTART - 5;
+    parameter BORDER_VEND               = PLAYFIELD_VEND + 5;
 
     parameter BG_COLOR                  = 24'h40_4040;
     parameter BORDER_COLOR              = 24'hff_ffff;
