@@ -11,7 +11,7 @@
  *      move when SW[0] is low
  *      rotate when SW[0] is high
  * KEY[2] is softdrop, KEY[0] is hard drop.
- * SW{13:0] selects which tetromino is displayed
+ * SW{13:10] selects which tetromino is displayed
  * SW[14] resets the tetromino to a pre-set orientation and position.
  * SW[17] is a hard reset.
  */
