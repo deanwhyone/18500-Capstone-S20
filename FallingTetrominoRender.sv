@@ -26,14 +26,12 @@ module FallingTetrominoRender
     input  logic [ 4:0]     origin_col,
     input  tile_type_t      falling_type_in,
     input  orientation_t    falling_orientation,
-    output tile_type_t      falling_type_out,
     output logic [ 4:0]     tile_row            [4],
     output logic [ 4:0]     tile_col            [4]
 );
     always_comb begin
         case (falling_type_in) // has default
             I: begin
-                falling_type_out = I;
                 case (falling_orientation)
                     ORIENTATION_0: begin
                         for (logic [4:0] i = 5'd0; i < 5'd4; i++) begin
@@ -62,14 +60,12 @@ module FallingTetrominoRender
                 endcase
             end
             O: begin
-                falling_type_out = O;
                 for (int i = 0; i < 4; i++) begin
                     tile_row[i] = origin_row - {4'd0, i[0]};
                     tile_col[i] = origin_col - {4'd0, i[1]};
                 end
             end
             T: begin
-                falling_type_out = T;
                 case (falling_orientation)
                     ORIENTATION_0: begin
                         tile_row[0] = origin_row;
@@ -126,7 +122,6 @@ module FallingTetrominoRender
                 endcase
             end
             J: begin
-                falling_type_out = J;
                 case (falling_orientation)
                     ORIENTATION_0: begin
                         tile_row[0] = origin_row;
@@ -183,7 +178,6 @@ module FallingTetrominoRender
                 endcase
             end
             L: begin
-                falling_type_out = L;
                 case (falling_orientation)
                     ORIENTATION_0: begin
                         tile_row[0] = origin_row;
@@ -241,7 +235,6 @@ module FallingTetrominoRender
                 endcase
             end
             S: begin
-                falling_type_out = S;
                 case (falling_orientation)
                     ORIENTATION_0: begin
                         tile_row[0] = origin_row;
@@ -298,7 +291,6 @@ module FallingTetrominoRender
                 endcase
             end
             Z: begin
-                falling_type_out = Z;
                 case (falling_orientation)
                     ORIENTATION_0: begin
                         tile_row[0] = origin_row;
@@ -355,7 +347,6 @@ module FallingTetrominoRender
                 endcase
             end
             default: begin
-                falling_type_out = BLANK;
                 for (int i = 0; i < 4; i++) begin
                     tile_row[i] = 5'd0;
                     tile_col[i] = 5'd0;

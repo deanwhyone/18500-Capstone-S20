@@ -413,7 +413,6 @@ module ActionStateUpdate
         .origin_col             (hard_drop_col),
         .falling_type_in        (falling_type_in),
         .falling_orientation    (hard_drop_orientation),
-        .falling_type_out       (),
         .tile_row               (ghost_rows),
         .tile_col               (ghost_cols)
     );

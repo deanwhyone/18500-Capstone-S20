@@ -46,7 +46,6 @@ module PPD_testbench
     logic [23:0]    ppd_output_color;
     logic           ppd_active;
 
-    tile_type_t     ftr_type_gen;
     logic [ 4:0]    ftr_tile_rows       [4];
     logic [ 4:0]    ftr_tile_cols       [4];
 
@@ -106,7 +105,7 @@ module PPD_testbench
         end
         if (SW[16]) begin
             for (int i = 0; i < 4; i++) begin
-                tile_type[ftr_tile_rows[i]][ftr_tile_cols[i]] = ftr_type_gen;
+                tile_type[ftr_tile_rows[i]][ftr_tile_cols[i]] = tile_type_t'(SW[13:10]);
             end
         end else begin
             for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
@@ -132,7 +131,6 @@ module PPD_testbench
         .origin_col             (SW[9:5]),
         .falling_type_in        (tile_type_t'(SW[13:10])),
         .falling_orientation    (orientation_t'(SW[15:14])),
-        .falling_type_out       (ftr_type_gen),
         .tile_row               (ftr_tile_rows),
         .tile_col               (ftr_tile_cols)
     );

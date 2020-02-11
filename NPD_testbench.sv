@@ -95,7 +95,6 @@ module NPD_testbench
     logic [ 4:0]    origin_col;
     logic [ 4:0]    origin_col_update;
 
-    tile_type_t     ftr_type_gen;
     logic [ 4:0]    ftr_tile_rows       [4];
     logic [ 4:0]    ftr_tile_cols       [4];
 
@@ -302,7 +301,7 @@ module NPD_testbench
                 tile_type[ghost_rows[i]][ghost_cols[i]]         = GHOST;
             end
             for (int i = 0; i < 4; i++) begin
-                tile_type[ftr_tile_rows[i]][ftr_tile_cols[i]]   = ftr_type_gen;
+                tile_type[ftr_tile_rows[i]][ftr_tile_cols[i]]   = tile_type_t'(SW[13:10]);
             end
         end else begin
             for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
@@ -478,7 +477,6 @@ module NPD_testbench
         .origin_col             (origin_col),
         .falling_type_in        (tile_type_t'(SW[13:10])),
         .falling_orientation    (falling_orientation),
-        .falling_type_out       (ftr_type_gen),
         .tile_row               (ftr_tile_rows),
         .tile_col               (ftr_tile_cols)
     );

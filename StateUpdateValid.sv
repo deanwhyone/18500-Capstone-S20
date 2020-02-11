@@ -126,7 +126,6 @@ module StateUpdateValid
                 .origin_col             (rotate_R_col_kicked[g]),
                 .falling_type_in        (falling_type),
                 .falling_orientation    (rotate_R_orientation),
-                .falling_type_out       (),
                 .tile_row               (rotate_R_rows[g]),
                 .tile_col               (rotate_R_cols[g])
             );
@@ -186,7 +185,6 @@ module StateUpdateValid
                 .origin_col             (rotate_L_col_kicked[g]),
                 .falling_type_in        (falling_type),
                 .falling_orientation    (rotate_L_orientation),
-                .falling_type_out       (),
                 .tile_row               (rotate_L_rows[g]),
                 .tile_col               (rotate_L_cols[g])
             );
@@ -234,7 +232,6 @@ module StateUpdateValid
         .origin_col             (move_R_col),
         .falling_type_in        (falling_type),
         .falling_orientation    (move_R_orientation),
-        .falling_type_out       (),
         .tile_row               (move_R_rows),
         .tile_col               (move_R_cols)
     );
@@ -255,7 +252,6 @@ module StateUpdateValid
         .origin_col             (move_L_col),
         .falling_type_in        (falling_type),
         .falling_orientation    (move_L_orientation),
-        .falling_type_out       (),
         .tile_row               (move_L_rows),
         .tile_col               (move_L_cols)
     );
@@ -276,7 +272,6 @@ module StateUpdateValid
         .origin_col             (soft_drop_col),
         .falling_type_in        (falling_type),
         .falling_orientation    (soft_drop_orientation),
-        .falling_type_out       (),
         .tile_row               (soft_drop_rows),
         .tile_col               (soft_drop_cols)
     );

@@ -25,7 +25,6 @@ module NextPixelDriver
 );
 
     tile_type_t  tile_type      [NEXT_ROWS][NEXT_COLS];
-    tile_type_t  ftr_type_gen   [NEXT_PIECES_COUNT];
     logic [ 4:0] origin_row     [NEXT_PIECES_COUNT];
     logic [ 4:0] origin_col     [NEXT_PIECES_COUNT];
 
@@ -40,7 +39,7 @@ module NextPixelDriver
         end
         for (int i = 0; i < NEXT_PIECES_COUNT; i++) begin
             for (int j = 0; j < 4; j++) begin
-                tile_type[tile_rows[i][j]][tile_cols[i][j]] = ftr_type_gen[i];
+                tile_type[tile_rows[i][j]][tile_cols[i][j]] = pieces_queue[i];
             end
         end
     end
@@ -94,7 +93,6 @@ module NextPixelDriver
                 .origin_col         (origin_col[g]),
                 .falling_type_in    (pieces_queue[g]),
                 .falling_orientation(ORIENTATION_0),
-                .falling_type_out   (ftr_type_gen[g]),
                 .tile_row           (tile_rows[g]),
                 .tile_col           (tile_cols[g])
             );
