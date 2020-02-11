@@ -64,7 +64,28 @@ package GamePkg;
                                          31'h0dec_0de5,
                                          31'h0ca5_cade};
 
-    parameter NEXT_PIECES_COUNT         = 6;
+    // not sure why we'd ever use anything else but avoiding magic numbers
+    parameter NEXT_PIECES_COUNT = 6;
+
+    // lock delay is typically 30 frames, or 0.5 seconds. Can be shorter (TGM)
+    // number of cycles at 50 MHz
+    parameter LOCK_DELAY = 25000000;
+
+    typedef enum logic [2:0] {
+        START_SCREEN,
+        SPRINT_MODE,
+        MULTIPLAYER_READY,
+        MULTIPLAYER_MODE,
+        GAME_WON,
+        GAME_LOST
+    } game_screens_t;
+
+    typedef enum logic [1:0] {
+        IDLE,
+        NEW_PIECE,
+        PIECE_FALLING,
+        PIECE_LOCK
+    } game_states_t;
 endpackage // GamePkg
 
 `endif
