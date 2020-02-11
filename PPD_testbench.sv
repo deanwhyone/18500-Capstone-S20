@@ -129,7 +129,7 @@ module PPD_testbench
     FallingTetrominoRender ftr_inst (
         .origin_row             (SW[4:0]),
         .origin_col             (SW[9:5]),
-        .falling_type_in        (tile_type_t'(SW[13:10])),
+        .falling_type           (tile_type_t'(SW[13:10])),
         .falling_orientation    (orientation_t'(SW[15:14])),
         .tile_row               (ftr_tile_rows),
         .tile_col               (ftr_tile_cols)

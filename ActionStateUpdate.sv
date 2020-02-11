@@ -22,7 +22,7 @@ module ActionStateUpdate
 (
     input  logic [ 4:0]                 origin_row,
     input  logic [ 4:0]                 origin_col,
-    input  tile_type_t                  falling_type_in,
+    input  tile_type_t                  falling_type,
     input  orientation_t                falling_orientation,
     input  logic [ 3:0] locked_state    [PLAYFIELD_ROWS][PLAYFIELD_COLS],
 
@@ -105,7 +105,7 @@ module ActionStateUpdate
         hard_drop_col           = origin_col;
         hard_drop_row           = origin_row;
         // figuring out what row to hard drop the tetromino to
-        unique case (falling_type_in)
+        unique case (falling_type)
             I: begin
                 case (hard_drop_orientation)
                     ORIENTATION_0: begin
@@ -411,7 +411,7 @@ module ActionStateUpdate
     FallingTetrominoRender ftr_ghost_inst (
         .origin_row             (hard_drop_row),
         .origin_col             (hard_drop_col),
-        .falling_type_in        (falling_type_in),
+        .falling_type           (falling_type),
         .falling_orientation    (hard_drop_orientation),
         .tile_row               (ghost_rows),
         .tile_col               (ghost_cols)

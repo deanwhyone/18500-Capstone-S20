@@ -91,7 +91,7 @@ module NextPixelDriver
             FallingTetrominoRender ftr_next_inst (
                 .origin_row         (origin_row[g]),
                 .origin_col         (origin_col[g]),
-                .falling_type_in    (pieces_queue[g]),
+                .falling_type       (pieces_queue[g]),
                 .falling_orientation(ORIENTATION_0),
                 .tile_row           (tile_rows[g]),
                 .tile_col           (tile_cols[g])

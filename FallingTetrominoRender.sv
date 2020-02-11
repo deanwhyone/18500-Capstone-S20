@@ -24,13 +24,13 @@ module FallingTetrominoRender
 (
     input  logic [ 4:0]     origin_row,
     input  logic [ 4:0]     origin_col,
-    input  tile_type_t      falling_type_in,
+    input  tile_type_t      falling_type,
     input  orientation_t    falling_orientation,
     output logic [ 4:0]     tile_row            [4],
     output logic [ 4:0]     tile_col            [4]
 );
     always_comb begin
-        case (falling_type_in) // has default
+        case (falling_type) // has default
             I: begin
                 case (falling_orientation)
                     ORIENTATION_0: begin

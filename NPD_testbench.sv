@@ -446,7 +446,7 @@ module NPD_testbench
     ActionStateUpdate asu_inst (
         .origin_row             (origin_row),
         .origin_col             (origin_col),
-        .falling_type_in        (tile_type_t'(SW[13:10])),
+        .falling_type           (tile_type_t'(SW[13:10])),
         .falling_orientation    (falling_orientation),
         .locked_state           (locked_state),
         .rotate_R_row           (rotate_R_row_new),
@@ -475,7 +475,7 @@ module NPD_testbench
     FallingTetrominoRender ftr_active_inst (
         .origin_row             (origin_row),
         .origin_col             (origin_col),
-        .falling_type_in        (tile_type_t'(SW[13:10])),
+        .falling_type           (tile_type_t'(SW[13:10])),
         .falling_orientation    (falling_orientation),
         .tile_row               (ftr_tile_rows),
         .tile_col               (ftr_tile_cols)
