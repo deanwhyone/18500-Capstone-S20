@@ -41,9 +41,9 @@ module TetrisTop
     output logic        VGA_VS
 );
     // abstract clk, rst_l signal for uniformity
-    logic   clk, rst_l;
-    assign  clk     = CLOCK_50;
-    assign rst_l    = SW[17];
+    logic  clk, rst_l;
+    assign clk      = CLOCK_50;
+    assign rst_l    = !SW[17];
 
     // declare local variables
     logic           key_R_trigger;
@@ -135,7 +135,8 @@ module TetrisTop
 
     logic           game_start_tetris;
     logic           game_end_tetris;
-    logic           game_end_opponent;
+    logic           opponent_game_end;
+    logic           opponent_battle_ready;
     game_screens_t  tetris_screen;
 
     tile_type_t     next_pieces_queue   [NEXT_PIECES_COUNT];
@@ -447,18 +448,19 @@ module TetrisTop
         .falling_col        (origin_col),
         .falling_orientation(falling_orientation),
         .falling_type       (falling_type),
-        .falling_piece_lock (falling_piece_lock),
         .start_sprint       (soft_drop),
         .lines_cleared      (), // register local number of lines cleared
         .battle_ready       (rotate_R || move_R),
         .ready_withdraw     (rotate_L || move_L),
-        .opponent_ready     (), // receive network ready
-        .opponent_lost      (game_end_opponent),
+        .opponent_ready     (opponent_battle_ready), // receive network ready
+        .opponent_lost      (opponent_game_end), // receive network top-out
         .top_out            (), // communicate local user lost to network
         .game_start         (game_start_tetris),
         .game_end           (game_end_tetris),
         .current_screen     (tetris_screen)
     );
+    assign opponent_battle_ready    = 1'b0; // no network, opponent never ready
+    assign opponent_game_end        = 1'b0; // no network, opponent never ends
 
     // GameStatesFSM
     GameStatesFSM game_states_fsm_inst (
@@ -510,6 +512,7 @@ module TetrisTop
 
     // ASU module
     ActionStateUpdate asu_inst (
+        .clk                    (clk),
         .origin_row             (origin_row),
         .origin_col             (origin_col),
         .falling_type           (falling_type),
