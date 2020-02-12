@@ -477,7 +477,9 @@ module TetrisTop
     );
 
     // SUV module
-    StateUpdateValid suv_inst (
+    NextStateValid nsv_inst (
+        .clk                    (clk),
+        .rst_l                  (rst_l),
         .falling_type           (falling_type),
         .rotate_R_row           (rotate_R_row_new),
         .rotate_R_col           (rotate_R_col_new),
