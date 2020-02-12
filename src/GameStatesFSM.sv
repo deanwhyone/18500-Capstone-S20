@@ -73,7 +73,7 @@ module GameStatesFSM
 
     // output logic
     always_comb begin
-        if (state == PIECE_FALLING) falling_piece_lock = 1'b1;
+        if (state == PIECE_LOCK)    falling_piece_lock = 1'b1;
         else                        falling_piece_lock = 1'b0;
 
         if (state == NEW_PIECE) new_tetromino = 1'b1;
