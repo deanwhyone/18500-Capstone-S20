@@ -36,7 +36,6 @@ module GameScreensFSM
     input  logic [ 4:0]     falling_col,
     input  orientation_t    falling_orientation,
     input  tile_type_t      falling_type,
-    input  logic            falling_piece_lock,
     input  logic            start_sprint,
     input  logic [ 5:0]     lines_cleared,
     input  logic            battle_ready,
