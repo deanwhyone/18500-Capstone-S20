@@ -10,18 +10,21 @@ module Sender
 		   DisplayPkg::*,
 		   GamePkg::*;
 (
-	input logic		  player_ready,
-	input logic       update_data,
-	input logic [3:0] garbage,
-	input tile_type_t hold,
-	input tile_type_t piece_queue	[NEXT_PIECES],
-	input tile_type_t playfield 	[PLAYFIELD_ROWS][PLAYFIELD_COLS],
-	input logic		  top_out,
-	output logic 	  serial_out_h,
-	output logic 	  serial_out_0,
-	output logic 	  serial_out_1,
-	output logic 	  serial_out_2,
-	output logic 	  serial_out_3
+	input  logic 	  			clk,
+	input  logic 	  			clk_gpio,
+	input  logic 	 			rst_l,
+	input  logic		  		player_ready,
+	input  logic       			update_data,
+	input  logic [GBG_BITS-1:0] garbage,
+	input  tile_type_t 			hold,
+	input  tile_type_t 			piece_queue	[NEXT_PIECES],
+	input  tile_type_t 			playfield 	[PLAYFIELD_ROWS][PLAYFIELD_COLS],
+	input  logic		  		top_out,
+	output logic 	  			serial_out_h,
+	output logic 	  			serial_out_0,
+	output logic 	  			serial_out_1,
+	output logic 	  			serial_out_2,
+	output logic 	  			serial_out_3
 );
 
 endmodule // Sender
