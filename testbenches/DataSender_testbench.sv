@@ -1,6 +1,7 @@
 /*
  * 18500 Capstone S20
  * Eric Chen, Alton Olsen, Deanyone Su
+ *
  * Simulation testbench for data sender module
  */
  `default_nettype none
@@ -39,25 +40,11 @@ module DataSender_testbench
 		##1;
 		send_start <= 0;
 		displayState();
-		##1;
-		displayState();
-		##1;
-		displayState();
-		##1;
-		displayState();
-		##1;
-		send_start <= 1;
-		displayState();
-		##1;
-		send_start <= 0;
-		displayState();
-		##1;
-		displayState();
-		##1;
-		displayState();
-		##1;
-		displayState();
-		##1;
+		for(int i = 0; i < 12; i++) begin
+			##1;
+			displayState();
+		end
+		##216;
 		displayState();
 		$finish();
 	end

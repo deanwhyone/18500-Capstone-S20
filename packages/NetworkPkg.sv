@@ -41,6 +41,12 @@ package NetworkPkg;
 	//# data bits per wire after hamming encoding, hardcoded to 8 parity bits
 	parameter ENC_DATA_BITS  = PAR_DATA_BITS + 8;
 
+	//# bits in a data packet
+	parameter DATA_PKT_BITS  = ENC_DATA_BITS + SYNC_BITS;
+
+	//# bits in a handshake packet
+	parameter HND_PKT_BITS   = ENC_HEAD_BITS + SYNC_BITS;
+
 	//# cycles before timeout & data resend
 	parameter TIMEOUT_CYCLES = 100;
 

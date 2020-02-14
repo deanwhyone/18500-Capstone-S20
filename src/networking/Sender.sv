@@ -1,9 +1,12 @@
-/*
+/**
  * 18500 Capstone S20
  * Eric Chen, Alton Olsen, Deanyone Su
+ * 
+ *								Sender.sv
  * Overall sender module to encode and transmit data serially across 5 wires
  * Interfaces with game logic
- */
+ *
+ **/
  `default_nettype none
 
 module Sender

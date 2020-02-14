@@ -11,7 +11,7 @@ module HandshakeSender
 (
 	input  logic 					 clk,
 	input  logic 					 rst_l,
-	input  logic 					 send_en,
+	input  logic 					 send_start,
 	input  logic [ENC_HEAD_BITS-1:0] data_in,
 	output logic 					 send_done,
 	output logic 					 serial_out
