@@ -2,6 +2,7 @@
  * 18500 Capstone S20
  * Eric Chen, Alton Olsen, Deanyone Su
  * Overall receiver module to decode and receive data serially across 5 wires
+ * Interfaces with game logic
  */
  `default_nettype none
 

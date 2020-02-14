@@ -86,3 +86,26 @@ module counter
             Q <= Q;
     end
 endmodule // counter
+
+
+/* Left shift register with load 
+ */
+module shift_reg
+   #(parameter                      WIDTH=0,
+     parameter logic [WIDTH-1:0]    RESET_VAL='b0)
+    (input  logic               clk, en, rst_l, load,
+     input  logic               shift_in,
+     input  logic [WIDTH-1:0]   D,
+     output logic [WIDTH-1:0]   Q);
+
+    always_ff @(posedge clk, negedge rst_l) begin
+        if (!rst_l)
+            Q <= RESET_VAL;
+        else if (load)
+            Q <= D;
+        else if (en) begin
+            Q <= Q << 1;
+            Q[0] <= shift_in;
+        end
+    end
+endmodule // shift_reg

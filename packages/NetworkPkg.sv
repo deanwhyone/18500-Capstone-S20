@@ -48,7 +48,7 @@ package NetworkPkg;
 	parameter SYNCWORD 		 = 8'hff;
 
 	// Packet ID's for handshaking
-	typedef enum logic [1:0] {
+	typedef enum logic {
 		PID_ACK = 1'b1, PID_GE = 1'b0, PID_X = 1'bx
 	} pid_t;
 
