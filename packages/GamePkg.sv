@@ -74,8 +74,8 @@ package GamePkg;
     typedef enum logic [2:0] {
         START_SCREEN,
         SPRINT_MODE,
-        MULTIPLAYER_READY,
-        MULTIPLAYER_MODE,
+        MP_READY,
+        MP_MODE,
         GAME_WON,
         GAME_LOST
     } game_screens_t;

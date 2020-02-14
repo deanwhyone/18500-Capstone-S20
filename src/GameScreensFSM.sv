@@ -15,12 +15,11 @@
  *                mode to ready up for 1v1. This needs to be communicated over
  *                network.
  * opponent_ready - communication over GPIO, networked player is ready in battle
- *                  mode. Move to MULTIPLAYER_MODE if both local and networked
- *                  players are ready. Should consider giving user option to
+ *                  mode. Move to MP_MODE if both local and networked players
+ *                  are ready. Should consider giving user option to
  *                  un-ready.
- * opponent_lost - opponent tops out in MULTIPLAYER_MODE, communicates over
- *                 network that the opponent has lost the game and local player
- *                 has won.
+ * opponent_lost - opponent tops out in MP_MODE, communicates over network that
+ *                 the opponent has lost the game and local player has won.
  * top_out - local player tops out, and loses. This needs to be communicated
  *           over the network for the opponent to win.
  */
@@ -71,7 +70,7 @@ module GameScreensFSM
                     next_state          = SPRINT_MODE;
                     game_start          = 1'b1;
                 end else if (battle_ready) begin
-                    next_state          = MULTIPLAYER_READY;
+                    next_state          = MP_READY;
                 end
             end
             SPRINT_MODE: begin
@@ -83,15 +82,15 @@ module GameScreensFSM
                     game_end            = 1'b1;
                 end
             end
-            MULTIPLAYER_READY: begin
+            MP_READY: begin
                 if (opponent_ready) begin
-                    next_state          = MULTIPLAYER_MODE;
+                    next_state          = MP_MODE;
                     game_start          = 1'b1;
                 end else if (ready_withdraw) begin
                     next_state = START_SCREEN;
                 end
             end
-            MULTIPLAYER_MODE: begin
+            MP_MODE: begin
                 if (top_out) begin
                     next_state          = GAME_LOST;
                     game_end            = 1'b1;
