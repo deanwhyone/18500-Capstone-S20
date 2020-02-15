@@ -199,25 +199,25 @@ module NextStateValid
             rotate_L_valid_TEST <= '0;
          end else begin
             for (int i = 0; i < 4; i++) begin
-                if (rotate_R_rows[wk_count][i] < PLAYFIELD_ROWS &&
-                    rotate_R_cols[wk_count][i] < PLAYFIELD_COLS &&
-                    locked_state[rotate_R_rows[wk_count][i]][rotate_R_cols[wk_count][i]] == BLANK) begin
+                if (rotate_R_rows[wk_count][i] >= PLAYFIELD_ROWS ||
+                    rotate_R_cols[wk_count][i] >= PLAYFIELD_COLS ||
+                    locked_state[rotate_R_rows[wk_count][i]][rotate_R_cols[wk_count][i]] != BLANK) begin
 
-                    rotate_R_valid_TEST[wk_count] <= 1'b1;
-                end else begin
                     rotate_R_valid_TEST[wk_count] <= 1'b0;
                     break;
+                end else begin
+                    rotate_R_valid_TEST[wk_count] <= 1'b1;
                 end
             end
             for (int i = 0; i < 4; i++) begin
-                if (rotate_L_rows[wk_count][i] < PLAYFIELD_ROWS &&
-                    rotate_L_cols[wk_count][i] < PLAYFIELD_COLS &&
-                    locked_state[rotate_L_rows[wk_count][i]][rotate_L_cols[wk_count][i]] == BLANK) begin
+                if (rotate_L_rows[wk_count][i] >= PLAYFIELD_ROWS ||
+                    rotate_L_cols[wk_count][i] >= PLAYFIELD_COLS ||
+                    locked_state[rotate_L_rows[wk_count][i]][rotate_L_cols[wk_count][i]] != BLANK) begin
 
-                    rotate_L_valid_TEST[wk_count] <= 1'b1;
-                end else begin
                     rotate_L_valid_TEST[wk_count] <= 1'b0;
                     break;
+                end else begin
+                    rotate_L_valid_TEST[wk_count] <= 1'b1;
                 end
             end
          end
