@@ -193,6 +193,36 @@ module NextStateValid
         end
     endgenerate
 
+    always_ff @ (posedge clk, negedge rst_l) begin
+         if (!rst_l) begin
+            rotate_R_valid_TEST <= '0;
+            rotate_L_valid_TEST <= '0;
+         end else begin
+            for (int i = 0; i < 4; i++) begin
+                if (rotate_R_rows[wk_count][i] < PLAYFIELD_ROWS &&
+                    rotate_R_cols[wk_count][i] < PLAYFIELD_COLS &&
+                    locked_state[rotate_R_rows[wk_count][i]][rotate_R_cols[wk_count][i]] == BLANK) begin
+
+                    rotate_R_valid_TEST[wk_count] <= 1'b1;
+                end else begin
+                    rotate_R_valid_TEST[wk_count] <= 1'b0;
+                    break;
+                end
+            end
+            for (int i = 0; i < 4; i++) begin
+                if (rotate_L_rows[wk_count][i] < PLAYFIELD_ROWS &&
+                    rotate_L_cols[wk_count][i] < PLAYFIELD_COLS &&
+                    locked_state[rotate_L_rows[wk_count][i]][rotate_L_cols[wk_count][i]] == BLANK) begin
+
+                    rotate_L_valid_TEST[wk_count] <= 1'b1;
+                end else begin
+                    rotate_L_valid_TEST[wk_count] <= 1'b0;
+                    break;
+                end
+            end
+         end
+    end
+
     always_comb begin
         rotate_R_valid      = 1'b0;
         rotate_R_row_kick   = rotate_R_row;
@@ -218,37 +248,9 @@ module NextStateValid
         end
     end
 
-    always_ff @ (posedge clk, negedge rst_l) begin
-         if (!rst_l) begin
-            rotate_R_valid_TEST <= '0;
-            rotate_L_valid_TEST <= '0;
-         end else begin
-            for (int i = 0; i < 4; i++) begin
-                if (rotate_R_rows[wk_count][i] >= PLAYFIELD_ROWS ||
-                    rotate_R_cols[wk_count][i] >= PLAYFIELD_COLS ||
-                    locked_state[rotate_R_rows[wk_count][i]][rotate_R_cols[wk_count][i]] != BLANK) begin
-
-                    rotate_R_valid_TEST[wk_count] <= 1'b0;
-                end else begin
-                    rotate_R_valid_TEST[wk_count] <= 1'b1;
-                end
-            end
-            for (int i = 0; i < 4; i++) begin
-                if (rotate_L_rows[wk_count][i] >= PLAYFIELD_ROWS ||
-                    rotate_L_cols[wk_count][i] >= PLAYFIELD_COLS ||
-                    locked_state[rotate_L_rows[wk_count][i]][rotate_L_cols[wk_count][i]] != BLANK) begin
-
-                    rotate_L_valid_TEST[wk_count] <= 1'b0;
-                end else begin
-                    rotate_L_valid_TEST[wk_count] <= 1'b1;
-                end
-            end
-         end
-    end
-
     always_comb begin
         wk_count_en  = 1'b1;
-        wk_count_ld  = wk_count == TEST_POSITIONS;
+        wk_count_ld  = wk_count == TEST_POSITIONS - 1;
     end
 
     counter #(
