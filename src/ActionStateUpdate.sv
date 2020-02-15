@@ -155,104 +155,122 @@ module ActionStateUpdate
                 case (hard_drop_orientation_pipe)
                     ORIENTATION_0: begin
                         for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
-                            if (tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col - 5'd2]) == BLANK) begin
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col - 5'd2]) == BLANK) begin
 
-                                hard_drop_row_pipe = i[4:0] + 5'd1;
-                            end else break;
+                                    hard_drop_row_pipe = i[4:0] + 5'd1;
+                                end else break;
+                            end
                         end
                     end
                     ORIENTATION_R: begin
                         for (int i = 2; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (tile_type_t'(locked_state[i - 2][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i - 2][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
 
-                                hard_drop_row_pipe = i[4:0];
-                            end else break;
+                                    hard_drop_row_pipe = i[4:0];
+                                end else break;
+                            end
                         end
                     end
                     ORIENTATION_2: begin
                         for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
-                            if (tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col - 5'd2]) == BLANK) begin
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col - 5'd2]) == BLANK) begin
 
-                                hard_drop_row_pipe = i[4:0];
-                            end else break;
+                                    hard_drop_row_pipe = i[4:0];
+                                end else break;
+                            end
                         end
                     end
                     ORIENTATION_L: begin
                         for (int i = 2; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (tile_type_t'(locked_state[i - 2][hard_drop_col - 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK) begin
-                                hard_drop_row_pipe = i[4:0];
-                            end else break;
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i - 2][hard_drop_col - 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK) begin
+                                    hard_drop_row_pipe = i[4:0];
+                                end else break;
+                            end
                         end
                     end
                 endcase
             end
             O: begin
                 for (int i = 1; i < PLAYFIELD_ROWS; i++) begin
-                    if (tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                        tile_type_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
-                        tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                        tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK) begin
+                    if (i > origin_row) begin
+                        if (tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                            tile_type_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
+                            tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                            tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK) begin
 
-                        hard_drop_row_pipe = i[4:0];
-                    end else break;
+                            hard_drop_row_pipe = i[4:0];
+                        end else break;
+                    end
                 end
             end
             T: begin
                 case (hard_drop_orientation_pipe)
                     ORIENTATION_0: begin
                         for (int i = 1; i < PLAYFIELD_ROWS; i++) begin
-                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
 
-                                hard_drop_row_pipe = i[4:0];
-                            end else break;
+                                    hard_drop_row_pipe = i[4:0];
+                                end else break;
+                            end
                         end
                     end
                     ORIENTATION_R: begin
                         for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
 
-                                hard_drop_row_pipe = i[4:0];
-                            end else break;
+                                    hard_drop_row_pipe = i[4:0];
+                                end else break;
+                            end
                         end
                     end
                     ORIENTATION_2: begin
                         for (int i = 0; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
 
-                                hard_drop_row_pipe = i[4:0];
-                            end else break;
+                                    hard_drop_row_pipe = i[4:0];
+                                end else break;
+                            end
                         end
                     end
                     ORIENTATION_L: begin
                         for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
 
-                                hard_drop_row_pipe = i[4:0];
-                            end else break;
+                                    hard_drop_row_pipe = i[4:0];
+                                end else break;
+                            end
                         end
                     end
                 endcase
@@ -261,46 +279,54 @@ module ActionStateUpdate
                 case (hard_drop_orientation_pipe)
                     ORIENTATION_0: begin
                         for (int i = 1; i < PLAYFIELD_ROWS; i++) begin
-                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
 
-                                hard_drop_row_pipe = i[4:0];
-                            end else break;
+                                    hard_drop_row_pipe = i[4:0];
+                                end else break;
+                            end
                         end
                     end
                     ORIENTATION_R: begin
                         for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i - 1][hard_drop_col + 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i - 1][hard_drop_col + 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
 
-                                hard_drop_row_pipe = i[4:0];
+                                    hard_drop_row_pipe = i[4:0];
+                                end
                             end
                         end
                     end
                     ORIENTATION_2: begin
                         for (int i = 0; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i + 1][hard_drop_col + 5'd1]) == BLANK) begin
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i + 1][hard_drop_col + 5'd1]) == BLANK) begin
 
-                                hard_drop_row_pipe = i[4:0];
-                            end else break;
+                                    hard_drop_row_pipe = i[4:0];
+                                end else break;
+                            end
                         end
                     end
                     ORIENTATION_L: begin
                         for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK) begin
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK) begin
 
-                                hard_drop_row_pipe = i[4:0];
-                            end else break;
+                                    hard_drop_row_pipe = i[4:0];
+                                end else break;
+                            end
                         end
                     end
                 endcase
@@ -309,46 +335,54 @@ module ActionStateUpdate
                 case (hard_drop_orientation_pipe)
                     ORIENTATION_0: begin
                         for (int i = 1; i < PLAYFIELD_ROWS; i++) begin
-                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i - 1][hard_drop_col + 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i - 1][hard_drop_col + 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
 
-                                hard_drop_row_pipe = i[4:0];
-                            end else break;
+                                    hard_drop_row_pipe = i[4:0];
+                                end else break;
+                            end
                         end
                     end
                     ORIENTATION_R: begin
                         for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i + 1][hard_drop_col + 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i + 1][hard_drop_col + 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK) begin
 
-                                hard_drop_row_pipe = i[4:0];
-                            end else break;
+                                    hard_drop_row_pipe = i[4:0];
+                                end else break;
+                            end
                         end
                     end
                     ORIENTATION_2: begin
                         for (int i = 0; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK) begin
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK) begin
 
-                                hard_drop_row_pipe = i[4:0];
-                            end else break;
+                                    hard_drop_row_pipe = i[4:0];
+                                end else break;
+                            end
                         end
                     end
                     ORIENTATION_L: begin
                         for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK) begin
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK) begin
 
-                                hard_drop_row_pipe = i[4:0];
-                            end else break;
+                                    hard_drop_row_pipe = i[4:0];
+                                end else break;
+                            end
                         end
                     end
                 endcase
@@ -357,46 +391,54 @@ module ActionStateUpdate
                 case (hard_drop_orientation_pipe)
                     ORIENTATION_0: begin
                         for (int i = 1; i < PLAYFIELD_ROWS; i++) begin
-                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i - 1][hard_drop_col + 5'd1]) == BLANK) begin
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i - 1][hard_drop_col + 5'd1]) == BLANK) begin
 
-                                hard_drop_row_pipe = i[4:0];
-                            end else break;
+                                    hard_drop_row_pipe = i[4:0];
+                                end else break;
+                            end
                         end
                     end
                     ORIENTATION_R: begin
                         for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i + 1][hard_drop_col + 5'd1]) == BLANK) begin
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i + 1][hard_drop_col + 5'd1]) == BLANK) begin
 
-                                hard_drop_row_pipe = i[4:0];
-                            end else break;
+                                    hard_drop_row_pipe = i[4:0];
+                                end else break;
+                            end
                         end
                     end
                     ORIENTATION_2: begin
                         for (int i = 0; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK) begin
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK) begin
 
-                                hard_drop_row_pipe = i[4:0];
-                            end else break;
+                                    hard_drop_row_pipe = i[4:0];
+                                end else break;
+                            end
                         end
                     end
                     ORIENTATION_L: begin
                         for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK) begin
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK) begin
 
-                                hard_drop_row_pipe = i[4:0];
-                            end else break;
+                                    hard_drop_row_pipe = i[4:0];
+                                end else break;
+                            end
                         end
                     end
                 endcase
@@ -405,46 +447,54 @@ module ActionStateUpdate
                 case (hard_drop_orientation_pipe)
                     ORIENTATION_0: begin
                         for (int i = 1; i < PLAYFIELD_ROWS; i++) begin
-                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i - 1][hard_drop_col - 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
 
-                                hard_drop_row_pipe = i[4:0];
-                            end else break;
+                                    hard_drop_row_pipe = i[4:0];
+                                end else break;
+                            end
                         end
                     end
                     ORIENTATION_R: begin
                         for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i - 1][hard_drop_col + 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i - 1][hard_drop_col + 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK) begin
 
-                                hard_drop_row_pipe = i[4:0];
-                            end else break;
+                                    hard_drop_row_pipe = i[4:0];
+                                end else break;
+                            end
                         end
                     end
                     ORIENTATION_2: begin
                         for (int i = 0; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i + 1][hard_drop_col + 5'd1]) == BLANK) begin
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i][hard_drop_col - 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i + 1][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i + 1][hard_drop_col + 5'd1]) == BLANK) begin
 
-                                hard_drop_row_pipe = i[4:0];
-                            end else break;
+                                    hard_drop_row_pipe = i[4:0];
+                                end else break;
+                            end
                         end
                     end
                     ORIENTATION_L: begin
                         for (int i = 1; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
-                                tile_type_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK &&
-                                tile_type_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK) begin
+                            if (i > origin_row) begin
+                                if (tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i - 1][hard_drop_col]) == BLANK &&
+                                    tile_type_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK &&
+                                    tile_type_t'(locked_state[i + 1][hard_drop_col - 5'd1]) == BLANK) begin
 
-                                hard_drop_row_pipe = i[4:0];
-                            end else break;
+                                    hard_drop_row_pipe = i[4:0];
+                                end else break;
+                            end
                         end
                     end
                 endcase
