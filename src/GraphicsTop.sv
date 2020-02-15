@@ -28,7 +28,7 @@ module GraphicsTop
 
     always_comb begin
         output_color    = BG_COLOR;
-        if (testpattern_active) begin
+        if (!testpattern_active) begin
             unique case (tetris_screen)
                 START_SCREEN: begin
                     if (VGA_row < 10'd240) begin
@@ -77,18 +77,18 @@ module GraphicsTop
             if (VGA_row < 10'd240) begin
                 if ((VGA_col < 10'd160) ||
                     (VGA_col >= 10'd320 && VGA_col < 10'd480)) begin
-                    output_color = {8'd255, 16'd0};
+                    output_color[23:16] = 8'd255;
                 end
 
                 if (VGA_col < 10'd320) begin
-                    output_color = {8'd0, 8'd255, 8'd0};
+                    output_color[15:8] = 8'd255;
                 end
 
                 if ((VGA_col < 10'd80) ||
                     (VGA_col >= 10'd160 && VGA_col < 10'd240) ||
                     (VGA_col >= 10'd320 && VGA_col < 10'd400) ||
                     (VGA_col >= 10'd480 && VGA_col < 10'd560)) begin
-                    output_color = {16'd0, 8'd255};
+                    output_color[7:0] = 8'd255;
                 end
             end
         end
