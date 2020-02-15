@@ -485,7 +485,6 @@ module TetrisTop
         .pieces_queue    (next_pieces_queue),
         .the_seven_bag   (LEDR[6:0])
     );
-    assign LEDR[17:7]              = 11'd0;
 
     GraphicsTop graphics_inst (
         .VGA_row            (VGA_row),
