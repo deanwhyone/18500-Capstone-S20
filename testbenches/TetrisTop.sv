@@ -397,10 +397,10 @@ module TetrisTop
         .game_end           (game_end_tetris),
         .user_input         (rotate_R || rotate_L || move_R || move_L),
         .hard_drop          (hard_drop),
-        .ftr_rows           (ftr_rows),
-        .ftr_cols           (ftr_cols),
-        .ghost_rows         (ghost_rows),
-        .ghost_cols         (ghost_cols),
+        .falling_row        (origin_row),
+        .falling_col        (origin_col),
+        .ghost_row          (hard_drop_row_new),
+        .ghost_col          (hard_drop_col_new),
         .falling_piece_lock (falling_piece_lock),
         .new_tetromino      (new_tetromino)
     );

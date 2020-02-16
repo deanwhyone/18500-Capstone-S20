@@ -20,10 +20,10 @@ module GameStatesFSM
     input  logic        game_end,
     input  logic        user_input,
     input  logic        hard_drop,
-    input  logic [ 4:0] ftr_rows            [4],
-    input  logic [ 4:0] ftr_cols            [4],
-    input  logic [ 4:0] ghost_rows          [4],
-    input  logic [ 4:0] ghost_cols          [4],
+    input  logic [ 4:0] falling_row,
+    input  logic [ 4:0] falling_col,
+    input  logic [ 4:0] ghost_row,
+    input  logic [ 4:0] ghost_col,
     output logic        falling_piece_lock,
     output logic        new_tetromino
 );
@@ -82,22 +82,25 @@ module GameStatesFSM
 
     // lock_counter should be enabled when falling tile is on the ground
     always_comb begin
-        lock_counter_en = 1'b0;
-        for (int i = 0; i < 4; i++) begin
-            match_mask[i] = 1'b0;
-        end
-        for (int i = 0; i < 4; i++) begin
-            for (int j = 0; j < 4; j++) begin
-                if (ftr_rows[i] == ghost_rows[j] &&
-                    ftr_cols[i] == ghost_cols[j]) begin
+        // lock_counter_en = 1'b0;
+        // for (int i = 0; i < 4; i++) begin
+        //     match_mask[i] = 1'b0;
+        // end
+        // for (int i = 0; i < 4; i++) begin
+        //     for (int j = 0; j < 4; j++) begin
+        //         if (ftr_rows[i] == ghost_rows[j] &&
+        //             ftr_cols[i] == ghost_cols[j]) begin
 
-                    match_mask[i] = 1'b1;
-                end
-            end
-        end
-        if ((state == PIECE_FALLING) && (&match_mask)) begin
-            lock_counter_en = 1'b1;
-        end
+        //             match_mask[i] = 1'b1;
+        //         end
+        //     end
+        // end
+        // if ((state == PIECE_FALLING) && (&match_mask)) begin
+        //     lock_counter_en = 1'b1;
+        // end
+        lock_counter_en =   (state == PIECE_FALLING) &&
+                            (falling_row == ghost_row) &&
+                            (falling_col == ghost_col);
     end
 
     // lock_counter should load when in NEW_PIECE state (1 cycle) and
