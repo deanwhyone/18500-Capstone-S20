@@ -42,7 +42,7 @@ module DataReceiver_testbench
 	initial begin
 		send_start = 1;
 		receive_start = 1;
-		data_in = {108{2'b10}};
+		data_in = {{92{2'b10}}, 32'hDEADBEEF};
 		doReset;
 		##1;
 		send_start <= 0;
