@@ -3,7 +3,7 @@
  * Eric Chen, Alton Olsen, Deanyone Su
  *
  * This is a SVGA interface that follows the standard SVGA protocol for
- * 800x600 display @ 72 fps. This is largely adapted from the VGA module given
+ * 800x600 display @ 72hz. This is largely adapted from the VGA module given
  * in 18240 Lab 5 for Mastermind.
  */
 `default_nettype none
@@ -30,7 +30,7 @@ module SVGA (
     // Row counter counts from 0 to 665
     //     count of   0 - 599 is display time
     //     count of 600 - 636 is front porch
-    //     count of 637 - 642 is VS=0 pulse width
+    //     count of 637 - 642 is VS=1 pulse width
     //     count of 643 - 665 is back porch
 
     simple_counter #(
@@ -52,7 +52,7 @@ module SVGA (
     // Col counter counts from 0 to 1039
     //     count of    0 -  799 is display time
     //     count of  800 -  855 is front porch
-    //     count of  856 -  975 is HS=0 pulse width
+    //     count of  856 -  975 is HS=1 pulse width
     //     count of  976 - 1039 is back porch
 
     simple_counter #(
