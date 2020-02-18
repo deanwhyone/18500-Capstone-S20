@@ -86,3 +86,100 @@ module counter
             Q <= Q;
     end
 endmodule // counter
+
+/**
+ * Converts (supported) ASCII value to 6x6 bitmap data.
+ * Supported ASCII values are alphanumerals
+ * character is ASCII value for which the bitmap is being searched for (address)
+ * Bitmapping from https://previews.123rf.com/images/iunewind/iunewind1607/iunewind160700049/60848823-8-bit-monospace-font-6x6-pixels-on-glyph-vector-set-of-alphabet-numbers-and-symbols.jpg
+ */
+module AlphanumeralBitMap (
+    input  logic        clk,
+    input  logic [ 7:0] character,
+    output logic [ 0:5] bitmap [6]);
+
+    always_ff @ (posedge clk) begin
+        case (character)
+            // .
+            8'h2e: bitmap <= '{6'h00, 6'h00, 6'h00, 6'h00, 6'h0c, 6'h0c};
+            // 0
+            8'h30: bitmap <= '{6'h1e, 6'h23, 6'h25, 6'h29, 6'h31, 6'h1e};
+            // 1
+            8'h31: bitmap <= '{6'h04, 6'h0c, 6'h14, 6'h04, 6'h04, 6'h1f};
+            // 2
+            8'h32: bitmap <= '{6'h1e, 6'h21, 6'h01, 6'h1e, 6'h20, 6'h3f};
+            // 3
+            8'h33: bitmap <= '{6'h1e, 6'h21, 6'h06, 6'h01, 6'h21, 6'h1e};
+            // 4
+            8'h34: bitmap <= '{6'h02, 6'h06, 6'h0a, 6'h12, 6'h3f, 6'h02};
+            // 5
+            8'h35: bitmap <= '{6'h3f, 6'h20, 6'h3e, 6'h01, 6'h21, 6'h1e};
+            // 6
+            8'h36: bitmap <= '{6'h1e, 6'h20, 6'h3e, 6'h21, 6'h21, 6'h1e};
+            // 7
+            8'h37: bitmap <= '{6'h3f, 6'h01, 6'h02, 6'h04, 6'h08, 6'h08};
+            // 8
+            8'h38: bitmap <= '{6'h1e, 6'h21, 6'h1e, 6'h21, 6'h21, 6'h1e};
+            // 9
+            8'h39: bitmap <= '{6'h1e, 6'h21, 6'h21, 6'h1f, 6'h01, 6'h1e};
+            // :
+            8'h3A: bitmap <= '{6'h00, 6'h08, 6'h00, 6'h00, 6'h08, 6'h00};
+            // A
+            8'h41: bitmap <= '{6'h1e, 6'h21, 6'h21, 6'h3f, 6'h21, 6'h21};
+            // B
+            8'h42: bitmap <= '{6'h3e, 6'h21, 6'h3e, 6'h21, 6'h21, 6'h3e};
+            // C
+            8'h43: bitmap <= '{6'h1e, 6'h21, 6'h20, 6'h20, 6'h21, 6'h1e};
+            // D
+            8'h44: bitmap <= '{6'h3c, 6'h22, 6'h21, 6'h21, 6'h22, 6'h3c};
+            // E
+            8'h45: bitmap <= '{6'h3f, 6'h20, 6'h3c, 6'h20, 6'h20, 6'h3f};
+            // F
+            8'h46: bitmap <= '{6'h3f, 6'h20, 6'h3e, 6'h20, 6'h20, 6'h20};
+            // G
+            8'h47: bitmap <= '{6'h1e, 6'h21, 6'h20, 6'h27, 6'h21, 6'h1e};
+            // H
+            8'h48: bitmap <= '{6'h21, 6'h21, 6'h3f, 6'h21, 6'h21, 6'h21};
+            // I
+            8'h49: bitmap <= '{6'h0e, 6'h04, 6'h04, 6'h04, 6'h04, 6'h0e};
+            // J
+            8'h4a: bitmap <= '{6'h07, 6'h02, 6'h02, 6'h22, 6'h22, 6'h1c};
+            // K
+            8'h4b: bitmap <= '{6'h22, 6'h24, 6'h38, 6'h24, 6'h22, 6'h21};
+            // L
+            8'h4c: bitmap <= '{6'h20, 6'h20, 6'h20, 6'h20, 6'h20, 6'h3f};
+            // M
+            8'h4d: bitmap <= '{6'h21, 6'h33, 6'h2d, 6'h21, 6'h21, 6'h21};
+            // N
+            8'h4e: bitmap <= '{6'h21, 6'h31, 6'h29, 6'h25, 6'h23, 6'h21};
+            // O
+            8'h4f: bitmap <= '{6'h1e, 6'h21, 6'h21, 6'h21, 6'h21, 6'h1e};
+            // P
+            8'h50: bitmap <= '{6'h3e, 6'h21, 6'h21, 6'h3e, 6'h20, 6'h20};
+            // Q
+            8'h51: bitmap <= '{6'h1e, 6'h21, 6'h21, 6'h25, 6'h23, 6'h1e};
+            // R
+            8'h52: bitmap <= '{6'h3e, 6'h21, 6'h21, 6'h3e, 6'h22, 6'h21};
+            // S
+            8'h53: bitmap <= '{6'h1f, 6'h20, 6'h1e, 6'h01, 6'h01, 6'h3e};
+            // T
+            8'h54: bitmap <= '{6'h3e, 6'h08, 6'h08, 6'h08, 6'h08, 6'h08};
+            // U
+            8'h55: bitmap <= '{6'h21, 6'h21, 6'h21, 6'h21, 6'h21, 6'h1e};
+            // V
+            8'h56: bitmap <= '{6'h21, 6'h21, 6'h21, 6'h21, 6'h12, 6'h0c};
+            // W
+            8'h57: bitmap <= '{6'h21, 6'h21, 6'h21, 6'h21, 6'h2d, 6'h12};
+            // X
+            8'h58: bitmap <= '{6'h21, 6'h12, 6'h0c, 6'h0c, 6'h12, 6'h21};
+            // Y
+            8'h59: bitmap <= '{6'h22, 6'h14, 6'h08, 6'h08, 6'h08, 6'h08};
+            // Z
+            8'h5A: bitmap <= '{6'h3f, 6'h02, 6'h04, 6'h08, 6'h10, 6'h3f};
+            // else
+            default: bitmap <= '{6{6'd0}};
+        endcase
+    end
+endmodule // AlphanumeralBitMap
+
+
