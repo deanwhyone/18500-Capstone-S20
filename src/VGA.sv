@@ -27,11 +27,11 @@ module VGA (
     logic           h_blank;
     logic           v_blank;
 
-    // Row counter counts from 0 to 520
+    // Row counter counts from 0 to 524
     //     count of   0 - 479 is display time (thus row_count is correct here)
     //     count of 480 - 489 is front porch
     //     count of 490 - 491 is VS=0 pulse width
-    //     count of 492 - 520 is back porch
+    //     count of 492 - 524 is back porch
 
     simple_counter #(
         .WIDTH  (10)
@@ -44,7 +44,7 @@ module VGA (
     );
 
     assign row        = row_count;
-    assign row_clear  = (row_count >= 10'd520);
+    assign row_clear  = (row_count >= 10'd524);
     assign row_enable = (col_count == 11'd1599);
     assign VS         = (row_count < 10'd490) | (row_count > 10'd491);
     assign v_blank    = (row_count > 10'd479);
