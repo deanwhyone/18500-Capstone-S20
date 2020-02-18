@@ -49,18 +49,18 @@ module SVGA_testpattern (
         if (SW[17]) begin
             // prototyping the tetris game screen
             // border color
-            if (VGA_row > 55 && VGA_row < 465 &&
-                VGA_col > 235 && VGA_col < 405) begin
+            if (VGA_row > 45 && VGA_row < 555 &&
+                VGA_col > 295 && VGA_col < 505) begin
                 {VGA_R, VGA_G, VGA_B}   = {8'd20, 8'd100, 8'd80};
             end
             // light up individual tiles
             // there are 200 tiles (10 wide, 20 tall)
             // 7 colors - SW[16:14]
             // color coordinate - x = SW[13:10], y = SW[9:5]
-            if (VGA_row >= (60 + 20*SW[9:5]) &&
-                VGA_row <  (80 + 20*SW[9:5]) &&
-                VGA_col >= (240 + 16*SW[13:10]) &&
-                VGA_col <  (256 + 16*SW[13:10])) begin
+            if (VGA_row >= (50 + 25*SW[9:5]) &&
+                VGA_row <  (75 + 25*SW[9:5]) &&
+                VGA_col >= (300 + 20*SW[13:10]) &&
+                VGA_col <  (320 + 20*SW[13:10])) begin
                 case (SW[16:14])
                     3'd0: begin
                         {VGA_R, VGA_G, VGA_B}   = 24'h00fdff;
@@ -88,20 +88,20 @@ module SVGA_testpattern (
             end
         end else begin
             // default to generating test pattern
-            if (VGA_row < 10'd240) begin
-                if ((VGA_col < 10'd160) ||
-                    (VGA_col >= 10'd320 && VGA_col < 10'd480)) begin
+            if (VGA_row < 10'd300) begin
+                if ((VGA_col < 10'd200) ||
+                    (VGA_col >= 10'd400 && VGA_col < 10'd600)) begin
                     VGA_R = 8'd255;
                 end
 
-                if (VGA_col < 10'd320) begin
+                if (VGA_col < 10'd400) begin
                     VGA_G = 8'd255;
                 end
 
-                if ((VGA_col < 10'd80) ||
-                    (VGA_col >= 10'd160 && VGA_col < 10'd240) ||
-                    (VGA_col >= 10'd320 && VGA_col < 10'd400) ||
-                    (VGA_col >= 10'd480 && VGA_col < 10'd560)) begin
+                if ((VGA_col < 10'd100) ||
+                    (VGA_col >= 10'd200 && VGA_col < 10'd300) ||
+                    (VGA_col >= 10'd400 && VGA_col < 10'd500) ||
+                    (VGA_col >= 10'd600 && VGA_col < 10'd700)) begin
                     VGA_B = 8'd255;
                 end
             end
