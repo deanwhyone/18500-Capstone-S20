@@ -41,7 +41,7 @@ module AR_testbench (
 
     logic [ 7:0]                chars           [STRING_LENGTH];
     logic [ 0:5]                bitmap          [STRING_LENGTH][6];
-    logic [STRING_LENGTH:0] actives;
+    logic [STRING_LENGTH:0]     actives;
     logic                       general_active;
 
     always_comb begin
