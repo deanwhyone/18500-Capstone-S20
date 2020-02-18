@@ -3,7 +3,7 @@
  * Eric Chen, Alton Olsen, Deanyone Su
  *
  * This is a basic VGA interface that follows the standard VGA protocol for
- * 640x480 display @ 30 fps. This is taken from mastermindVGA file provided in
+ * 640x480 display @ 60 fps. This is taken from mastermindVGA file provided in
  * 18240 for Lab 5.
  */
 `default_nettype none
@@ -34,7 +34,7 @@ module VGA (
     //     count of 492 - 520 is back porch
 
     simple_counter #(
-        .WIDTH(10)
+        .WIDTH  (10)
     ) row_counter (
         .Q      (row_count),
         .en     (row_enable),
@@ -47,7 +47,7 @@ module VGA (
     assign row_clear  = (row_count >= 10'd520);
     assign row_enable = (col_count == 11'd1599);
     assign VS         = (row_count < 10'd490) | (row_count > 10'd491);
-    assign v_blank    = (row_count >= 10'd480);
+    assign v_blank    = (row_count > 10'd479);
 
     // Col counter counts from 0 to 1599
     //     count of    0 - 1279 is display time (col is div by 2)
@@ -56,7 +56,7 @@ module VGA (
     //     count of 1504 - 1599 is back porch
 
     simple_counter #(
-        .WIDTH(11)
+        .WIDTH  (11)
     ) col_counter (
         .Q      (col_count),
         .en     (col_enable),
