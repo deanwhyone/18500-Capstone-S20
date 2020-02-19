@@ -180,5 +180,3 @@ module AlphanumeralBitMap (
         endcase
     end
 endmodule // AlphanumeralBitMap
-
-
