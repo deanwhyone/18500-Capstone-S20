@@ -42,7 +42,6 @@ module AlphanumeralRender # (
     end
 
     AlphanumeralBitMap ABM_inst (
-        .clk        (clk),
         .character  (character),
         .bitmap     (bitmap)
     );
