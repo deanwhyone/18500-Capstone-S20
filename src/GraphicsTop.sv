@@ -12,7 +12,6 @@ module GraphicsTop
     import DisplayPkg::*,
            GamePkg::*;
 (
-    input  logic            clk,
     input  logic [ 9:0]     VGA_row,
     input  logic [ 9:0]     VGA_col,
     input  tile_type_t      tile_type           [PLAYFIELD_ROWS][PLAYFIELD_COLS],
@@ -26,6 +25,8 @@ module GraphicsTop
     logic           ppd_active;
     logic [23:0]    npd_output_color;
     logic           npd_active;
+    logic [23:0]    lcpd_active;
+    logic           lcpd_output_color;
 
     always_comb begin
         output_color    = BG_COLOR;
@@ -49,6 +50,10 @@ module GraphicsTop
                     // use the NPD to light up tiles in the next tile area
                     if (npd_active) begin
                         output_color    = npd_output_color;
+                    end
+                    // use the LCPD to render the lines cleared info box
+                    if (lcpd_active) begin
+                        output_color    = lcpd_output_color;
                     end
                 end
                 MP_READY: begin
@@ -110,5 +115,12 @@ module GraphicsTop
         .pieces_queue   (next_pieces_queue),
         .output_color   (npd_output_color),
         .active         (npd_active)
+    );
+    // LCPD module
+    LinesClearedPixelDriver lcpd_inst (
+        .VGA_row        (VGA_row),
+        .VGA_col        (VGA_col),
+        .output_color   (lcpd_output_color),
+        .active         (lcpd_active)
     );
 endmodule // GraphicsTop

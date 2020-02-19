@@ -62,8 +62,6 @@ module AR_testbench (
                 .ORIGIN_ROW (0),
                 .ORIGIN_COL (8 * SCALE * (g))
             ) AR_inst (
-                .clk        (clk),
-                .rst_l      (rst_l),
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
                 .character  (chars[g]),
@@ -76,8 +74,6 @@ module AR_testbench (
                 .ORIGIN_ROW (150),
                 .ORIGIN_COL (8 * SCALE * (g - 10))
             ) AR_inst (
-                .clk        (clk),
-                .rst_l      (rst_l),
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
                 .character  (chars[g]),
@@ -90,8 +86,6 @@ module AR_testbench (
                 .ORIGIN_ROW (200),
                 .ORIGIN_COL (8 * SCALE * (g - 24))
             ) AR_inst (
-                .clk        (clk),
-                .rst_l      (rst_l),
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
                 .character  (chars[g]),
@@ -103,11 +97,9 @@ module AR_testbench (
                 .ORIGIN_ROW (250),
                 .ORIGIN_COL (0)
             ) AR_inst (
-                .clk        (clk),
-                .rst_l      (rst_l),
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
-                .character  (8'h2e),
+                .character  (":"),
                 .active     (actives[STRING_LENGTH])
             );
     endgenerate

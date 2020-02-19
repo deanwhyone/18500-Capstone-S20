@@ -487,7 +487,6 @@ module TetrisTop
     );
 
     GraphicsTop graphics_inst (
-        .clk                (clk),
         .VGA_row            (VGA_row),
         .VGA_col            (VGA_col),
         .tile_type          (tile_type),
