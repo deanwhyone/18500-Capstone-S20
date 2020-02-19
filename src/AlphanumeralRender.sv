@@ -13,8 +13,7 @@ module AlphanumeralRender # (
     parameter ORIGIN_ROW    = 0,
     parameter ORIGIN_COL    = 0
 ) (
-    input  logic clk,
-    input  logic rst_l,
+    input  logic        clk,
     input  logic [ 9:0] VGA_row,
     input  logic [ 9:0] VGA_col,
     input  logic [ 7:0] character,

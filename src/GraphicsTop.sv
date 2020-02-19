@@ -12,6 +12,7 @@ module GraphicsTop
     import DisplayPkg::*,
            GamePkg::*;
 (
+    input  logic            clk,
     input  logic [ 9:0]     VGA_row,
     input  logic [ 9:0]     VGA_col,
     input  tile_type_t      tile_type           [PLAYFIELD_ROWS][PLAYFIELD_COLS],
