@@ -27,6 +27,11 @@ package DisplayPkg;
     parameter TILE_HEIGHT               =
         (PLAYFIELD_VEND - PLAYFIELD_VSTART) / PLAYFIELD_ROWS;
 
+    parameter BORDER_HSTART             = PLAYFIELD_HSTART - 5;
+    parameter BORDER_HEND               = PLAYFIELD_HEND + 5;
+    parameter BORDER_VSTART             = PLAYFIELD_VSTART - 5;
+    parameter BORDER_VEND               = PLAYFIELD_VEND + 5;
+
     parameter NEXT_ROWS                 = 19;
     parameter NEXT_COLS                 = 6;
 
@@ -35,10 +40,10 @@ package DisplayPkg;
     parameter NEXT_VSTART               = PLAYFIELD_VSTART;
     parameter NEXT_VEND                 = NEXT_VSTART + NEXT_ROWS * TILE_HEIGHT;
 
-    parameter BORDER_HSTART             = PLAYFIELD_HSTART - 5;
-    parameter BORDER_HEND               = PLAYFIELD_HEND + 5;
-    parameter BORDER_VSTART             = PLAYFIELD_VSTART - 5;
-    parameter BORDER_VEND               = PLAYFIELD_VEND + 5;
+    parameter LC_HSTART                 = BORDER_HSTART - 175;
+    parameter LC_HEND                   = BORDER_HSTART;
+    parameter LC_VSTART                 = PLAYFIELD_VEND - 100;
+    parameter LC_VEND                   = PLAYFIELD_VEND;
 
     parameter BG_COLOR                  = 24'h40_4040;
     parameter BORDER_COLOR              = 24'hff_ffff;

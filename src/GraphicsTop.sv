@@ -25,8 +25,8 @@ module GraphicsTop
     logic           ppd_active;
     logic [23:0]    npd_output_color;
     logic           npd_active;
-    logic [23:0]    lcpd_active;
-    logic           lcpd_output_color;
+    logic [23:0]    lcpd_output_color;
+    logic           lcpd_active;
 
     always_comb begin
         output_color    = BG_COLOR;
