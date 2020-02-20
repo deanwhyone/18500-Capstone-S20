@@ -16,8 +16,15 @@ module GraphicsTop
     input  logic [ 9:0]     VGA_col,
     input  tile_type_t      tile_type           [PLAYFIELD_ROWS][PLAYFIELD_COLS],
     input  tile_type_t      next_pieces_queue   [NEXT_PIECES_COUNT],
+    input  logic [ 5:0]     lines_cleared,
     input  logic            testpattern_active,
     input  game_screens_t   tetris_screen,
+    input  logic [ 4:0]     time_hours,
+    input  logic [ 5:0]     time_minutes,
+    input  logic [ 5:0]     time_seconds,
+    input  logic [ 3:0]     time_deciseconds,
+    input  logic [ 3:0]     time_centiseconds,
+    input  logic [ 3:0]     time_milliseconds,
     output logic [23:0]     output_color
 );
 
@@ -27,6 +34,8 @@ module GraphicsTop
     logic           npd_active;
     logic [23:0]    lcpd_output_color;
     logic           lcpd_active;
+    logic [23:0]    tpd_output_color;
+    logic           tpd_active;
 
     always_comb begin
         output_color    = BG_COLOR;
@@ -54,6 +63,10 @@ module GraphicsTop
                     // use the LCPD to render the lines cleared info box
                     if (lcpd_active) begin
                         output_color    = lcpd_output_color;
+                    end
+                    // use the TPD to render the timer
+                    if (tpd_active) begin
+                        output_color    = tpd_output_color;
                     end
                 end
                 MP_READY: begin
@@ -120,7 +133,21 @@ module GraphicsTop
     LinesClearedPixelDriver lcpd_inst (
         .VGA_row        (VGA_row),
         .VGA_col        (VGA_col),
+        .lines_cleared  (lines_cleared),
         .output_color   (lcpd_output_color),
         .active         (lcpd_active)
+    );
+    // TPD module
+    TimerPixelDriver tpd_inst (
+        .VGA_row            (VGA_row),
+        .VGA_col            (VGA_col),
+        .time_hours         (time_hours),
+        .time_minutes       (time_minutes),
+        .time_seconds       (time_seconds),
+        .time_deciseconds   (time_deciseconds),
+        .time_centiseconds  (time_centiseconds),
+        .time_milliseconds  (time_milliseconds),
+        .output_color       (tpd_output_color),
+        .active             (tpd_active)
     );
 endmodule // GraphicsTop

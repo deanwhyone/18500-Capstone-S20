@@ -140,6 +140,32 @@ module TetrisTop
 
     logic           falling_piece_lock;
 
+    logic [ 5:0]    lines_cleared;
+    logic           lines_cleared_en;
+    logic           lines_cleared_ld;
+
+    logic [ 4:0]  time_hours;
+    logic         time_hours_en;
+    logic         time_hours_ld;
+    logic [ 5:0]  time_minutes;
+    logic         time_minutes_en;
+    logic         time_minutes_ld;
+    logic [ 5:0]  time_seconds;
+    logic         time_seconds_en;
+    logic         time_seconds_ld;
+    logic [ 3:0]  time_deciseconds;
+    logic         time_deciseconds_en;
+    logic         time_deciseconds_ld;
+    logic [ 3:0]  time_centiseconds;
+    logic         time_centiseconds_en;
+    logic         time_centiseconds_ld;
+    logic [ 3:0]  time_milliseconds;
+    logic         time_milliseconds_en;
+    logic         time_milliseconds_ld;
+    logic [15:0]  time_clk;
+    logic         time_clk_en;
+    logic         time_clk_ld;
+
     // synchronizer chains
     always_ff @ (posedge clk) begin
         key_R_trigger_sync      <= !KEY[1];
@@ -365,7 +391,23 @@ module TetrisTop
         end
     end
 
-    // keep register of cleared lines
+    // handle line clearing logic
+    always_comb begin
+        lines_cleared_ld = game_start_tetris;
+    end
+
+    // counter holds lines cleared for the pending game
+    counter #(
+        .WIDTH      ($bits(lines_cleared))
+    ) lines_cleared_ctr_inst (
+        .clk    (clk),
+        .rst_l  (rst_l),
+        .en     (lines_cleared_en),
+        .load   (lines_cleared_ld),
+        .up     (1'b1),
+        .D      ('0),
+        .Q      (lines_cleared)
+    );
 
     // GameScreensFSM
     GameScreensFSM game_screen_fsm_inst (
@@ -376,7 +418,7 @@ module TetrisTop
         .falling_orientation(falling_orientation),
         .falling_type       (falling_type),
         .start_sprint       (soft_drop),
-        .lines_cleared      (), // register local number of lines cleared
+        .lines_cleared      (lines_cleared),
         .battle_ready       (rotate_R || move_R),
         .ready_withdraw     (rotate_L || move_L),
         .opponent_ready     (opponent_battle_ready), // receive network ready
@@ -403,6 +445,115 @@ module TetrisTop
         .ghost_col          (hard_drop_col_new),
         .falling_piece_lock (falling_piece_lock),
         .new_tetromino      (new_tetromino)
+    );
+
+    // handle timer logic
+    always_comb begin
+        time_clk_en             = (tetris_screen == SPRINT_MODE) ||
+                                  (tetris_screen == MP_MODE);
+        time_clk_ld             = time_clk == 16'd50_000;
+
+        time_milliseconds_en    = time_clk_ld;
+        time_milliseconds_ld    = (time_milliseconds == 4'd9) &&
+                                  time_milliseconds_en;
+
+        time_centiseconds_en    = time_milliseconds_ld;
+        time_centiseconds_ld    = (time_centiseconds == 4'd9) &&
+                                  time_centiseconds_en;
+
+        time_deciseconds_en     = time_centiseconds_ld;
+        time_deciseconds_ld     = (time_deciseconds == 4'd9) &&
+                                  time_deciseconds_en;
+
+        time_seconds_en         = time_deciseconds_ld;
+        time_seconds_ld         = (time_seconds == 6'd59) &&
+                                  time_seconds_en;
+
+        time_minutes_en         = time_seconds_ld;
+        time_minutes_ld         = (time_minutes == 6'd59) &&
+                                  time_minutes_en;
+
+        time_hours_en           = time_minutes_ld;
+        time_hours_ld           = 1'b0; // I really hope it never runs this long
+    end
+
+    // time tracking counters
+    counter #(
+        .WIDTH      ($bits(time_hours))
+    ) time_hours_ctr_inst (
+        .clk    (clk),
+        .rst_l  (rst_l),
+        .en     (time_hours_en),
+        .load   (time_hours_ld),
+        .up     (1'b1),
+        .D      ('0),
+        .Q      (time_hours)
+    );
+    counter #(
+        .WIDTH      ($bits(time_minutes))
+    ) time_minutes_ctr_inst (
+        .clk    (clk),
+        .rst_l  (rst_l),
+        .en     (time_minutes_en),
+        .load   (time_minutes_ld),
+        .up     (1'b1),
+        .D      ('0),
+        .Q      (time_minutes)
+    );
+    counter #(
+        .WIDTH      ($bits(time_seconds))
+    ) time_seconds_ctr_inst (
+        .clk    (clk),
+        .rst_l  (rst_l),
+        .en     (time_seconds_en),
+        .load   (time_seconds_ld),
+        .up     (1'b1),
+        .D      ('0),
+        .Q      (time_seconds)
+    );
+    counter #(
+        .WIDTH      ($bits(time_deciseconds))
+    ) time_deciseconds_ctr_inst (
+        .clk    (clk),
+        .rst_l  (rst_l),
+        .en     (time_deciseconds_en),
+        .load   (time_deciseconds_ld),
+        .up     (1'b1),
+        .D      ('0),
+        .Q      (time_deciseconds)
+    );
+    counter #(
+        .WIDTH      ($bits(time_centiseconds))
+    ) time_centiseconds_ctr_inst (
+        .clk    (clk),
+        .rst_l  (rst_l),
+        .en     (time_centiseconds_en),
+        .load   (time_centiseconds_ld),
+        .up     (1'b1),
+        .D      ('0),
+        .Q      (time_centiseconds)
+    );
+    counter #(
+        .WIDTH      ($bits(time_milliseconds))
+    ) time_milliseconds_ctr_inst (
+        .clk    (clk),
+        .rst_l  (rst_l),
+        .en     (time_milliseconds_en),
+        .load   (time_milliseconds_ld),
+        .up     (1'b1),
+        .D      ('0),
+        .Q      (time_milliseconds)
+    );
+    counter #(
+        .WIDTH      ($bits(time_clk))
+    ) time_clk_ctr_inst (
+        .clk    (clk),
+        .rst_l  (rst_l),
+        .en     (time_clk_en),
+        .load   (time_clk_ld),
+        .up     (1'b1),
+        .D      ('0),
+        .Q      (time_clk)
     );
 
     // SUV module
@@ -491,8 +642,15 @@ module TetrisTop
         .VGA_col            (VGA_col),
         .tile_type          (tile_type),
         .next_pieces_queue  (next_pieces_queue),
+        .lines_cleared      (lines_cleared),
         .testpattern_active (SW[16]),
         .tetris_screen      (tetris_screen),
+        .time_hours         (time_hours),
+        .time_minutes       (time_minutes),
+        .time_seconds       (time_seconds),
+        .time_deciseconds   (time_deciseconds),
+        .time_centiseconds  (time_centiseconds),
+        .time_milliseconds  (time_milliseconds),
         .output_color       ({VGA_R, VGA_G, VGA_B})
     );
 

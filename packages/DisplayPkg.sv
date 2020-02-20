@@ -40,10 +40,15 @@ package DisplayPkg;
     parameter NEXT_VSTART               = PLAYFIELD_VSTART;
     parameter NEXT_VEND                 = NEXT_VSTART + NEXT_ROWS * TILE_HEIGHT;
 
-    parameter LC_HSTART                 = BORDER_HSTART - 175;
+    parameter LC_HSTART                 = BORDER_HSTART - 100;
     parameter LC_HEND                   = BORDER_HSTART;
-    parameter LC_VSTART                 = PLAYFIELD_VEND - 100;
+    parameter LC_VSTART                 = PLAYFIELD_VEND - 48;
     parameter LC_VEND                   = PLAYFIELD_VEND;
+
+    parameter TIMER_HSTART              = LC_HSTART;
+    parameter TIMER_HEND                = LC_HEND;
+    parameter TIMER_VSTART              = LC_VSTART - 16;
+    parameter TIMER_VEND                = LC_VSTART;
 
     parameter BG_COLOR                  = 24'h40_4040;
     parameter BORDER_COLOR              = 24'hff_ffff;
