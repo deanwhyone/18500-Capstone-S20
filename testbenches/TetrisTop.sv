@@ -263,18 +263,18 @@ module TetrisTop
             hard_drop       <= 1'b0;
         end else begin
             if (SW[0]) begin
-                rotate_R    <= key_R_trigger && !rotate_R && rotate_R_armed;
-                rotate_L    <= key_L_trigger && !rotate_L && rotate_L_armed;
+                rotate_R    <= key_R_trigger && rotate_R_armed;
+                rotate_L    <= key_L_trigger && rotate_L_armed;
                 move_R      <= 1'b0;
                 move_L      <= 1'b0;
             end else begin
-                move_R      <= key_R_trigger && !move_R && move_R_armed;
-                move_L      <= key_L_trigger && !move_L && move_L_armed;
+                move_R      <= key_R_trigger && move_R_armed;
+                move_L      <= key_L_trigger && move_L_armed;
                 rotate_R    <= 1'b0;
                 rotate_L    <= 1'b0;
             end
-            soft_drop   <= key_soft_trigger && !soft_drop && soft_drop_armed;
-            hard_drop   <= key_hard_trigger && !hard_drop && hard_drop_armed;
+            soft_drop   <= key_soft_trigger && soft_drop_armed;
+            hard_drop   <= key_hard_trigger && hard_drop_armed;
         end
     end
 
