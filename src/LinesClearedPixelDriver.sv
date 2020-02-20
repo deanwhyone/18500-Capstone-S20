@@ -91,7 +91,7 @@ module LinesClearedPixelDriver
         .active     (active_lc_tens)
     );
 
-    assign lc_ones_digit = lines_cleared % 10;
+    assign lc_ones_digit = lines_cleared % 8'd10;
 
     AlphanumeralRender #(
         .SCALE      (2),
