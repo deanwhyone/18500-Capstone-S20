@@ -3,7 +3,7 @@
 module music
   (input  logic CLOCK_50,
    input  logic SW[0:17],
-   output logic GPIO[0:35]);
+   output logic GPIO_0[29:15]); // only uses odd numbered pins (29, 27, 25 ... 15)
   
   logic clock, reset;
   assign clock = CLOCK_50;
@@ -23,11 +23,20 @@ module music
   logic [24:0] note_tick_counter;
   logic [6:0] current_note;
   logic [7:0] lead_signal;
+  logic [7:0] bass_signal;
+  logic [7:0] dac_out;
 
   wavegen lead_wavegen(.clock        (clock),
                        .reset        (reset),
-                       .note         (music_mem[current_note << 1]),
+                       .note         (music_mem[current_note * 2]),
                        .signal       (lead_signal));
+							  
+  wavegen bass_wavegen(.clock        (clock),
+                       .reset        (reset),
+                       .note         (music_mem[current_note * 2 + 1]),
+                       .signal       (bass_signal));
+							  
+  assign dac_out = lead_signal + bass_signal;
 
   counter #(.WIDTH(10)) _audio_sample_counter(.D('b0),
                                               .clk(clock),
@@ -52,17 +61,17 @@ module music
                                              .load('b0),
                                              .up('b1),
                                              .Q(current_note));
-
+															
   always_ff @(posedge clock) begin
     if (audio_sample_counter == 0) begin
-      GPIO[29] <= lead_signal[0];
-      GPIO[27] <= lead_signal[1];
-      GPIO[25] <= lead_signal[2];
-      GPIO[23] <= lead_signal[3];
-      GPIO[21] <= lead_signal[4];
-      GPIO[19] <= lead_signal[5];
-      GPIO[17] <= lead_signal[6];
-      GPIO[15] <= lead_signal[7];
+      GPIO_0[29] <= dac_out[0];
+      GPIO_0[27] <= dac_out[1];
+      GPIO_0[25] <= dac_out[2];
+      GPIO_0[23] <= dac_out[3];
+      GPIO_0[21] <= dac_out[4];
+      GPIO_0[19] <= dac_out[5];
+      GPIO_0[17] <= dac_out[6];
+      GPIO_0[15] <= dac_out[7];
     end
   end
 
