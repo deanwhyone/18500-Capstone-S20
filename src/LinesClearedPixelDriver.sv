@@ -91,21 +91,7 @@ module LinesClearedPixelDriver
         .active     (active_lc_tens)
     );
 
-    always_comb begin
-        lc_ones_digit = 8'(lines_cleared[2:0]);
-        if (lines_cleared[3]) begin
-            case (lines_cleared[2:0])
-                3'd0: lc_ones_digit = 8'd8;
-                3'd1: lc_ones_digit = 8'd9;
-                3'd2: lc_ones_digit = 8'd0;
-                3'd3: lc_ones_digit = 8'd1;
-                3'd4: lc_ones_digit = 8'd2;
-                3'd5: lc_ones_digit = 8'd3;
-                3'd6: lc_ones_digit = 8'd4;
-                3'd7: lc_ones_digit = 8'd5;
-            endcase
-        end
-    end
+    assign lc_ones_digit = lines_cleared % 10;
 
     AlphanumeralRender #(
         .SCALE      (2),
@@ -123,7 +109,6 @@ module LinesClearedPixelDriver
                         (|actives_2)    ||
                         active_lc_tens  ||
                         active_lc_ones;
-
     end
 
     always_comb begin
