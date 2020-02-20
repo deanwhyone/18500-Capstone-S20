@@ -17,6 +17,7 @@ module LinesClearedPixelDriver
 (
     input  logic [ 9:0]     VGA_row,
     input  logic [ 9:0]     VGA_col,
+    input  logic [ 5:0]     lines_cleared,
     output logic [23:0]     output_color,
     output logic            active
 );
@@ -25,10 +26,15 @@ module LinesClearedPixelDriver
 
     logic [ 7:0]                word_1          [WORD_LENGTH_1];
     logic [ 7:0]                word_2          [WORD_LENGTH_2];
+    logic [ 7:0]                lc_tens_digit;
+    logic [ 7:0]                lc_ones_digit;
 
     logic [WORD_LENGTH_1 - 1:0] actives_1;
     logic [WORD_LENGTH_2 - 1:0] actives_2;
+    logic                       active_lc_tens;
+    logic                       active_lc_ones;
     logic                       active_char;
+
 
     always_comb begin
         word_1 = '{"L", "I", "N", "E", "S"};
@@ -41,8 +47,8 @@ module LinesClearedPixelDriver
             AlphanumeralRender #(
                 .SCALE      (2),
                 .ORIGIN_ROW (LC_VSTART),
-                .ORIGIN_COL (LC_HSTART + 15 * g)
-            ) ar_inst_lines (
+                .ORIGIN_COL (LC_HSTART + 14 * g)
+            ) ar_lines_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
                 .character  (word_1[g]),
@@ -52,9 +58,9 @@ module LinesClearedPixelDriver
         for (g = 0; g < WORD_LENGTH_2; g++) begin : STRING_CLEARED_G
             AlphanumeralRender #(
                 .SCALE      (2),
-                .ORIGIN_ROW (LC_VSTART + 50),
-                .ORIGIN_COL (LC_HSTART + 15 * g)
-            ) ar_inst_lines (
+                .ORIGIN_ROW (LC_VSTART + 15),
+                .ORIGIN_COL (LC_HSTART + 14 * g)
+            ) ar_cleared_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
                 .character  (word_2[g]),
@@ -64,7 +70,59 @@ module LinesClearedPixelDriver
     endgenerate
 
     always_comb begin
-        active_char = (|actives_1) || (|actives_2);
+        lc_tens_digit = 8'd0;
+        if (lines_cleared >= 6'd10 && lines_cleared < 6'd20) begin
+            lc_tens_digit = 8'd1;
+        end else if (lines_cleared >= 6'd20 && lines_cleared < 6'd30) begin
+            lc_tens_digit = 8'd2;
+        end else if (lines_cleared >= 6'd30 && lines_cleared < 6'd40) begin
+            lc_tens_digit = 8'd3;
+        end
+    end
+
+    AlphanumeralRender #(
+        .SCALE      (2),
+        .ORIGIN_ROW (LC_VSTART + 30),
+        .ORIGIN_COL (LC_HSTART)
+    ) ar_tens_inst (
+        .VGA_row    (VGA_row),
+        .VGA_col    (VGA_col),
+        .character  (lc_tens_digit + 8'h30),
+        .active     (active_lc_tens)
+    );
+
+    always_comb begin
+        lc_ones_digit = 8'(lines_cleared[2:0]);
+        if (lines_cleared[3]) begin
+            case (lines_cleared[2:0])
+                3'd0: lc_ones_digit = 8'd8;
+                3'd1: lc_ones_digit = 8'd9;
+                3'd2: lc_ones_digit = 8'd0;
+                3'd3: lc_ones_digit = 8'd1;
+                3'd4: lc_ones_digit = 8'd2;
+                3'd5: lc_ones_digit = 8'd3;
+                3'd6: lc_ones_digit = 8'd4;
+                3'd7: lc_ones_digit = 8'd5;
+            endcase
+        end
+    end
+
+    AlphanumeralRender #(
+        .SCALE      (2),
+        .ORIGIN_ROW (LC_VSTART + 30),
+        .ORIGIN_COL (LC_HSTART + 14)
+    ) ar_ones_inst (
+        .VGA_row    (VGA_row),
+        .VGA_col    (VGA_col),
+        .character  (lc_ones_digit + 8'h30),
+        .active     (active_lc_ones)
+    );
+
+    always_comb begin
+        active_char =   (|actives_1)    ||
+                        (|actives_2)    ||
+                        active_lc_tens  ||
+                        active_lc_ones;
 
     end
 
