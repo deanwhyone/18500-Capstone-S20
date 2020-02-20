@@ -22,7 +22,7 @@ module LinesClearedPixelDriver
     output logic            active
 );
     localparam WORD_LENGTH_1 = 5;
-    localparam WORD_LENGTH_2 = 8;
+    localparam WORD_LENGTH_2 = 7;
 
     logic [ 7:0]                word_1          [WORD_LENGTH_1];
     logic [ 7:0]                word_2          [WORD_LENGTH_2];
@@ -38,7 +38,7 @@ module LinesClearedPixelDriver
 
     always_comb begin
         word_1 = '{"L", "I", "N", "E", "S"};
-        word_2 = '{"C", "L", "E", "A", "R", "E", "D", ":"};
+        word_2 = '{"C", "L", "E", "A", "R", "E", "D"};
     end
 
     genvar g;
