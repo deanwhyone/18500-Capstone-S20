@@ -394,6 +394,7 @@ module ASU_testbench
 
     // ASU module
     ActionStateUpdate asu_inst (
+        .clk                    (clk),
         .origin_row             (origin_row),
         .origin_col             (origin_col),
         .falling_type           (tile_type_t'(SW[13:10])),
