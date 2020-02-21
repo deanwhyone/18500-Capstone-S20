@@ -52,6 +52,7 @@ module TetrisTop
     logic           move_L;
     logic           soft_drop;
     logic           hard_drop;
+    logic           state_update_user;
 
     logic           rotate_R_valid;
     logic           rotate_L_valid;
@@ -239,13 +240,20 @@ module TetrisTop
         end
     end
 
+    assign state_update_user =  rotate_R    ||
+                                rotate_L    ||
+                                move_R      ||
+                                move_L      ||
+                                soft_drop   ||
+                                hard_drop;
+
     // state registers
     register #(
         .WIDTH      (5),
         .RESET_VAL  (0)
     ) origin_row_reg_inst (
         .clk    (clk),
-        .en     (rotate_R || rotate_L || move_R || move_L || soft_drop || hard_drop),
+        .en     (state_update_user),
         .rst_l  (rst_l),
         .clear  (falling_piece_lock),
         .D      (origin_row_update),
@@ -256,7 +264,7 @@ module TetrisTop
         .RESET_VAL  (4)
     ) origin_col_reg_inst (
         .clk    (clk),
-        .en     (rotate_R || rotate_L || move_R || move_L || soft_drop || hard_drop),
+        .en     (state_update_user),
         .rst_l  (rst_l),
         .clear  (falling_piece_lock),
         .D      (origin_col_update),
@@ -267,7 +275,7 @@ module TetrisTop
         .RESET_VAL  (0)
     ) origin_orientation_reg_inst (
         .clk    (clk),
-        .en     (rotate_R || rotate_L || move_R || move_L || soft_drop || hard_drop),
+        .en     (state_update_user),
         .rst_l  (rst_l),
         .clear  (falling_piece_lock),
         .D      (falling_orientation_update),
@@ -332,10 +340,10 @@ module TetrisTop
         .falling_orientation(falling_orientation),
         .falling_type       (falling_type),
         .falling_piece_lock (falling_piece_lock),
-        .start_sprint       (soft_drop),
+        .start_sprint       (!KEY[2]),
         .lines_cleared      (lines_cleared),
-        .battle_ready       (rotate_R || move_R),
-        .ready_withdraw     (rotate_L || move_L),
+        .battle_ready       (!KEY[3]),
+        .ready_withdraw     (!KEY[0]),
         .opponent_ready     (opponent_battle_ready), // receive network ready
         .opponent_lost      (opponent_game_end), // receive network top-out
         .top_out            (), // communicate local user lost to network
