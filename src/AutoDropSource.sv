@@ -37,6 +37,7 @@ module AutoDropSource
     input  logic            clk,
     input  logic            rst_l,
     input  logic            soft_drop,
+    input  logic            soft_drop_valid,
     input  game_screens_t   tetris_screen,
     output logic            auto_drop
 );
@@ -71,7 +72,7 @@ module AutoDropSource
         auto_drop_cd_en =   tetris_screen == SPRINT_MODE ||
                             tetris_screen == MP_MODE;
         auto_drop_cd_ld =   (auto_drop_cd == gravity_choice) || soft_drop;
-        auto_drop       =   auto_drop_cd == gravity_choice;
+        auto_drop       =   auto_drop_cd == gravity_choice && soft_drop_valid;
     end
 
     counter #(

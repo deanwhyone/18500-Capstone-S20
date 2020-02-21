@@ -338,6 +338,7 @@ module TetrisTop
         .clk            (clk),
         .rst_l          (rst_l),
         .soft_drop      (soft_drop),
+        .soft_drop_valid(soft_drop_valid),
         .tetris_screen  (tetris_screen),
         .auto_drop      (auto_drop)
     );
