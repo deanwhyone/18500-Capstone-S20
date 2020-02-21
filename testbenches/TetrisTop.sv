@@ -398,6 +398,16 @@ module TetrisTop
 
         time_hours_en           = time_minutes_ld;
         time_hours_ld           = 1'b0; // I really hope it never runs this long
+
+        if (game_start_tetris) begin
+            {time_clk_ld,
+             time_milliseconds_ld,
+             time_centiseconds_ld,
+             time_deciseconds_ld,
+             time_seconds_ld,
+             time_minutes_ld,
+             time_hours_ld}         = '1;
+        end
     end
 
     // time tracking counters
