@@ -35,6 +35,7 @@ module GameScreensFSM
     input  logic [ 4:0]     falling_col,
     input  orientation_t    falling_orientation,
     input  tile_type_t      falling_type,
+    input  logic            falling_piece_lock,
     input  logic            start_sprint,
     input  logic [ 5:0]     lines_cleared,
     input  logic            battle_ready,
@@ -116,9 +117,11 @@ module GameScreensFSM
     // is placed being greater than the PLAYFIELD_ROWS value (20)
     always_comb begin
         top_out = 1'b0;
-        for (int i = 0; i < 4; i++) begin
-            if (tile_row[i] > PLAYFIELD_ROWS) begin
-                top_out = 1'b1;
+        if (falling_piece_lock) begin
+            for (int i = 0; i < 4; i++) begin
+                if (tile_row[i] > PLAYFIELD_ROWS) begin
+                    top_out = 1'b1;
+                end
             end
         end
     end

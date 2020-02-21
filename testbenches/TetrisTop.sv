@@ -46,16 +46,6 @@ module TetrisTop
     assign rst_l    = !SW[17];
 
     // declare local variables
-    logic           key_R_trigger;
-    logic           key_L_trigger;
-    logic           key_R_trigger_sync;
-    logic           key_L_trigger_sync;
-
-    logic           key_soft_trigger;
-    logic           key_hard_trigger;
-    logic           key_soft_trigger_sync;
-    logic           key_hard_trigger_sync;
-
     logic           rotate_R;
     logic           rotate_L;
     logic           move_R;
@@ -63,25 +53,11 @@ module TetrisTop
     logic           soft_drop;
     logic           hard_drop;
 
-    logic           rotate_R_armed;
-    logic           rotate_L_armed;
-    logic           move_R_armed;
-    logic           move_L_armed;
-    logic           soft_drop_armed;
-    logic           hard_drop_armed;
-
     logic           rotate_R_valid;
     logic           rotate_L_valid;
     logic           move_R_valid;
     logic           move_L_valid;
     logic           soft_drop_valid;
-
-    logic [31:0]    rotate_R_cd;
-    logic [31:0]    rotate_L_cd;
-    logic [31:0]    move_R_cd;
-    logic [31:0]    move_L_cd;
-    logic [31:0]    soft_drop_cd;
-    logic [31:0]    hard_drop_cd;
 
     logic [ 9:0]    VGA_row;
     logic [ 9:0]    VGA_col;
@@ -166,117 +142,49 @@ module TetrisTop
     logic         time_clk_en;
     logic         time_clk_ld;
 
-    // synchronizer chains
-    always_ff @ (posedge clk) begin
-        key_R_trigger_sync      <= !KEY[1];
-        key_L_trigger_sync      <= !KEY[3];
-        key_soft_trigger_sync   <= !KEY[2];
-        key_hard_trigger_sync   <= !KEY[0];
-        key_R_trigger           <= key_R_trigger_sync;
-        key_L_trigger           <= key_L_trigger_sync;
-        key_soft_trigger        <= key_soft_trigger_sync;
-        key_hard_trigger        <= key_hard_trigger_sync;
-    end
-
-    // use counters to set cooldown for each input
-    counter #(
-        .WIDTH  (32)
-    ) rotate_R_cd_counter (
-        .clk    (clk),
-        .rst_l  (rst_l),
-        .en     (rotate_R_cd != '0 || rotate_R),
-        .load   (rotate_R_cd == 32'd10_000_000),
-        .up     (1'b1),
-        .D      ('0),
-        .Q      (rotate_R_cd)
+    // DAS modules handle input sync chain and cooldown
+    DelayedAutoShiftFSM DAS_move_R_inst (
+        .clk            (clk),
+        .rst_l          (rst_l),
+        .action_user    (!SW[0] && !KEY[1]),
+        .action_valid   (move_R_valid),
+        .action_out     (move_R)
     );
-    assign rotate_R_armed = rotate_R_cd == '0 && rotate_R_valid;
-    counter #(
-        .WIDTH  (32)
-    ) rotate_L_cd_counter (
-        .clk    (clk),
-        .rst_l  (rst_l),
-        .en     (rotate_L_cd != '0 || rotate_L),
-        .load   (rotate_L_cd == 32'd10_000_000),
-        .up     (1'b1),
-        .D      ('0),
-        .Q      (rotate_L_cd)
+    DelayedAutoShiftFSM DAS_move_L_inst (
+        .clk            (clk),
+        .rst_l          (rst_l),
+        .action_user    (!SW[0] && !KEY[3]),
+        .action_valid   (move_L_valid),
+        .action_out     (move_L)
     );
-    assign rotate_L_armed = rotate_L_cd == '0 && rotate_L_valid;
-    counter #(
-        .WIDTH  (32)
-    ) move_R_cd_cder (
-        .clk    (clk),
-        .rst_l  (rst_l),
-        .en     (move_R_cd != '0 || move_R),
-        .load   (move_R_cd == 32'd10_000_000),
-        .up     (1'b1),
-        .D      ('0),
-        .Q      (move_R_cd)
+    DelayedAutoShiftFSM DAS_rotate_R_inst (
+        .clk            (clk),
+        .rst_l          (rst_l),
+        .action_user    (SW[0] && !KEY[1]),
+        .action_valid   (rotate_R_valid),
+        .action_out     (rotate_R)
     );
-    assign move_R_armed = move_R_cd == '0 && move_R_valid;
-    counter #(
-        .WIDTH  (32)
-    ) move_L_cd_counter (
-        .clk    (clk),
-        .rst_l  (rst_l),
-        .en     (move_L_cd != '0 || move_L),
-        .load   (move_L_cd == 32'd10_000_000),
-        .up     (1'b1),
-        .D      ('0),
-        .Q      (move_L_cd)
+    DelayedAutoShiftFSM DAS_rotate_L_inst (
+        .clk            (clk),
+        .rst_l          (rst_l),
+        .action_user    (SW[0] && !KEY[3]),
+        .action_valid   (rotate_L_valid),
+        .action_out     (rotate_L)
     );
-    assign move_L_armed = move_L_cd == '0 && move_L_valid;
-    counter #(
-        .WIDTH  (32)
-    ) soft_drop_cd_counter (
-        .clk    (clk),
-        .rst_l  (rst_l),
-        .en     (soft_drop_cd != '0 || soft_drop),
-        .load   (soft_drop_cd == 32'd10_000_000),
-        .up     (1'b1),
-        .D      ('0),
-        .Q      (soft_drop_cd)
+    DelayedAutoShiftFSM DAS_soft_drop_inst (
+        .clk            (clk),
+        .rst_l          (rst_l),
+        .action_user    (!KEY[2]),
+        .action_valid   (soft_drop_valid),
+        .action_out     (soft_drop)
     );
-    assign soft_drop_armed = soft_drop_cd == '0 && soft_drop_valid;
-    counter #(
-        .WIDTH  (32)
-    ) hard_drop_cd_counter (
-        .clk    (clk),
-        .rst_l  (rst_l),
-        .en     (hard_drop_cd != '0 || hard_drop),
-        .load   (hard_drop_cd == 32'd10_000_000),
-        .up     (1'b1),
-        .D      ('0),
-        .Q      (hard_drop_cd)
+    DelayedAutoShiftFSM DAS_hard_drop_inst (
+        .clk            (clk),
+        .rst_l          (rst_l),
+        .action_user    (!KEY[0]),
+        .action_valid   (1'b1),
+        .action_out     (hard_drop)
     );
-    assign hard_drop_armed = hard_drop_cd == '0;
-
-    // use rising edge triggers to detect unique inputs
-    always_ff @ (posedge clk, negedge rst_l) begin
-        if (!rst_l) begin
-            rotate_R        <= 1'b0;
-            rotate_L        <= 1'b0;
-            move_R          <= 1'b0;
-            move_L          <= 1'b0;
-            soft_drop       <= 1'b0;
-            hard_drop       <= 1'b0;
-        end else begin
-            if (SW[0]) begin
-                rotate_R    <= key_R_trigger && rotate_R_armed;
-                rotate_L    <= key_L_trigger && rotate_L_armed;
-                move_R      <= 1'b0;
-                move_L      <= 1'b0;
-            end else begin
-                move_R      <= key_R_trigger && move_R_armed;
-                move_L      <= key_L_trigger && move_L_armed;
-                rotate_R    <= 1'b0;
-                rotate_L    <= 1'b0;
-            end
-            soft_drop   <= key_soft_trigger && soft_drop_armed;
-            hard_drop   <= key_hard_trigger && hard_drop_armed;
-        end
-    end
 
     // set tile_type to drive pattern into playfield
     always_comb begin
@@ -334,7 +242,7 @@ module TetrisTop
     // state registers
     register #(
         .WIDTH      (5),
-        .RESET_VAL  (5)
+        .RESET_VAL  (0)
     ) origin_row_reg_inst (
         .clk    (clk),
         .en     (rotate_R || rotate_L || move_R || move_L || soft_drop || hard_drop),
@@ -345,7 +253,7 @@ module TetrisTop
     );
     register #(
         .WIDTH      (5),
-        .RESET_VAL  (5)
+        .RESET_VAL  (4)
     ) origin_col_reg_inst (
         .clk    (clk),
         .en     (rotate_R || rotate_L || move_R || move_L || soft_drop || hard_drop),
@@ -383,9 +291,15 @@ module TetrisTop
                 locked_state[i] <= '{PLAYFIELD_COLS{BLANK}};
             end
         end else begin
-            if (falling_piece_lock) begin
-                for (int i = 0; i < 4; i++) begin
-                    locked_state[ftr_rows[i]][ftr_cols[i]] <= falling_type;
+            if (game_start_tetris) begin
+                for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                    locked_state[i] <= '{PLAYFIELD_COLS{BLANK}};
+                end
+            end else begin
+                if (falling_piece_lock) begin
+                    for (int i = 0; i < 4; i++) begin
+                        locked_state[ftr_rows[i]][ftr_cols[i]] <= falling_type;
+                    end
                 end
             end
         end
@@ -417,6 +331,7 @@ module TetrisTop
         .falling_col        (origin_col),
         .falling_orientation(falling_orientation),
         .falling_type       (falling_type),
+        .falling_piece_lock (falling_piece_lock),
         .start_sprint       (soft_drop),
         .lines_cleared      (lines_cleared),
         .battle_ready       (rotate_R || move_R),
@@ -637,6 +552,7 @@ module TetrisTop
         .the_seven_bag   (LEDR[6:0])
     );
 
+    // top level module for all graphics drivers
     GraphicsTop graphics_inst (
         .VGA_row            (VGA_row),
         .VGA_col            (VGA_col),
@@ -667,5 +583,4 @@ module TetrisTop
     assign VGA_CLK      = !clk;
     assign VGA_BLANK_N  = !VGA_BLANK;
     assign VGA_SYNC_N   = 1'b0;
-
 endmodule // TetrisTop
