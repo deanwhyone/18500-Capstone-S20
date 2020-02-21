@@ -52,6 +52,7 @@ module TetrisTop
     logic           move_L;
     logic           soft_drop;
     logic           hard_drop;
+    logic           auto_drop;
     logic           state_update_user;
 
     logic           rotate_R_valid;
@@ -228,7 +229,7 @@ module TetrisTop
             origin_col_update           = move_L_col_new;
             falling_orientation_update  = move_L_orientation_new;
         end
-        if (soft_drop) begin
+        if (soft_drop || auto_drop) begin
             origin_row_update           = soft_drop_row_new;
             origin_col_update           = soft_drop_col_new;
             falling_orientation_update  = soft_drop_orientation_new;
@@ -245,7 +246,8 @@ module TetrisTop
                                 move_R      ||
                                 move_L      ||
                                 soft_drop   ||
-                                hard_drop;
+                                hard_drop   ||
+                                auto_drop;
 
     // state registers
     register #(
@@ -329,6 +331,15 @@ module TetrisTop
         .up     (1'b1),
         .D      ('0),
         .Q      (lines_cleared)
+    );
+
+    // AutoDrop module handles gravity. Currently fixed
+    AutoDropSource ADS_inst (
+        .clk            (clk),
+        .rst_l          (rst_l),
+        .soft_drop      (soft_drop),
+        .tetris_screen  (tetris_screen),
+        .auto_drop      (auto_drop)
     );
 
     // GameScreensFSM
