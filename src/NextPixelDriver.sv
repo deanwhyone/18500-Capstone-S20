@@ -50,10 +50,6 @@ module NextPixelDriver
             origin_col[i] = 5'd2;
             if (pieces_queue[i] == I) begin
                 origin_row[i] = origin_row[i] + 5'd1;
-                origin_col[i] = origin_col[i] + 5'd1;
-            end
-            if (pieces_queue[i] == O) begin
-                origin_col[i] = origin_col[i] + 5'd1;
             end
         end
     end

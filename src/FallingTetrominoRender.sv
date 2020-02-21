@@ -13,8 +13,7 @@
  * Origin of each tetromino is either:
  * the center of the tile
  *      T, J, L, S, Z
- * the top left corner of the tile
- *      I, O
+ * the bottom, left tile for O and I
  */
 `default_nettype none
 
@@ -36,25 +35,25 @@ module FallingTetrominoRender
                     ORIENTATION_0: begin
                         for (logic [4:0] i = 5'd0; i < 5'd4; i++) begin
                             tile_row[i] = origin_row - 5'd1;
-                            tile_col[i] = origin_col + (5'd1 - i);
+                            tile_col[i] = origin_col + (5'd2 - i);
                         end
                     end
                     ORIENTATION_R: begin
                         for (logic [4:0] i = 5'd0; i < 5'd4; i++) begin
                             tile_row[i] = origin_row + (5'd1 - i);
-                            tile_col[i] = origin_col;
+                            tile_col[i] = origin_col + 5'd1;
                         end
                     end
                     ORIENTATION_2: begin
                         for (logic [4:0] i = 5'd0; i < 5'd4; i++) begin
                             tile_row[i] = origin_row;
-                            tile_col[i] = origin_col + (5'd1 - i);
+                            tile_col[i] = origin_col + (5'd2 - i);
                         end
                     end
                     ORIENTATION_L: begin
                         for (logic [4:0] i = 5'd0; i < 5'd4; i++) begin
                             tile_row[i] = origin_row + (5'd1 - i);
-                            tile_col[i] = origin_col - 5'd1;
+                            tile_col[i] = origin_col;
                         end
                     end
                 endcase
@@ -62,7 +61,7 @@ module FallingTetrominoRender
             O: begin
                 for (int i = 0; i < 4; i++) begin
                     tile_row[i] = origin_row - {4'd0, i[0]};
-                    tile_col[i] = origin_col - {4'd0, i[1]};
+                    tile_col[i] = origin_col + {4'd0, i[1]};
                 end
             end
             T: begin
