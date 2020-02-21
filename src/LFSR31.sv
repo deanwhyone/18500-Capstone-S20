@@ -28,7 +28,7 @@ module LFSR31 #(
             // but Quartus doesn't support streaming operators?
             // {>>{registers}} <= SEED;
             for (int i = 0; i < WIDTH; i++) begin
-                registers[i] = SEED[i];
+                registers[i] <= SEED[i];
             end
         end else begin
             registers[WIDTH - 1] <= registers[0];
