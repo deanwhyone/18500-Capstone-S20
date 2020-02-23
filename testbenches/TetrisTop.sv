@@ -118,9 +118,11 @@ module TetrisTop
 
     logic           falling_piece_lock;
 
-    logic [ 5:0]    lines_cleared;
-    logic           lines_cleared_en;
-    logic           lines_cleared_ld;
+    logic [ 5:0]                    lines_cleared;
+    logic                           lines_cleared_en;
+    logic [PLAYFIELD_ROWS - 1:0]    lines_full;
+    logic [PLAYFIELD_ROWS - 1:0]    lines_empty;
+    logic [ 5:0]                    lines_to_clear;
 
     logic [ 4:0]  time_hours;
     logic         time_hours_en;
@@ -295,41 +297,68 @@ module TetrisTop
     );
 
     // locked state
-    always_ff @ (posedge clk, negedge rst_l) begin
-        if (!rst_l) begin
+    always_ff @ (posedge clk) begin
+        if (game_start_tetris) begin
             for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
                 locked_state[i] <= '{PLAYFIELD_COLS{BLANK}};
             end
         end else begin
-            if (game_start_tetris) begin
-                for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+            for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+                if (lines_full[i]) begin
                     locked_state[i] <= '{PLAYFIELD_COLS{BLANK}};
                 end
-            end else begin
-                if (falling_piece_lock) begin
-                    for (int i = 0; i < 4; i++) begin
-                        locked_state[ftr_rows[i]][ftr_cols[i]] <= falling_type;
-                    end
+            end
+
+            if (lines_empty[0]) begin
+                locked_state[0] <= '{PLAYFIELD_COLS{BLANK}};
+            end
+            for (int i = 1; i < PLAYFIELD_ROWS; i++) begin
+                if (lines_empty[i]) begin
+                    locked_state[i] <= locked_state[i - 1];
+                    locked_state[i - 1] <= '{PLAYFIELD_COLS{BLANK}};
+                end
+            end
+
+            if (falling_piece_lock) begin
+                for (int i = 0; i < 4; i++) begin
+                    locked_state[ftr_rows[i]][ftr_cols[i]] <= falling_type;
                 end
             end
         end
     end
 
+    // find which lines are "full" or "empty"
+    always_comb begin
+        lines_full = '1;
+        lines_empty = '1;
+        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+            for (int j = 0; j < PLAYFIELD_COLS; j++) begin
+                if (locked_state[i][j] == BLANK ||
+                    locked_state[i][j] == GHOST) begin
+                    lines_full[i] = 1'b0;
+                end else begin
+                    lines_empty[i] = 1'b0;
+                end
+            end
+        end
+    end
+    assign LEDR[17:8] = lines_empty[PLAYFIELD_ROWS-1:10];
+
     // handle line clearing logic
     always_comb begin
-        lines_cleared_ld = game_start_tetris;
+        lines_cleared_en    = 1'b0;
+        lines_to_clear      = lines_cleared + countSetBits(lines_full);
     end
 
-    // counter holds lines cleared for the pending game
-    counter #(
+    // register holds lines cleared for the pending game
+    register #(
         .WIDTH      ($bits(lines_cleared))
-    ) lines_cleared_ctr_inst (
+    ) lines_cleared_reg_inst (
         .clk    (clk),
-        .rst_l  (rst_l),
         .en     (lines_cleared_en),
-        .load   (lines_cleared_ld),
-        .up     (1'b1),
-        .D      ('0),
+        .rst_l  (rst_l),
+        .clear  (game_start_tetris),
+        .D      (lines_to_clear),
         .Q      (lines_cleared)
     );
 
