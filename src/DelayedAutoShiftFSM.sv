@@ -20,7 +20,7 @@ module DelayedAutoShiftFSM (
     output logic action_out
 );
     localparam CD_SHORT = 5_000_000;
-    localparam CD_LONG  = 30_000_000;
+    localparam CD_LONG  = 10_000_000;
 
     logic           action_trigger;
     logic           action_sync;
