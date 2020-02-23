@@ -155,7 +155,7 @@ module ActionStateUpdate
                 case (hard_drop_orientation_pipe)
                     ORIENTATION_0: begin
                         for (int i = 0; i < PLAYFIELD_ROWS - 1; i++) begin
-                            if (i > origin_row) begin
+                            if (i >= origin_row) begin
                                 if (tile_type_t'(locked_state[i][hard_drop_col + 5'd2]) == BLANK &&
                                     tile_type_t'(locked_state[i][hard_drop_col + 5'd1]) == BLANK &&
                                     tile_type_t'(locked_state[i][hard_drop_col]) == BLANK &&
