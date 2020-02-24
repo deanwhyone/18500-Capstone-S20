@@ -314,8 +314,12 @@ module TetrisTop
             end
             for (int i = 1; i < PLAYFIELD_ROWS; i++) begin
                 if (lines_empty[i]) begin
-                    locked_state[i] <= locked_state[i - 1];
                     locked_state[i - 1] <= '{PLAYFIELD_COLS{BLANK}};
+                end
+            end
+            for (int i = 1; i < PLAYFIELD_ROWS; i++) begin
+                if (lines_empty[i]) begin
+                    locked_state[i]     <= locked_state[i - 1];
                 end
             end
 
@@ -346,7 +350,7 @@ module TetrisTop
 
     // handle line clearing logic
     always_comb begin
-        lines_cleared_en    = 1'b0;
+        lines_cleared_en    = |lines_full;
         lines_to_clear      = lines_cleared + countSetBits(lines_full);
     end
 
