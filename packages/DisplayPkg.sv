@@ -76,6 +76,15 @@ package DisplayPkg;
         Z
     } tile_type_t;
 
+    function int countSetBits;
+        input logic [PLAYFIELD_ROWS - 1:0] bits;
+        int set_bit_count;
+        set_bit_count = 0;
+        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+            set_bit_count = set_bit_count + bits[i];
+        end
+        return set_bit_count;
+    endfunction
 endpackage // DisplayPkg
 
 `endif
