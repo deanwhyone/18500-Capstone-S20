@@ -10,8 +10,7 @@
  *      move when SW[0] is low
  *      rotate when SW[0] is high
  * KEY[2] is softdrop, KEY[0] is hard drop.
- * SW{13:10] selects which tetromino is displayed
- * SW[14] resets the tetromino to a pre-set orientation and position.
+ * SW{13:10] selects which tetromino is put in the hold area
  * SW[16] loads in the VGA testpattern when low, otherwise should run Tetris
  * SW[17] is a hard reset.
  *
@@ -632,6 +631,8 @@ module TetrisTop
         .time_deciseconds   (time_deciseconds),
         .time_centiseconds  (time_centiseconds),
         .time_milliseconds  (time_milliseconds),
+        .hold_piece_type    (tile_type_t'(SW[13:10])),
+        .hold_piece_valid   (1'b1),
         .output_color       ({VGA_R, VGA_G, VGA_B})
     );
 

@@ -25,6 +25,8 @@ module GraphicsTop
     input  logic [ 3:0]     time_deciseconds,
     input  logic [ 3:0]     time_centiseconds,
     input  logic [ 3:0]     time_milliseconds,
+    input  tile_type_t      hold_piece_type,
+    input  logic            hold_piece_valid,
     output logic [23:0]     output_color
 );
 
@@ -36,6 +38,8 @@ module GraphicsTop
     logic           lcpd_active;
     logic [23:0]    tpd_output_color;
     logic           tpd_active;
+    logic [23:0]    hpd_output_color;
+    logic           hpd_active;
 
     always_comb begin
         output_color    = BG_COLOR;
@@ -67,6 +71,10 @@ module GraphicsTop
                     // use the TPD to render the timer
                     if (tpd_active) begin
                         output_color    = tpd_output_color;
+                    end
+                    // use the HPD to render the timer
+                    if (hpd_active) begin
+                        output_color    = hpd_output_color;
                     end
                 end
                 MP_READY: begin
@@ -149,5 +157,14 @@ module GraphicsTop
         .time_milliseconds  (time_milliseconds),
         .output_color       (tpd_output_color),
         .active             (tpd_active)
+    );
+    // HPD module
+    HoldPixelDriver hpd_inst (
+        .VGA_row            (VGA_row),
+        .VGA_col            (VGA_col),
+        .hold_piece_type    (hold_piece_type),
+        .hold_piece_valid   (hold_piece_valid),
+        .output_color       (hpd_output_color),
+        .active             (hpd_active)
     );
 endmodule // GraphicsTop
