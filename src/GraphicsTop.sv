@@ -163,7 +163,6 @@ module GraphicsTop
         .VGA_row            (VGA_row),
         .VGA_col            (VGA_col),
         .hold_piece_type    (hold_piece_type),
-        .hold_piece_valid   (hold_piece_valid),
         .output_color       (hpd_output_color),
         .active             (hpd_active)
     );

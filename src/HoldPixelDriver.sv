@@ -19,7 +19,6 @@ module HoldPixelDriver
     input  logic [ 9:0] VGA_col,
 
     input  tile_type_t  hold_piece_type,
-    input  logic        hold_piece_valid,
 
     output logic [23:0] output_color,
     output logic        active
@@ -60,8 +59,7 @@ module HoldPixelDriver
                 if (VGA_row >= (HOLD_VSTART + TILE_HEIGHT * i)      &&
                     VGA_row < (HOLD_VSTART + TILE_HEIGHT * (i + 1)) &&
                     VGA_col >= (HOLD_HSTART + TILE_WIDTH * j)       &&
-                    VGA_col < (HOLD_HSTART + TILE_WIDTH * (j + 1))  &&
-                    hold_piece_valid) begin
+                    VGA_col < (HOLD_HSTART + TILE_WIDTH * (j + 1))) begin
                     active = 1'b1;
                     case (tile_type[i][j])
                         I:          output_color = TETROMINO_I_COLOR;

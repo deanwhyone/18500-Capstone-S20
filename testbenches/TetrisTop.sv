@@ -377,6 +377,8 @@ module TetrisTop
         .auto_drop      (auto_drop)
     );
 
+    // HoldPieceHandler registers the hold piece
+
     // GameScreensFSM
     GameScreensFSM game_screen_fsm_inst (
         .clk                (clk),
@@ -632,7 +634,6 @@ module TetrisTop
         .time_centiseconds  (time_centiseconds),
         .time_milliseconds  (time_milliseconds),
         .hold_piece_type    (tile_type_t'(SW[13:10])),
-        .hold_piece_valid   (1'b1),
         .output_color       ({VGA_R, VGA_G, VGA_B})
     );
 
