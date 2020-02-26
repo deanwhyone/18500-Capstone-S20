@@ -118,33 +118,33 @@ module TetrisTop
 
     logic           falling_piece_lock;
 
-    logic [ 5:0]                    lines_cleared;
-    logic                           lines_cleared_en;
-    logic [PLAYFIELD_ROWS - 1:0]    lines_full;
-    logic [PLAYFIELD_ROWS - 1:0]    lines_empty;
-    logic [ 5:0]                    lines_to_clear;
+    logic [ 5:0]    lines_cleared;
+    logic           lines_cleared_en;
+    logic           lines_full          [PLAYFIELD_ROWS];
+    logic           lines_empty         [PLAYFIELD_ROWS];
+    logic [ 5:0]    lines_to_clear;
 
-    logic [ 4:0]  time_hours;
-    logic         time_hours_en;
-    logic         time_hours_ld;
-    logic [ 5:0]  time_minutes;
-    logic         time_minutes_en;
-    logic         time_minutes_ld;
-    logic [ 5:0]  time_seconds;
-    logic         time_seconds_en;
-    logic         time_seconds_ld;
-    logic [ 3:0]  time_deciseconds;
-    logic         time_deciseconds_en;
-    logic         time_deciseconds_ld;
-    logic [ 3:0]  time_centiseconds;
-    logic         time_centiseconds_en;
-    logic         time_centiseconds_ld;
-    logic [ 3:0]  time_milliseconds;
-    logic         time_milliseconds_en;
-    logic         time_milliseconds_ld;
-    logic [15:0]  time_clk;
-    logic         time_clk_en;
-    logic         time_clk_ld;
+    logic [ 4:0]    time_hours;
+    logic           time_hours_en;
+    logic           time_hours_ld;
+    logic [ 5:0]    time_minutes;
+    logic           time_minutes_en;
+    logic           time_minutes_ld;
+    logic [ 5:0]    time_seconds;
+    logic           time_seconds_en;
+    logic           time_seconds_ld;
+    logic [ 3:0]    time_deciseconds;
+    logic           time_deciseconds_en;
+    logic           time_deciseconds_ld;
+    logic [ 3:0]    time_centiseconds;
+    logic           time_centiseconds_en;
+    logic           time_centiseconds_ld;
+    logic [ 3:0]    time_milliseconds;
+    logic           time_milliseconds_en;
+    logic           time_milliseconds_ld;
+    logic [15:0]    time_clk;
+    logic           time_clk_en;
+    logic           time_clk_ld;
 
     // DAS modules handle input sync chain and cooldown
     DelayedAutoShiftFSM DAS_move_R_inst (
@@ -333,8 +333,8 @@ module TetrisTop
 
     // find which lines are "full" or "empty"
     always_comb begin
-        lines_full = '1;
-        lines_empty = '1;
+        lines_full  = '{PLAYFIELD_ROWS{1'b1}};
+        lines_empty = '{PLAYFIELD_ROWS{1'b1}};
         for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
             for (int j = 0; j < PLAYFIELD_COLS; j++) begin
                 if (locked_state[i][j] == BLANK ||
@@ -346,11 +346,13 @@ module TetrisTop
             end
         end
     end
-    assign LEDR[17:8] = lines_empty[PLAYFIELD_ROWS-1:10];
 
     // handle line clearing logic
     always_comb begin
-        lines_cleared_en    = |lines_full;
+        lines_cleared_en    = 1'b0;
+        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
+            lines_cleared_en = lines_cleared_en | lines_full[i];
+        end
         lines_to_clear      = lines_cleared + countSetBits(lines_full);
     end
 
