@@ -9,7 +9,10 @@
  * KEY[3] and KEY[1] are left and right
  *      move when SW[0] is low
  *      rotate when SW[0] is high
- * KEY[2] is softdrop, KEY[0] is hard drop.
+ * KEY[2] is softdrop
+ * KEY[0] is
+ *      hard drop when SW[0] is low
+ *      hold when SW[0] is high
  * SW{13:10] selects which tetromino is put in the hold area
  * SW[16] loads in the VGA testpattern when low, otherwise should run Tetris
  * SW[17] is a hard reset.
@@ -52,6 +55,7 @@ module TetrisTop
     logic           soft_drop;
     logic           hard_drop;
     logic           auto_drop;
+    logic           hold;
     logic           state_update_user;
 
     logic           rotate_R_valid;
@@ -59,6 +63,7 @@ module TetrisTop
     logic           move_R_valid;
     logic           move_L_valid;
     logic           soft_drop_valid;
+    logic           hold_valid;
 
     logic [ 9:0]    VGA_row;
     logic [ 9:0]    VGA_col;
@@ -71,10 +76,11 @@ module TetrisTop
     logic [ 4:0]    origin_col;
     logic [ 4:0]    origin_col_update;
 
-    tile_type_t     falling_type;
     logic [ 4:0]    ftr_rows            [4];
     logic [ 4:0]    ftr_cols            [4];
 
+    tile_type_t     falling_type;
+    tile_type_t     falling_type_update;
     orientation_t   falling_orientation;
     orientation_t   falling_orientation_update;
 
@@ -114,6 +120,10 @@ module TetrisTop
 
     tile_type_t     next_pieces_queue   [NEXT_PIECES_COUNT];
     logic           new_tetromino;
+
+    tile_type_t     hold_piece_type;
+    logic           hold_bag_fetch;
+    logic           hold_swap;
 
     logic           falling_piece_lock;
 
@@ -184,9 +194,16 @@ module TetrisTop
     DelayedAutoShiftFSM DAS_hard_drop_inst (
         .clk            (clk),
         .rst_l          (rst_l),
-        .action_user    (!KEY[0]),
+        .action_user    (!SW[0] && !KEY[0]),
         .action_valid   (1'b1),
         .action_out     (hard_drop)
+    );
+    DelayedAutoShiftFSM DAS_hold_inst (
+        .clk            (clk),
+        .rst_l          (rst_l),
+        .action_user    (SW[0] && !KEY[0]),
+        .action_valid   (hold_valid),
+        .action_out     (hold)
     );
 
     // set tile_type to drive pattern into playfield
@@ -258,7 +275,7 @@ module TetrisTop
         .clk    (clk),
         .en     (state_update_user),
         .rst_l  (rst_l),
-        .clear  (falling_piece_lock),
+        .clear  (falling_piece_lock || hold),
         .D      (origin_row_update),
         .Q      (origin_row)
     );
@@ -269,7 +286,7 @@ module TetrisTop
         .clk    (clk),
         .en     (state_update_user),
         .rst_l  (rst_l),
-        .clear  (falling_piece_lock),
+        .clear  (falling_piece_lock || hold),
         .D      (origin_col_update),
         .Q      (origin_col)
     );
@@ -280,7 +297,7 @@ module TetrisTop
         .clk    (clk),
         .en     (state_update_user),
         .rst_l  (rst_l),
-        .clear  (falling_piece_lock),
+        .clear  (falling_piece_lock || hold),
         .D      (falling_orientation_update),
         .Q      (falling_orientation)
     );
@@ -288,12 +305,19 @@ module TetrisTop
         .WIDTH      ($bits(tile_type_t))
     ) origin_type_reg_inst (
         .clk    (clk),
-        .en     (new_tetromino),
+        .en     (new_tetromino || hold),
         .rst_l  (rst_l),
         .clear  (1'b0),
-        .D      (next_pieces_queue[0]),
+        .D      (falling_type_update),
         .Q      (falling_type)
     );
+
+    always_comb begin
+        falling_type_update = next_pieces_queue[0];
+        if (hold_swap) begin
+            falling_type_update = hold_piece_type;
+        end
+    end
 
     // locked state
     always_ff @ (posedge clk) begin
@@ -368,7 +392,7 @@ module TetrisTop
     );
 
     // AutoDrop module handles gravity. Currently fixed
-    AutoDropSource ADS_inst (
+    AutoDropSource ads_inst (
         .clk            (clk),
         .rst_l          (rst_l),
         .soft_drop      (soft_drop),
@@ -378,6 +402,18 @@ module TetrisTop
     );
 
     // HoldPieceHandler registers the hold piece
+    HoldPieceHandler hph_inst (
+        .clk            (clk),
+        .rst_l          (rst_l),
+        .hold_input     (hold),
+        .game_start     (game_start_tetris),
+        .new_tetromino  (new_tetromino),
+        .falling_type   (falling_type),
+        .hold_valid     (hold_valid),
+        .bag_fetch      (hold_bag_fetch),
+        .hold_swap      (hold_swap),
+        .hold_piece_type(hold_piece_type)
+    );
 
     // GameScreensFSM
     GameScreensFSM game_screen_fsm_inst (
@@ -613,7 +649,7 @@ module TetrisTop
     TheSevenBag seven_bag_inst (
         .clk             (clk),
         .rst_l           (rst_l),
-        .pieces_remove   (new_tetromino),
+        .pieces_remove   (new_tetromino || hold_bag_fetch),
         .pieces_queue    (next_pieces_queue),
         .the_seven_bag   (LEDR[6:0])
     );
@@ -633,7 +669,7 @@ module TetrisTop
         .time_deciseconds   (time_deciseconds),
         .time_centiseconds  (time_centiseconds),
         .time_milliseconds  (time_milliseconds),
-        .hold_piece_type    (tile_type_t'(SW[13:10])),
+        .hold_piece_type    (hold_piece_type),
         .output_color       ({VGA_R, VGA_G, VGA_B})
     );
 
