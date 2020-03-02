@@ -45,7 +45,8 @@ module GameScreensFSM
     output logic            top_out,
     output logic            game_start,
     output logic            game_end,
-    output game_screens_t   current_screen
+    output game_screens_t   current_screen,
+    output logic            randomizer_race
 );
     game_screens_t  state;
     game_screens_t  next_state;
@@ -65,8 +66,10 @@ module GameScreensFSM
         next_state                      = state;
         game_start                      = 1'b0;
         game_end                        = 1'b0;
+        randomizer_race                 = 1'b0;
         unique case (state)
             START_SCREEN: begin
+                randomizer_race         = 1'b1;
                 if (start_sprint) begin
                     next_state          = SPRINT_MODE;
                     game_start          = 1'b1;

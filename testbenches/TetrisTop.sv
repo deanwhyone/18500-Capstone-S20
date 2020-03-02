@@ -120,6 +120,7 @@ module TetrisTop
 
     tile_type_t     next_pieces_queue   [NEXT_PIECES_COUNT];
     logic           new_tetromino;
+    logic           randomizer_race;
 
     tile_type_t     hold_piece_type;
     logic           hold_bag_fetch;
@@ -433,7 +434,8 @@ module TetrisTop
         .top_out            (), // communicate local user lost to network
         .game_start         (game_start_tetris),
         .game_end           (game_end_tetris),
-        .current_screen     (tetris_screen)
+        .current_screen     (tetris_screen),
+        .randomizer_race    (randomizer_race)
     );
     assign opponent_battle_ready    = 1'b0; // no network, opponent never ready
     assign opponent_game_end        = 1'b0; // no network, opponent never ends
@@ -649,7 +651,7 @@ module TetrisTop
     TheSevenBag seven_bag_inst (
         .clk             (clk),
         .rst_l           (rst_l),
-        .pieces_remove   (new_tetromino || hold_bag_fetch),
+        .pieces_remove   (randomizer_race || new_tetromino || hold_bag_fetch),
         .pieces_queue    (next_pieces_queue),
         .the_seven_bag   (LEDR[6:0])
     );
