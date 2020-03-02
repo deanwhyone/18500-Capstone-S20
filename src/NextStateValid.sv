@@ -75,8 +75,8 @@ module NextStateValid
     logic [ 4:0] rotate_L_rows          [TEST_POSITIONS][4];
     logic [ 4:0] rotate_L_cols          [TEST_POSITIONS][4];
 
-    logic [TEST_POSITIONS-1:0]  rotate_R_valid_TEST;
-    logic [TEST_POSITIONS-1:0]  rotate_L_valid_TEST;
+    logic        rotate_R_valid_TEST    [TEST_POSITIONS];
+    logic        rotate_L_valid_TEST    [TEST_POSITIONS];
 
     logic [ 2:0] wk_count;
     logic        wk_count_en;
@@ -195,8 +195,8 @@ module NextStateValid
 
     always_ff @ (posedge clk, negedge rst_l) begin
          if (!rst_l) begin
-            rotate_R_valid_TEST <= '0;
-            rotate_L_valid_TEST <= '0;
+            rotate_R_valid_TEST <= '{TEST_POSITIONS{1'b0}};
+            rotate_L_valid_TEST <= '{TEST_POSITIONS{1'b0}};
          end else begin
             for (int i = 0; i < 4; i++) begin
                 if (rotate_R_rows[wk_count][i] >= PLAYFIELD_ROWS ||
