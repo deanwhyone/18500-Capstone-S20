@@ -27,7 +27,6 @@ module TheSevenBag
     logic                               piece_generate_valid;
     logic                               pieces_reg_en   [NEXT_PIECES_COUNT - 1];
     logic                               pieces_enq;
-    // logic [ 6:0]                        the_seven_bag;
     logic [ 6:0]                        the_seven_bag_next;
 
     // the seven bag is constructed of a packed 7-bit register
