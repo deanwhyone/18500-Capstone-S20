@@ -52,6 +52,7 @@ module GameScreensFSM
     game_screens_t  next_state;
 
     logic [ 4:0]    tile_row    [4];
+    logic [ 2:0]    race_count;
 
     always_ff @ (posedge clk, negedge rst_l) begin
         if (!rst_l) begin
@@ -69,12 +70,14 @@ module GameScreensFSM
         randomizer_race                 = 1'b0;
         unique case (state)
             START_SCREEN: begin
-                randomizer_race         = 1'b1;
+                randomizer_race         = race_count == '1;
                 if (start_sprint) begin
                     next_state          = SPRINT_MODE;
                     game_start          = 1'b1;
+                    randomizer_race     = 1'b0;
                 end else if (battle_ready) begin
                     next_state          = MP_READY;
+                    randomizer_race     = 1'b0;
                 end
             end
             SPRINT_MODE: begin
@@ -136,5 +139,19 @@ module GameScreensFSM
         .falling_orientation(falling_orientation),
         .tile_row           (tile_row),
         .tile_col           ()
+    );
+
+    // to randomize the SevenBag, you cannot deq every cycle since the bag
+    // cannot be filled every cycle. Then, we space out bag deq using a counter
+    counter #(
+        .WIDTH      ($bits(race_count))
+    ) race_ctr_inst (
+        .clk    (clk),
+        .rst_l  (rst_l),
+        .en     (state == START_SCREEN),
+        .load   (1'b0),
+        .up     (1'b1),
+        .D      ('0),
+        .Q      (race_count)
     );
 endmodule // GameScreensFSM
