@@ -23,7 +23,7 @@ module TSpinDetector
     input  logic [ 4:0]     origin_row,
     input  logic [ 4:0]     origin_col,
     input  tile_type_t      falling_type,
-    input  orientation_t    falling_orientation
+    input  orientation_t    falling_orientation,
     input  logic [ 3:0]     locked_state    [PLAYFIELD_ROWS][PLAYFIELD_COLS],
     input  logic            rotate_R,
     input  logic            rotate_L,
@@ -74,7 +74,7 @@ module TSpinDetector
 
     // check three corners
     always_comb begin
-        for (int i = 0; i < 4; i++) begin0
+        for (int i = 0; i < 4; i++) begin
             corners_filled[i] = 1'b0;
         end
         if (locked_state[origin_row - 4'b1][origin_col - 4'b1] != BLANK ||
@@ -113,6 +113,7 @@ module TSpinDetector
 
     // check immobile
     always_comb begin
+        immobile = 1'b0;
         if (!move_R_valid && !move_L_valid) begin
             case (falling_orientation)
                 ORIENTATION_R: begin
@@ -133,8 +134,6 @@ module TSpinDetector
                 // three corner check passes, then the piece is upwards immobile
                 default: immobile = 1'b1;
             endcase
-        end else begin
-            immobile = 1'b0;
         end
     end
 endmodule // TSpinDetector
