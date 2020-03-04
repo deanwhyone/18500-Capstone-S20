@@ -17,6 +17,7 @@ module GraphicsTop
     input  tile_type_t      tile_type           [PLAYFIELD_ROWS][PLAYFIELD_COLS],
     input  tile_type_t      next_pieces_queue   [NEXT_PIECES_COUNT],
     input  logic [ 5:0]     lines_cleared,
+    input  logic            tspin_detected,
     input  logic            testpattern_active,
     input  game_screens_t   tetris_screen,
     input  logic [ 4:0]     time_hours,
@@ -40,6 +41,8 @@ module GraphicsTop
     logic           tpd_active;
     logic [23:0]    hpd_output_color;
     logic           hpd_active;
+    logic [23:0]    tspd_output_color;
+    logic           tspd_active;
 
     always_comb begin
         output_color    = BG_COLOR;
@@ -75,6 +78,10 @@ module GraphicsTop
                     // use the HPD to render the timer
                     if (hpd_active) begin
                         output_color    = hpd_output_color;
+                    end
+                    // use the TSPD to render the timer
+                    if (tspd_active) begin
+                        output_color    = tspd_output_color;
                     end
                 end
                 MP_READY: begin
@@ -165,5 +172,13 @@ module GraphicsTop
         .hold_piece_type    (hold_piece_type),
         .output_color       (hpd_output_color),
         .active             (hpd_active)
+    );
+    // TSPD module
+    TSpinPixelDriver tspd_inst (
+        .VGA_row        (VGA_row),
+        .VGA_col        (VGA_col),
+        .tspin_detected (tspin_detected),
+        .output_color   (tspd_output_color),
+        .active         (tspd_active)
     );
 endmodule // GraphicsTop

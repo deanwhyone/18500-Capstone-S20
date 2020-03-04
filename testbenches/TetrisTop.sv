@@ -127,6 +127,7 @@ module TetrisTop
     logic           hold_swap;
 
     logic           falling_piece_lock;
+    logic           tspin_detected;
 
     logic [ 5:0]    lines_cleared;
     logic           lines_cleared_en;
@@ -575,6 +576,26 @@ module TetrisTop
         .Q      (time_clk)
     );
 
+    // TSD module
+    TSpinDetector tsd_inst (
+        .clk                (clk),
+        .rst_l              (rst_l),
+        .origin_row         (origin_row),
+        .origin_col         (origin_col),
+        .falling_type       (falling_type),
+        .falling_orientation(falling_orientation),
+        .locked_state       (locked_state),
+        .rotate_R           (rotate_R),
+        .rotate_L           (rotate_L),
+        .move_R             (move_R),
+        .move_L             (move_L),
+        .move_R_valid       (move_R_valid),
+        .move_L_valid       (move_L_valid),
+        .falling_piece_lock (falling_piece_lock),
+        .tspin_detected     (tspin_detected)
+    );
+    assign LEDR[17] = tspin_detected;
+
     // SUV module
     NextStateValid nsv_inst (
         .clk                    (clk),
@@ -663,6 +684,7 @@ module TetrisTop
         .tile_type          (tile_type),
         .next_pieces_queue  (next_pieces_queue),
         .lines_cleared      (lines_cleared),
+        .tspin_detected     (tspin_detected),
         .testpattern_active (SW[16]),
         .tetris_screen      (tetris_screen),
         .time_hours         (time_hours),
