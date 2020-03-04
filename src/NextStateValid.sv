@@ -11,10 +11,10 @@
  * should be used to arm each user input option.
  *
  * Key difference from SUV is a measure to reduce area consumed by this module
- * We will serially check the wall kicks. We expect this to reduce the area
- * because locked_state is being replicated to allow indexing by each output
- * movement option. By checking wall-kicks sequentially we can reduce the number
- * of replications of locked_state.
+ * We will serially check all user input options. We expect this to reduce the
+ * area because locked_state is being replicated to allow indexing by each
+ * output movement option. By checking sequentially we can reduce the number of
+ * replications of locked_state.
  */
 `default_nettype none
 
@@ -62,6 +62,7 @@ module NextStateValid
 
     output logic                        soft_drop_valid
 );
+    enum logic [ 1:0] {SOFT, MOVE_R, MOVE_L} state, next_state;
 
     logic [ 4:0] rotate_R_row_kicked    [TEST_POSITIONS];
     logic [ 4:0] rotate_R_col_kicked    [TEST_POSITIONS];
@@ -90,6 +91,85 @@ module NextStateValid
 
     logic [ 4:0] soft_drop_rows         [4];
     logic [ 4:0] soft_drop_cols         [4];
+
+    logic [ 4:0] vc_rows                [4];
+    logic [ 4:0] vc_cols                [4];
+
+    always_ff @ (posedge clk, negedge rst_l) begin
+        if (!rst_l) begin
+            state <= SOFT;
+        end else begin
+            state <= next_state;
+        end
+    end
+
+    always_comb begin
+        next_state = state;
+        unique case (state)
+            MOVE_R: begin
+                for (int i = 0; i < 4; i++) begin
+                    vc_rows[i] = move_R_rows[i];
+                    vc_cols[i] = move_R_cols[i];
+                end
+                next_state = MOVE_L;
+            end
+            MOVE_L: begin
+                for (int i = 0; i < 4; i++) begin
+                    vc_rows[i] = move_L_rows[i];
+                    vc_cols[i] = move_L_cols[i];
+                end
+                next_state = SOFT;
+            end
+            SOFT: begin
+                for (int i = 0; i < 4; i++) begin
+                    vc_rows[i] = soft_drop_rows[i];
+                    vc_cols[i] = soft_drop_cols[i];
+                end
+                next_state = MOVE_R;
+            end
+        endcase
+    end
+
+    always_ff @ (posedge clk, negedge rst_l) begin
+        if (!rst_l) begin
+            move_R_valid    <= 1'b0;
+            move_L_valid    <= 1'b0;
+            soft_drop_valid <= 1'b0;
+        end else begin
+            unique case (state)
+                MOVE_R: begin
+                    move_R_valid <= 1'b1;
+                    for (int i = 0; i < 4; i++) begin
+                        if (move_R_cols[i] >= PLAYFIELD_COLS ||
+                            locked_state[vc_rows[i]][vc_cols[i]] != BLANK) begin
+
+                            move_R_valid <= 1'b0;
+                        end
+                    end
+                end
+                MOVE_L: begin
+                    move_L_valid <= 1'b1;
+                    for (int i = 0; i < 4; i++) begin
+                        if (move_L_cols[i] >= PLAYFIELD_COLS ||
+                            locked_state[vc_rows[i]][vc_cols[i]] != BLANK) begin
+
+                            move_L_valid <= 1'b0;
+                        end
+                    end
+                end
+                SOFT: begin
+                    soft_drop_valid <= 1'b1;
+                    for (int i = 0; i < 4; i++) begin
+                        if (soft_drop_rows[i] >= PLAYFIELD_ROWS ||
+                            locked_state[soft_drop_rows[i]][soft_drop_cols[i]] != BLANK) begin
+
+                            soft_drop_valid <= 1'b0;
+                        end
+                    end
+                end
+            endcase
+        end
+    end
 
     genvar g;
     generate
@@ -273,18 +353,6 @@ module NextStateValid
         .tile_row               (move_R_rows),
         .tile_col               (move_R_cols)
     );
-
-    always_comb begin
-        move_R_valid = 1'b1;
-        for (int i = 0; i < 4; i++) begin
-            if (move_R_cols[i] >= PLAYFIELD_COLS ||
-                locked_state[move_R_rows[i]][move_R_cols[i]] != BLANK) begin
-
-                move_R_valid = 1'b0;
-            end
-        end
-    end
-
     FallingTetrominoRender ftr_move_L_inst (
         .origin_row             (move_L_row),
         .origin_col             (move_L_col),
@@ -293,18 +361,6 @@ module NextStateValid
         .tile_row               (move_L_rows),
         .tile_col               (move_L_cols)
     );
-
-    always_comb begin
-        move_L_valid = 1'b1;
-        for (int i = 0; i < 4; i++) begin
-            if (move_L_cols[i] >= PLAYFIELD_COLS ||
-                locked_state[move_L_rows[i]][move_L_cols[i]] != BLANK) begin
-
-                move_L_valid = 1'b0;
-            end
-        end
-    end
-
     FallingTetrominoRender ftr_soft_drop_inst (
         .origin_row             (soft_drop_row),
         .origin_col             (soft_drop_col),
@@ -313,16 +369,4 @@ module NextStateValid
         .tile_row               (soft_drop_rows),
         .tile_col               (soft_drop_cols)
     );
-
-    always_comb begin
-        soft_drop_valid = 1'b1;
-        for (int i = 0; i < 4; i++) begin
-            if (soft_drop_rows[i] >= PLAYFIELD_ROWS ||
-                locked_state[soft_drop_rows[i]][soft_drop_cols[i]] != BLANK) begin
-
-                soft_drop_valid = 1'b0;
-            end
-        end
-    end
-
 endmodule // NextStateValid
