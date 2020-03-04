@@ -58,7 +58,7 @@ package DisplayPkg;
     parameter TIMER_VSTART          = LC_VSTART - 16;
     parameter TIMER_VEND            = LC_VSTART;
 
-    parameter TSPIN_HSTART          = 0;
+    parameter TSPIN_HSTART          = 20;
     parameter TSPIN_HEND            = HOLD_HSTART - 5;
     parameter TSPIN_VSTART          = HOLD_VSTART;
     parameter TSPIN_VEND            = HOLD_VEND;
