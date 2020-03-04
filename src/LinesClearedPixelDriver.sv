@@ -26,11 +26,13 @@ module LinesClearedPixelDriver
 
     logic [ 7:0]                word_1          [WORD_LENGTH_1];
     logic [ 7:0]                word_2          [WORD_LENGTH_2];
+    logic [ 7:0]                lc_hundreds_digit;
     logic [ 7:0]                lc_tens_digit;
     logic [ 7:0]                lc_ones_digit;
 
     logic [WORD_LENGTH_1 - 1:0] actives_1;
     logic [WORD_LENGTH_2 - 1:0] actives_2;
+    logic                       active_lc_hundreds;
     logic                       active_lc_tens;
     logic                       active_lc_ones;
     logic                       active_char;
@@ -69,21 +71,27 @@ module LinesClearedPixelDriver
         end
     endgenerate
 
-    always_comb begin
-        lc_tens_digit = 8'd0;
-        if (lines_cleared >= 6'd10 && lines_cleared < 6'd20) begin
-            lc_tens_digit = 8'd1;
-        end else if (lines_cleared >= 6'd20 && lines_cleared < 6'd30) begin
-            lc_tens_digit = 8'd2;
-        end else if (lines_cleared >= 6'd30 && lines_cleared < 6'd40) begin
-            lc_tens_digit = 8'd3;
-        end
-    end
+    assign lc_hundreds_digit = (lines_cleared -
+                                lc_tens_digit -
+                                lc_ones_digit) % 8'd100;
 
     AlphanumeralRender #(
         .SCALE      (2),
         .ORIGIN_ROW (LC_VSTART + 30),
         .ORIGIN_COL (LC_HSTART)
+    ) ar_hundreds_inst (
+        .VGA_row    (VGA_row),
+        .VGA_col    (VGA_col),
+        .character  (lc_hundreds_digit + 8'h30),
+        .active     (active_lc_hundreds)
+    );
+
+    assign lc_tens_digit = (lines_cleared - lc_ones_digit) % 8'd10;
+
+    AlphanumeralRender #(
+        .SCALE      (2),
+        .ORIGIN_ROW (LC_VSTART + 30),
+        .ORIGIN_COL (LC_HSTART + 14)
     ) ar_tens_inst (
         .VGA_row    (VGA_row),
         .VGA_col    (VGA_col),
@@ -96,7 +104,7 @@ module LinesClearedPixelDriver
     AlphanumeralRender #(
         .SCALE      (2),
         .ORIGIN_ROW (LC_VSTART + 30),
-        .ORIGIN_COL (LC_HSTART + 14)
+        .ORIGIN_COL (LC_HSTART + 28)
     ) ar_ones_inst (
         .VGA_row    (VGA_row),
         .VGA_col    (VGA_col),
@@ -105,9 +113,10 @@ module LinesClearedPixelDriver
     );
 
     always_comb begin
-        active_char =   (|actives_1)    ||
-                        (|actives_2)    ||
-                        active_lc_tens  ||
+        active_char =   (|actives_1)        ||
+                        (|actives_2)        ||
+                        active_lc_hundreds  ||
+                        active_lc_tens      ||
                         active_lc_ones;
     end
 

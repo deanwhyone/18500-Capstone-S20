@@ -16,7 +16,7 @@ module GraphicsTop
     input  logic [ 9:0]     VGA_col,
     input  tile_type_t      tile_type           [PLAYFIELD_ROWS][PLAYFIELD_COLS],
     input  tile_type_t      next_pieces_queue   [NEXT_PIECES_COUNT],
-    input  logic [ 5:0]     lines_cleared,
+    input  logic [ 9:0]     lines_cleared,
     input  logic            tspin_detected,
     input  logic            testpattern_active,
     input  game_screens_t   tetris_screen,

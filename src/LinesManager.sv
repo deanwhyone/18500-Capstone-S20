@@ -16,10 +16,13 @@ module LinesManager
     input  logic        rst_l,
     input  logic        game_start,
     input  logic        lines_full      [PLAYFIELD_ROWS],
-    output logic [ 5:0] lines_cleared
+    output logic [ 9:0] lines_cleared
 );
-    logic [ 5:0]    lines_to_clear;
+    logic [ 9:0]    lines_to_clear;
     logic           lines_cleared_en;
+
+    logic [ 9:0]    lines_sent;
+    logic [ 9:0]    lines_sent_incr;
 
     // handle line clearing logic
     always_comb begin
@@ -40,5 +43,17 @@ module LinesManager
         .clear  (game_start),
         .D      (lines_to_clear),
         .Q      (lines_cleared)
+    );
+
+    // register holds lines cleared for the pending game
+    register #(
+        .WIDTH  ($bits(lines_cleared))
+    ) lines_sent_reg_inst (
+        .clk    (clk),
+        .en     (lines_cleared_en),
+        .rst_l  (rst_l),
+        .clear  (game_start),
+        .D      (lines_sent_incr),
+        .Q      (lines_sent)
     );
 endmodule // LinesManager

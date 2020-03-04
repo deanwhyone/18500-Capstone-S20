@@ -129,7 +129,7 @@ module TetrisTop
     logic           falling_piece_lock;
     logic           tspin_detected;
 
-    logic [ 5:0]    lines_cleared;
+    logic [ 9:0]    lines_cleared;
     logic           lines_full          [PLAYFIELD_ROWS];
     logic           lines_empty         [PLAYFIELD_ROWS];
 
