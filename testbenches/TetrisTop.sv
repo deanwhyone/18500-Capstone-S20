@@ -130,6 +130,7 @@ module TetrisTop
     logic           tspin_detected;
 
     logic [ 9:0]    lines_cleared;
+    logic [ 9:0]    lines_sent;
     logic           lines_full          [PLAYFIELD_ROWS];
     logic           lines_empty         [PLAYFIELD_ROWS];
 
@@ -370,11 +371,14 @@ module TetrisTop
 
     // LinesManager module manages lines cleared and lines sent
     LinesManager lm_inst (
-        .clk            (clk),
-        .rst_l          (rst_l),
-        .game_start     (game_start_tetris),
-        .lines_full     (lines_full),
-        .lines_cleared  (lines_cleared)
+        .clk                (clk),
+        .rst_l              (rst_l),
+        .game_start         (game_start_tetris),
+        .falling_piece_lock (falling_piece_lock),
+        .tspin_detected     (tspin_detected),
+        .lines_full         (lines_full),
+        .lines_cleared      (lines_cleared),
+        .lines_sent         (lines_sent)
     );
 
     // AutoDrop module handles gravity. Currently fixed
