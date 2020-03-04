@@ -27,6 +27,7 @@ module TSpinPixelDriver
     logic [ 7:0]                word_2          [WORD_LENGTH_2];
     logic [WORD_LENGTH_1 - 1:0] actives_1;
     logic [WORD_LENGTH_2 - 1:0] actives_2;
+    logic                       active_char;
 
     always_comb begin
         word_1 = '{"T", "S", "P", "I", "N"};
@@ -61,10 +62,12 @@ module TSpinPixelDriver
         end
     endgenerate
 
+    assign active_char = (|actives_1) || (|actives_2);
+
     always_comb begin
-        output_color    = 24'h0;
-        if (tspin_detected) begin
-            output_color    = 24'hff_ffff;
+        output_color = BG_COLOR;
+        if (tspin_detected && active_char) begin
+            output_color = 24'hff_ffff;
         end
     end
 
