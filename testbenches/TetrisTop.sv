@@ -130,10 +130,8 @@ module TetrisTop
     logic           tspin_detected;
 
     logic [ 5:0]    lines_cleared;
-    logic           lines_cleared_en;
     logic           lines_full          [PLAYFIELD_ROWS];
     logic           lines_empty         [PLAYFIELD_ROWS];
-    logic [ 5:0]    lines_to_clear;
 
     logic [ 4:0]    time_hours;
     logic           time_hours_en;
@@ -333,7 +331,6 @@ module TetrisTop
                     locked_state[i] <= '{PLAYFIELD_COLS{BLANK}};
                 end
             end
-
             if (lines_empty[0]) begin
                 locked_state[0] <= '{PLAYFIELD_COLS{BLANK}};
             end
@@ -347,7 +344,6 @@ module TetrisTop
                     locked_state[i]     <= locked_state[i - 1];
                 end
             end
-
             if (falling_piece_lock) begin
                 for (int i = 0; i < 4; i++) begin
                     locked_state[ftr_rows[i]][ftr_cols[i]] <= falling_type;
@@ -372,25 +368,13 @@ module TetrisTop
         end
     end
 
-    // handle line clearing logic
-    always_comb begin
-        lines_cleared_en    = 1'b0;
-        for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
-            lines_cleared_en = lines_cleared_en | lines_full[i];
-        end
-        lines_to_clear      = lines_cleared + countSetBits(lines_full);
-    end
-
-    // register holds lines cleared for the pending game
-    register #(
-        .WIDTH      ($bits(lines_cleared))
-    ) lines_cleared_reg_inst (
-        .clk    (clk),
-        .en     (lines_cleared_en),
-        .rst_l  (rst_l),
-        .clear  (game_start_tetris),
-        .D      (lines_to_clear),
-        .Q      (lines_cleared)
+    // LinesManager module manages lines cleared and lines sent
+    LinesManager lm_inst (
+        .clk            (clk),
+        .rst_l          (rst_l),
+        .game_start     (game_start_tetris),
+        .lines_full     (lines_full),
+        .lines_cleared  (lines_cleared)
     );
 
     // AutoDrop module handles gravity. Currently fixed
@@ -493,7 +477,7 @@ module TetrisTop
              time_deciseconds_ld,
              time_seconds_ld,
              time_minutes_ld,
-             time_hours_ld}         = '1;
+             time_hours_ld        } = '1;
         end
     end
 
