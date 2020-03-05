@@ -48,15 +48,15 @@ package DisplayPkg;
     parameter HOLD_VSTART           = PLAYFIELD_VSTART;
     parameter HOLD_VEND             = HOLD_VSTART + HOLD_ROWS * TILE_HEIGHT;
 
-    parameter LC_HSTART             = BORDER_HSTART - 100;
-    parameter LC_HEND               = BORDER_HSTART;
-    parameter LC_VSTART             = PLAYFIELD_VEND - 48;
-    parameter LC_VEND               = PLAYFIELD_VEND;
+    parameter LINES_HSTART          = BORDER_HSTART - 100;
+    parameter LINES_HEND            = BORDER_HSTART;
+    parameter LINES_VSTART          = PLAYFIELD_VEND - 100;
+    parameter LINES_VEND            = PLAYFIELD_VEND;
 
-    parameter TIMER_HSTART          = LC_HSTART;
-    parameter TIMER_HEND            = LC_HEND;
-    parameter TIMER_VSTART          = LC_VSTART - 16;
-    parameter TIMER_VEND            = LC_VSTART;
+    parameter TIMER_HSTART          = LINES_HSTART;
+    parameter TIMER_HEND            = LINES_HEND;
+    parameter TIMER_VSTART          = LINES_VSTART - 20;
+    parameter TIMER_VEND            = LINES_VSTART;
 
     parameter TSPIN_HSTART          = 20;
     parameter TSPIN_HEND            = HOLD_HSTART - 5;
