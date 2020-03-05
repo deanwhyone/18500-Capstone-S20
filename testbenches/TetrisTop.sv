@@ -378,7 +378,8 @@ module TetrisTop
         .tspin_detected     (tspin_detected),
         .lines_full         (lines_full),
         .lines_cleared      (lines_cleared),
-        .lines_sent         (lines_sent)
+        .lines_sent         (lines_sent),
+        .combo_count        (LEDR[16:12])
     );
 
     // AutoDrop module handles gravity. Currently fixed
@@ -672,6 +673,7 @@ module TetrisTop
         .tile_type          (tile_type),
         .next_pieces_queue  (next_pieces_queue),
         .lines_cleared      (lines_cleared),
+        .lines_sent         (lines_sent),
         .tspin_detected     (tspin_detected),
         .testpattern_active (SW[16]),
         .tetris_screen      (tetris_screen),

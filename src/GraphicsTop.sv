@@ -17,6 +17,7 @@ module GraphicsTop
     input  tile_type_t      tile_type           [PLAYFIELD_ROWS][PLAYFIELD_COLS],
     input  tile_type_t      next_pieces_queue   [NEXT_PIECES_COUNT],
     input  logic [ 9:0]     lines_cleared,
+    input  logic [ 9:0]     lines_sent,
     input  logic            tspin_detected,
     input  logic            testpattern_active,
     input  game_screens_t   tetris_screen,
@@ -35,8 +36,8 @@ module GraphicsTop
     logic           ppd_active;
     logic [23:0]    npd_output_color;
     logic           npd_active;
-    logic [23:0]    lcpd_output_color;
-    logic           lcpd_active;
+    logic [23:0]    lpd_output_color;
+    logic           lpd_active;
     logic [23:0]    tpd_output_color;
     logic           tpd_active;
     logic [23:0]    hpd_output_color;
@@ -67,9 +68,9 @@ module GraphicsTop
                     if (npd_active) begin
                         output_color    = npd_output_color;
                     end
-                    // use the LCPD to render the lines cleared info box
-                    if (lcpd_active) begin
-                        output_color    = lcpd_output_color;
+                    // use the lpd to render the lines cleared info box
+                    if (lpd_active) begin
+                        output_color    = lpd_output_color;
                     end
                     // use the TPD to render the timer
                     if (tpd_active) begin
@@ -144,13 +145,14 @@ module GraphicsTop
         .output_color   (npd_output_color),
         .active         (npd_active)
     );
-    // LCPD module
-    LinesClearedPixelDriver lcpd_inst (
+    // LPD module
+    LinesPixelDriver lpd_inst (
         .VGA_row        (VGA_row),
         .VGA_col        (VGA_col),
         .lines_cleared  (lines_cleared),
-        .output_color   (lcpd_output_color),
-        .active         (lcpd_active)
+        .lines_sent     (lines_sent),
+        .output_color   (lpd_output_color),
+        .active         (lpd_active)
     );
     // TPD module
     TimerPixelDriver tpd_inst (

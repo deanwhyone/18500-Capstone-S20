@@ -19,15 +19,16 @@ module LinesManager
     input  logic        tspin_detected,
     input  logic        lines_full          [PLAYFIELD_ROWS],
     output logic [ 9:0] lines_cleared,
-    output logic [ 9:0] lines_sent
+    output logic [ 9:0] lines_sent,
+    output logic [ 4:0] combo_count
 );
     enum logic {BREAK, COMBO}       state_combo, nstate_combo;
     enum logic {LOCK_WAIT, CHECK}   state_check, nstate_check;
 
-    logic [ 4:0]    lines_to_clear;
+    logic [ 9:0]    lines_to_clear;
     logic           lines_cleared_en;
 
-    logic [ 4:0]    combo_count; // longest combo in theory is 29
+    // logic [ 4:0]    combo_count; // longest combo in theory is 29
     logic           combo_en;
     logic           combo_cl;
     logic [ 9:0]    combo_incr;
@@ -41,7 +42,7 @@ module LinesManager
         for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
             lines_cleared_en = lines_cleared_en || lines_full[i];
         end
-        lines_to_clear = 5'(countSetBits(lines_full));
+        lines_to_clear = 10'(countSetBits(lines_full));
     end
 
     // register holds lines cleared for the pending game
@@ -52,7 +53,7 @@ module LinesManager
         .en     (lines_cleared_en),
         .rst_l  (rst_l),
         .clear  (game_start),
-        .D      (lines_cleared + 10'(lines_to_clear)),
+        .D      (lines_cleared + lines_to_clear),
         .Q      (lines_cleared)
     );
 
@@ -71,7 +72,7 @@ module LinesManager
         nstate_combo    = state_combo;
         if (state_check == CHECK) begin
             if (lines_cleared_en) begin
-                combo_en        = 1'b1;
+                combo_en        = (state_combo == COMBO);
                 nstate_combo    = COMBO;
             end else begin
                 combo_cl        = 1'b1;
@@ -84,13 +85,13 @@ module LinesManager
 
     always_comb begin
         combo_incr = 10'd0;
-        if (combo_count >= 1 || combo_count < 3) begin
+        if (combo_count >= 1 && combo_count < 3) begin
             combo_incr = 10'd1;
-        end else if (combo_count >= 3 || combo_count < 5) begin
+        end else if (combo_count >= 3 && combo_count < 5) begin
             combo_incr = 10'd2;
-        end else if (combo_count >= 5 || combo_count < 7) begin
+        end else if (combo_count >= 5 && combo_count < 7) begin
             combo_incr = 10'd3;
-        end else if (combo_count >= 7 || combo_count < 10) begin
+        end else if (combo_count >= 7 && combo_count < 10) begin
             combo_incr = 10'd4;
         end else if (combo_count >= 10) begin
             combo_incr = 10'd5;
@@ -110,17 +111,18 @@ module LinesManager
     );
 
     always_comb begin
-        lines_to_send = 10'd0;
-        if (lines_to_clear == 5'd2) begin
-            lines_to_send = 10'd1;
-        end else if (lines_to_clear == 5'd3) begin
-            lines_to_send = 10'd2;
-        end else if (lines_to_clear == 5'd4) begin
-            lines_to_send = 10'd4;
-        end
-
         if (tspin_detected) begin
-            lines_to_send = (lines_to_send + 10'd1) << 1;
+            lines_to_send = (lines_to_clear + 10'd1) << 1;
+        end else begin
+            if (lines_to_clear == 5'd2) begin
+                lines_to_send = 10'd1;
+            end else if (lines_to_clear == 5'd3) begin
+                lines_to_send = 10'd2;
+            end else if (lines_to_clear == 5'd4) begin
+                lines_to_send = 10'd4;
+            end else begin
+                lines_to_send = 10'd0;
+            end
         end
 
         lines_to_send = lines_to_send + combo_incr;
