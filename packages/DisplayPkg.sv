@@ -68,7 +68,7 @@ package DisplayPkg;
     parameter TILE_BLANK_COLOR      = 24'h00_0000;
     parameter TILE_GARBAGE_COLOR    = 24'haa_aaaa;
     parameter TILE_GHOST_COLOR      = 24'h80_8080;
-    parameter TETROMINO_I_COLOR     = 24'h00_fdff;
+    parameter TETROMINO_I_COLOR     = 24'h00_ffff;
     parameter TETROMINO_O_COLOR     = 24'hff_ff00;
     parameter TETROMINO_T_COLOR     = 24'hff_00ff;
     parameter TETROMINO_J_COLOR     = 24'h00_00ff;
