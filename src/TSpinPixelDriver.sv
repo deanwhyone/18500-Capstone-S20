@@ -13,7 +13,12 @@
 
 module TSpinPixelDriver
     import DisplayPkg::*;
-(
+#(
+    parameter HSTART,
+    parameter HEND,
+    parameter VSTART,
+    parameter VEND
+) (
     input  logic [ 9:0]     VGA_row,
     input  logic [ 9:0]     VGA_col,
     input  logic            tspin_detected,
@@ -39,8 +44,8 @@ module TSpinPixelDriver
         for (g = 0; g < WORD_LENGTH_1; g++) begin : STRING_TSPIN_G
             AlphanumeralRender #(
                 .SCALE      (2),
-                .ORIGIN_ROW (TSPIN_VSTART),
-                .ORIGIN_COL (TSPIN_HSTART + 14 * g)
+                .ORIGIN_ROW (VSTART),
+                .ORIGIN_COL (HSTART + 14 * g)
             ) tspin_lines_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -51,8 +56,8 @@ module TSpinPixelDriver
         for (g = 0; g < WORD_LENGTH_2; g++) begin : STRING_DETECTED_G
             AlphanumeralRender #(
                 .SCALE      (2),
-                .ORIGIN_ROW (TSPIN_VSTART + 15),
-                .ORIGIN_COL (TSPIN_HSTART + 14 * g)
+                .ORIGIN_ROW (VSTART + 15),
+                .ORIGIN_COL (HSTART + 14 * g)
             ) tspin_cleared_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -73,10 +78,10 @@ module TSpinPixelDriver
 
     always_comb begin
         active = 1'b0;
-        if (VGA_row >= TSPIN_VSTART &&
-            VGA_row <  TSPIN_VEND   &&
-            VGA_col >= TSPIN_HSTART &&
-            VGA_col <  TSPIN_HEND) begin
+        if (VGA_row >= VSTART &&
+            VGA_row <  VEND   &&
+            VGA_col >= HSTART &&
+            VGA_col <  HEND) begin
 
             active = 1'b1;
         end

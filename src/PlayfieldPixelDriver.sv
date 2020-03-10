@@ -12,7 +12,10 @@
 
 module PlayfieldPixelDriver
     import DisplayPkg::*;
-(
+#(
+    parameter HSTART,
+    parameter VSTART
+) (
     input  logic [ 9:0] VGA_row,
     input  logic [ 9:0] VGA_col,
 
@@ -29,10 +32,10 @@ module PlayfieldPixelDriver
         // colorize tiles based on input
         for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
             for (int j = 0; j < PLAYFIELD_COLS; j++) begin
-                if (VGA_row >= (PLAYFIELD_VSTART + TILE_HEIGHT * i)         &&
-                    VGA_row < (PLAYFIELD_VSTART + TILE_HEIGHT * (i + 1))    &&
-                    VGA_col >= (PLAYFIELD_HSTART + TILE_WIDTH * j)          &&
-                    VGA_col < (PLAYFIELD_HSTART + TILE_WIDTH * (j + 1))) begin
+                if (VGA_row >= (VSTART + TILE_HEIGHT * i)       &&
+                    VGA_row < (VSTART + TILE_HEIGHT * (i + 1))  &&
+                    VGA_col >= (HSTART + TILE_WIDTH * j)        &&
+                    VGA_col < (HSTART + TILE_WIDTH * (j + 1))) begin
                     active = 1'b1;
                     case (tile_type[i][j])
                         GARBAGE:    output_color = TILE_GARBAGE_COLOR;

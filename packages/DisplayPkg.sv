@@ -11,60 +11,78 @@
 `define DISPLAY_PKG_READ
 
 package DisplayPkg;
-    parameter VGA_WIDTH             = 640;
-    parameter VGA_HEIGHT            = 480;
+    parameter SVGA_WIDTH            = 800;
+    parameter SVGA_HEIGHT           = 600;
 
     parameter PLAYFIELD_ROWS        = 20;
     parameter PLAYFIELD_COLS        = 10;
 
-    parameter PLAYFIELD_HSTART      = 240;
-    parameter PLAYFIELD_HEND        = 400;
-    parameter PLAYFIELD_VSTART      = 60;
-    parameter PLAYFIELD_VEND        = 460;
+    parameter PF_USER_HSTART        = 130;
+    parameter PF_USER_HEND          = 330;
+    parameter PF_USER_VSTART        = 80;
+    parameter PF_USER_VEND          = 560;
+
+    parameter PF_LAN_HSTART         = 510;
+    parameter PF_LAN_HEND           = 710;
+    parameter PF_LAN_VSTART         = PF_USER_VSTART;
+    parameter PF_LAN_VEND           = PF_USER_VEND;
 
     parameter TILE_WIDTH            =
-        (PLAYFIELD_HEND - PLAYFIELD_HSTART) / PLAYFIELD_COLS;
+        (PF_USER_HEND - PF_USER_HSTART) / PLAYFIELD_COLS;
     parameter TILE_HEIGHT           =
-        (PLAYFIELD_VEND - PLAYFIELD_VSTART) / PLAYFIELD_ROWS;
+        (PF_USER_VEND - PF_USER_VSTART) / PLAYFIELD_ROWS;
+    parameter MINI_TILE_WIDTH        = TILE_WIDTH / 2;
+    parameter MINI_TILE_HEIGHT       = TILE_HEIGHT / 2;
 
-    parameter BORDER_HSTART         = PLAYFIELD_HSTART - 5;
-    parameter BORDER_HEND           = PLAYFIELD_HEND + 5;
-    parameter BORDER_VSTART         = PLAYFIELD_VSTART - 5;
-    parameter BORDER_VEND           = PLAYFIELD_VEND + 5;
+    parameter BORDER_USER_HSTART    = PF_USER_HSTART - 10;
+    parameter BORDER_USER_HEND      = PF_USER_HEND + 10;
+    parameter BORDER_USER_VSTART    = PF_USER_VSTART - 10;
+    parameter BORDER_USER_VEND      = PF_USER_VEND + 10;
+
+    parameter BORDER_LAN_HSTART     = PF_LAN_HSTART - 10;
+    parameter BORDER_LAN_HEND       = PF_LAN_HEND + 10;
+    parameter BORDER_LAN_VSTART     = PF_LAN_VSTART - 10;
+    parameter BORDER_LAN_VEND       = PF_LAN_VEND + 10;
 
     parameter NEXT_ROWS             = 19;
     parameter NEXT_COLS             = 6;
 
-    parameter NEXT_HSTART           = BORDER_HEND;
-    parameter NEXT_HEND             = NEXT_HSTART + NEXT_COLS * TILE_WIDTH;
-    parameter NEXT_VSTART           = PLAYFIELD_VSTART;
-    parameter NEXT_VEND             = NEXT_VSTART + NEXT_ROWS * TILE_HEIGHT;
+    parameter NEXT_USER_HSTART      = BORDER_USER_HEND;
+    parameter NEXT_USER_HEND        = NEXT_USER_HSTART + NEXT_COLS * MINI_TILE_WIDTH;
+    parameter NEXT_USER_VSTART      = PF_USER_VSTART;
+    parameter NEXT_USER_VEND        = NEXT_USER_VSTART + NEXT_ROWS * MINI_TILE_HEIGHT;
+
+    parameter NEXT_LAN_HSTART       = BORDER_LAN_HEND;
+    parameter NEXT_LAN_HEND         = NEXT_LAN_HSTART + NEXT_COLS * MINI_TILE_WIDTH;
+    parameter NEXT_LAN_VSTART       = PF_LAN_VSTART;
+    parameter NEXT_LAN_VEND         = NEXT_LAN_VSTART + NEXT_ROWS * MINI_TILE_HEIGHT;
 
     parameter HOLD_ROWS             = 4;
     parameter HOLD_COLS             = 6;
 
-    parameter HOLD_HSTART           = BORDER_HSTART - HOLD_COLS * TILE_WIDTH;
-    parameter HOLD_HEND             = BORDER_HSTART;
-    parameter HOLD_VSTART           = PLAYFIELD_VSTART;
-    parameter HOLD_VEND             = HOLD_VSTART + HOLD_ROWS * TILE_HEIGHT;
+    parameter HOLD_USER_HSTART      = BORDER_USER_HSTART - HOLD_COLS * MINI_TILE_WIDTH;
+    parameter HOLD_USER_HEND        = BORDER_USER_HSTART;
+    parameter HOLD_USER_VSTART      = PF_USER_VSTART;
+    parameter HOLD_USER_VEND        = HOLD_USER_VSTART + HOLD_ROWS * MINI_TILE_HEIGHT;
 
-    parameter LINES_HSTART          = BORDER_HSTART - 100;
-    parameter LINES_HEND            = BORDER_HSTART;
-    parameter LINES_VSTART          = PLAYFIELD_VEND - 100;
-    parameter LINES_VEND            = PLAYFIELD_VEND;
+    parameter HOLD_LAN_HSTART       = BORDER_LAN_HSTART - HOLD_COLS * MINI_TILE_WIDTH;
+    parameter HOLD_LAN_HEND         = BORDER_LAN_HSTART;
+    parameter HOLD_LAN_VSTART       = PF_LAN_VSTART;
+    parameter HOLD_LAN_VEND         = HOLD_LAN_VSTART + HOLD_ROWS * MINI_TILE_HEIGHT;
+
+    parameter LINES_HSTART          = BORDER_USER_HSTART - 100;
+    parameter LINES_HEND            = BORDER_USER_HSTART;
+    parameter LINES_VSTART          = PF_USER_VEND - 100;
+    parameter LINES_VEND            = PF_USER_VEND;
 
     parameter TIMER_HSTART          = LINES_HSTART;
     parameter TIMER_HEND            = LINES_HEND;
     parameter TIMER_VSTART          = LINES_VSTART - 20;
     parameter TIMER_VEND            = LINES_VSTART;
 
-    parameter TSPIN_HSTART          = 20;
-    parameter TSPIN_HEND            = HOLD_HSTART - 5;
-    parameter TSPIN_VSTART          = HOLD_VSTART;
-    parameter TSPIN_VEND            = HOLD_VEND;
-
     parameter BG_COLOR              = 24'h40_4040;
     parameter BORDER_COLOR          = 24'hff_ffff;
+    parameter BORDER_COLOR_ALT      = 24'h00_ffff;
     parameter TILE_BLANK_COLOR      = 24'h00_0000;
     parameter TILE_GARBAGE_COLOR    = 24'haa_aaaa;
     parameter TILE_GHOST_COLOR      = 24'h80_8080;

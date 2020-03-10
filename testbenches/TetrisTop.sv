@@ -13,12 +13,13 @@
  * KEY[0] is
  *      hard drop when SW[0] is low
  *      hold when SW[0] is high
- * SW{13:10] selects which tetromino is put in the hold area
- * SW[16] loads in the VGA testpattern when low, otherwise should run Tetris
- * SW[17] is a hard reset.
+ * SW[9] loads in the VGA testpattern when low, otherwise should run Tetris
+ * SW[10] is a hard reset.
  *
  * LEDR[6:0] illuminate the state of the seven bag, each light represents a
  * different tetromino remainin the in the bag.
+ *
+ * LEDR[9] indicates a T-spin is detected
  */
 `default_nettype none
 
@@ -28,13 +29,13 @@ module TetrisTop
 (
     input  logic        CLOCK_50,
 
-    input  logic [17:0] SW,
+    input  logic [ 9:0] SW,
     input  logic [ 3:0] KEY,
 
-    output logic [17:0] LEDR,
-    output logic [ 7:0] VGA_R,
-    output logic [ 7:0] VGA_G,
-    output logic [ 7:0] VGA_B,
+    output logic [ 9:0] LEDR,
+    output logic [ 3:0] VGA_R,
+    output logic [ 3:0] VGA_G,
+    output logic [ 3:0] VGA_B,
 
     output logic        VGA_CLK,
     output logic        VGA_SYNC_N,
@@ -45,7 +46,7 @@ module TetrisTop
     // abstract clk, rst_l signal for uniformity
     logic  clk, rst_l;
     assign clk      = CLOCK_50;
-    assign rst_l    = !SW[17];
+    assign rst_l    = !SW[9];
 
     // declare local variables
     logic           rotate_R;
@@ -155,6 +156,8 @@ module TetrisTop
     logic [15:0]    time_clk;
     logic           time_clk_en;
     logic           time_clk_ld;
+
+    logic [23:0]    graphics_color;
 
     // DAS modules handle input sync chain and cooldown
     DelayedAutoShiftFSM DAS_move_R_inst (
@@ -379,7 +382,7 @@ module TetrisTop
         .lines_full         (lines_full),
         .lines_cleared      (lines_cleared),
         .lines_sent         (lines_sent),
-        .combo_count        (LEDR[16:12])
+        .combo_count        ()
     );
 
     // AutoDrop module handles gravity. Currently fixed
@@ -583,7 +586,7 @@ module TetrisTop
         .falling_piece_lock (falling_piece_lock),
         .tspin_detected     (tspin_detected)
     );
-    assign LEDR[17] = tspin_detected;
+    assign LEDR[9] = tspin_detected;
 
     // SUV module
     NextStateValid nsv_inst (
@@ -675,7 +678,7 @@ module TetrisTop
         .lines_cleared      (lines_cleared),
         .lines_sent         (lines_sent),
         .tspin_detected     (tspin_detected),
-        .testpattern_active (SW[16]),
+        .testpattern_active (SW[8]),
         .tetris_screen      (tetris_screen),
         .time_hours         (time_hours),
         .time_minutes       (time_minutes),
@@ -684,11 +687,17 @@ module TetrisTop
         .time_centiseconds  (time_centiseconds),
         .time_milliseconds  (time_milliseconds),
         .hold_piece_type    (hold_piece_type),
-        .output_color       ({VGA_R, VGA_G, VGA_B})
+        .output_color       (graphics_color)
     );
 
+    always_comb begin
+        VGA_R = graphics_color[23:20];
+        VGA_G = graphics_color[15:12];
+        VGA_B = graphics_color[ 7: 4];
+    end
+
     // VGA module
-    VGA vga_inst (
+    SVGA svga_inst (
         .row    (VGA_row),
         .col    (VGA_col),
         .HS     (VGA_HS),

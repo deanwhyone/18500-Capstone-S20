@@ -36,14 +36,19 @@ module GraphicsTop
     logic           ppd_active;
     logic [23:0]    npd_output_color;
     logic           npd_active;
+    logic [23:0]    hpd_output_color;
+    logic           hpd_active;
     logic [23:0]    lpd_output_color;
     logic           lpd_active;
     logic [23:0]    tpd_output_color;
     logic           tpd_active;
-    logic [23:0]    hpd_output_color;
-    logic           hpd_active;
-    logic [23:0]    tspd_output_color;
-    logic           tspd_active;
+
+    logic [23:0]    ppd_output_color_lan;
+    logic           ppd_active_lan;
+    logic [23:0]    npd_output_color_lan;
+    logic           npd_active_lan;
+    logic [23:0]    hpd_output_color_lan;
+    logic           hpd_active_lan;
 
     always_comb begin
         output_color    = BG_COLOR;
@@ -56,9 +61,25 @@ module GraphicsTop
                 end
                 SPRINT_MODE: begin
                     // border color
-                    if (VGA_row >= BORDER_VSTART && VGA_row < BORDER_VEND &&
-                        VGA_col >= BORDER_HSTART && VGA_col < BORDER_HEND) begin
+                    if (VGA_row >= BORDER_USER_VSTART &&
+                        VGA_row <  BORDER_USER_VEND   &&
+                        VGA_col >= BORDER_USER_HSTART &&
+                        VGA_col <  BORDER_USER_HEND) begin
+
                         output_color    = BORDER_COLOR;
+                        if (tspin_detected) begin
+                            output_color = BORDER_COLOR_ALT;
+                        end
+                    end
+                    if (VGA_row >= BORDER_LAN_VSTART &&
+                        VGA_row <  BORDER_LAN_VEND   &&
+                        VGA_col >= BORDER_LAN_HSTART &&
+                        VGA_col <  BORDER_LAN_HEND) begin
+
+                        output_color    = BORDER_COLOR;
+                        if (tspin_detected) begin
+                            output_color = BORDER_COLOR_ALT;
+                        end
                     end
                     // use the PPD to light up tiles in the playfield
                     if (ppd_active) begin
@@ -68,6 +89,10 @@ module GraphicsTop
                     if (npd_active) begin
                         output_color    = npd_output_color;
                     end
+                    // use the HPD to render the hold piece
+                    if (hpd_active) begin
+                        output_color    = hpd_output_color;
+                    end
                     // use the lpd to render the lines cleared info box
                     if (lpd_active) begin
                         output_color    = lpd_output_color;
@@ -76,13 +101,15 @@ module GraphicsTop
                     if (tpd_active) begin
                         output_color    = tpd_output_color;
                     end
-                    // use the HPD to render the timer
-                    if (hpd_active) begin
-                        output_color    = hpd_output_color;
+                    // opponent HUD
+                    if (ppd_active_lan) begin
+                        output_color    = ppd_output_color_lan;
                     end
-                    // use the TSPD to render the timer
-                    if (tspd_active) begin
-                        output_color    = tspd_output_color;
+                    if (npd_active_lan) begin
+                        output_color    = npd_output_color_lan;
+                    end
+                    if (hpd_active_lan) begin
+                        output_color    = hpd_output_color_lan;
                     end
                 end
                 MP_READY: begin
@@ -130,7 +157,10 @@ module GraphicsTop
     end
 
     // PPD module
-    PlayfieldPixelDriver ppd_inst (
+    PlayfieldPixelDriver #(
+        .HSTART(PF_USER_HSTART),
+        .VSTART(PF_USER_VSTART)
+    ) ppd_inst (
         .VGA_row        (VGA_row),
         .VGA_col        (VGA_col),
         .tile_type      (tile_type),
@@ -138,12 +168,26 @@ module GraphicsTop
         .active         (ppd_active)
     );
     // NPD module
-    NextPixelDriver npd_inst (
+    NextPixelDriver #(
+        .HSTART(NEXT_USER_HSTART),
+        .VSTART(NEXT_USER_VSTART)
+    ) npd_inst (
         .VGA_row        (VGA_row),
         .VGA_col        (VGA_col),
         .pieces_queue   (next_pieces_queue),
         .output_color   (npd_output_color),
         .active         (npd_active)
+    );
+    // HPD module
+    HoldPixelDriver #(
+        .HSTART(HOLD_USER_HSTART),
+        .VSTART(HOLD_USER_VSTART)
+    ) hpd_inst (
+        .VGA_row            (VGA_row),
+        .VGA_col            (VGA_col),
+        .hold_piece_type    (hold_piece_type),
+        .output_color       (hpd_output_color),
+        .active             (hpd_active)
     );
     // LPD module
     LinesPixelDriver lpd_inst (
@@ -167,20 +211,40 @@ module GraphicsTop
         .output_color       (tpd_output_color),
         .active             (tpd_active)
     );
-    // HPD module
-    HoldPixelDriver hpd_inst (
-        .VGA_row            (VGA_row),
-        .VGA_col            (VGA_col),
-        .hold_piece_type    (hold_piece_type),
-        .output_color       (hpd_output_color),
-        .active             (hpd_active)
-    );
-    // TSPD module
-    TSpinPixelDriver tspd_inst (
+
+    // Opponent HUD
+
+    // PPD module
+    PlayfieldPixelDriver #(
+        .HSTART(PF_LAN_HSTART),
+        .VSTART(PF_LAN_VSTART)
+    ) ppd_lan_inst (
         .VGA_row        (VGA_row),
         .VGA_col        (VGA_col),
-        .tspin_detected (tspin_detected),
-        .output_color   (tspd_output_color),
-        .active         (tspd_active)
+        .tile_type      ('{20{'{10{BLANK}}}}),
+        .output_color   (ppd_output_color_lan),
+        .active         (ppd_active_lan)
+    );
+    // NPD module
+    NextPixelDriver #(
+        .HSTART(NEXT_LAN_HSTART),
+        .VSTART(NEXT_LAN_VSTART)
+    ) npd_lan_inst (
+        .VGA_row        (VGA_row),
+        .VGA_col        (VGA_col),
+        .pieces_queue   ('{NEXT_PIECES_COUNT{T}}),
+        .output_color   (npd_output_color_lan),
+        .active         (npd_active_lan)
+    );
+    // HPD module
+    HoldPixelDriver #(
+        .HSTART(HOLD_LAN_HSTART),
+        .VSTART(HOLD_LAN_VSTART)
+    ) hpd_lan_inst (
+        .VGA_row            (VGA_row),
+        .VGA_col            (VGA_col),
+        .hold_piece_type    (tile_type_t'(T)),
+        .output_color       (hpd_output_color_lan),
+        .active             (hpd_active_lan)
     );
 endmodule // GraphicsTop

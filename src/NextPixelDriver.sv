@@ -14,7 +14,10 @@
 module NextPixelDriver
     import  DisplayPkg::*,
             GamePkg::*;
-(
+#(
+    parameter VSTART,
+    parameter HSTART
+) (
     input  logic [ 9:0] VGA_row,
     input  logic [ 9:0] VGA_col,
 
@@ -61,10 +64,10 @@ module NextPixelDriver
         // colorize tiles based on input
         for (int i = 0; i < NEXT_ROWS; i++) begin
             for (int j = 0; j < NEXT_COLS; j++) begin
-                if (VGA_row >= (NEXT_VSTART + TILE_HEIGHT * i)      &&
-                    VGA_row < (NEXT_VSTART + TILE_HEIGHT * (i + 1)) &&
-                    VGA_col >= (NEXT_HSTART + TILE_WIDTH * j)       &&
-                    VGA_col < (NEXT_HSTART + TILE_WIDTH * (j + 1))) begin
+                if (VGA_row >= (VSTART + MINI_TILE_HEIGHT * i)        &&
+                    VGA_row < (VSTART + MINI_TILE_HEIGHT * (i + 1))   &&
+                    VGA_col >= (HSTART + MINI_TILE_WIDTH * j)         &&
+                    VGA_col < (HSTART + MINI_TILE_WIDTH * (j + 1))) begin
                     active = 1'b1;
                     case (tile_type[i][j])
                         I:          output_color = TETROMINO_I_COLOR;
