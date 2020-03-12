@@ -1,0 +1,11 @@
+*
+!.gitignore
+!*.sv
+!*.qsf
+!*.tcl
+!*.py
+!*.mif
+!src/
+!testbenches/
+!packages/
+!assets/
