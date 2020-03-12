@@ -13,7 +13,7 @@
  * KEY[0] is
  *      hard drop when SW[0] is low
  *      hold when SW[0] is high
- * SW[9] loads in the VGA testpattern when low, otherwise should run Tetris
+ * SW[9] loads in the VGA testpattern when high, otherwise should run Tetris
  * SW[10] is a hard reset.
  *
  * LEDR[6:0] illuminate the state of the seven bag, each light represents a
