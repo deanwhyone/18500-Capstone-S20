@@ -24,14 +24,16 @@ module LinesManager
 );
     enum logic {BREAK, COMBO}       state_combo, nstate_combo;
     enum logic {LOCK_WAIT, CHECK}   state_check, nstate_check;
+    enum logic {NONE, B2B}          state_b2b, nstate_b2b;
 
     logic [ 9:0]    lines_to_clear;
     logic           lines_cleared_en;
 
-    // logic [ 4:0]    combo_count; // longest combo in theory is 29
     logic           combo_en;
     logic           combo_cl;
     logic [ 9:0]    combo_incr;
+
+    logic [ 9:0]    b2b_incr;
 
     logic [ 9:0]    lines_to_send;
     logic [ 9:0]    lines_sent_new;
@@ -61,9 +63,11 @@ module LinesManager
         if (!rst_l) begin
             state_combo <= BREAK;
             state_check <= LOCK_WAIT;
+            state_b2b   <= NONE;
         end else begin
             state_combo <= nstate_combo;
             state_check <= nstate_check;
+            state_b2b   <= nstate_b2b;
         end
     end
     always_comb begin
@@ -82,6 +86,19 @@ module LinesManager
     end
 
     assign nstate_check = (falling_piece_lock) ? CHECK : LOCK_WAIT;
+
+    always_comb begin
+        nstate_b2b = state_b2b;
+        if (falling_piece_lock) begin
+            if ((lines_to_clear == 10'd4) || tspin_detected) begin
+                nstate_b2b = B2B;
+            end else begin
+                nstate_b2b = NONE;
+            end
+        end
+    end
+
+    assign b2b_incr = (state_b2b == B2B) ? 10'd1 : 10'd0;
 
     always_comb begin
         combo_incr = 10'd0;
@@ -125,7 +142,7 @@ module LinesManager
             end
         end
 
-        lines_to_send = lines_to_send + combo_incr;
+        lines_to_send = lines_to_send + combo_incr + b2b_incr;
     end
 
     assign lines_sent_new = lines_sent + lines_to_send;
