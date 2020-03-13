@@ -29,11 +29,12 @@ module GraphicsTop
     input  logic [ 3:0]     time_milliseconds,
     input  tile_type_t      hold_piece_type,
     input  logic            hold_piece_valid,
+    input  logic [ 4:0]     pending_garbage,
     output logic [23:0]     output_color
 );
 
-    logic [23:0]    ppd_output_color;
-    logic           ppd_active;
+    logic [23:0]    pfpd_output_color;
+    logic           pfpd_active;
     logic [23:0]    npd_output_color;
     logic           npd_active;
     logic [23:0]    hpd_output_color;
@@ -42,9 +43,11 @@ module GraphicsTop
     logic           lpd_active;
     logic [23:0]    tpd_output_color;
     logic           tpd_active;
+    logic [23:0]    ppd_output_color;
+    logic           ppd_active;
 
-    logic [23:0]    ppd_output_color_lan;
-    logic           ppd_active_lan;
+    logic [23:0]    pfpd_output_color_lan;
+    logic           pfpd_active_lan;
     logic [23:0]    npd_output_color_lan;
     logic           npd_active_lan;
     logic [23:0]    hpd_output_color_lan;
@@ -81,9 +84,9 @@ module GraphicsTop
                             output_color = BORDER_COLOR_ALT;
                         end
                     end
-                    // use the PPD to light up tiles in the playfield
-                    if (ppd_active) begin
-                        output_color    = ppd_output_color;
+                    // use the PFPD to light up tiles in the playfield
+                    if (pfpd_active) begin
+                        output_color    = pfpd_output_color;
                     end
                     // use the NPD to light up tiles in the next tile area
                     if (npd_active) begin
@@ -101,9 +104,13 @@ module GraphicsTop
                     if (tpd_active) begin
                         output_color    = tpd_output_color;
                     end
+                    // use the PPD to render the pending lines of garbage
+                    if (ppd_active) begin
+                        output_color    = ppd_output_color;
+                    end
                     // opponent HUD
-                    if (ppd_active_lan) begin
-                        output_color    = ppd_output_color_lan;
+                    if (pfpd_active_lan) begin
+                        output_color    = pfpd_output_color_lan;
                     end
                     if (npd_active_lan) begin
                         output_color    = npd_output_color_lan;
@@ -156,16 +163,16 @@ module GraphicsTop
         end
     end
 
-    // PPD module
+    // PFPD module
     PlayfieldPixelDriver #(
         .HSTART(PF_USER_HSTART),
         .VSTART(PF_USER_VSTART)
-    ) ppd_inst (
+    ) pfpd_inst (
         .VGA_row        (VGA_row),
         .VGA_col        (VGA_col),
         .tile_type      (tile_type),
-        .output_color   (ppd_output_color),
-        .active         (ppd_active)
+        .output_color   (pfpd_output_color),
+        .active         (pfpd_active)
     );
     // NPD module
     NextPixelDriver #(
@@ -211,19 +218,32 @@ module GraphicsTop
         .output_color       (tpd_output_color),
         .active             (tpd_active)
     );
+    // PPD module
+    PendingPixelDriver #(
+        .HSTART (PENDING_HSTART),
+        .HEND   (PENDING_HEND),
+        .VSTART (PENDING_VSTART),
+        .VEND   (PENDING_VEND)
+    ) ppd_inst (
+        .VGA_row        (VGA_row),
+        .VGA_col        (VGA_col),
+        .pending_garbage(pending_garbage),
+        .output_color   (ppd_output_color),
+        .active         (ppd_active)
+    );
 
     // Opponent HUD
 
-    // PPD module
+    // PFPD module
     PlayfieldPixelDriver #(
         .HSTART(PF_LAN_HSTART),
         .VSTART(PF_LAN_VSTART)
-    ) ppd_lan_inst (
+    ) pfpd_lan_inst (
         .VGA_row        (VGA_row),
         .VGA_col        (VGA_col),
         .tile_type      ('{20{'{10{BLANK}}}}),
-        .output_color   (ppd_output_color_lan),
-        .active         (ppd_active_lan)
+        .output_color   (pfpd_output_color_lan),
+        .active         (pfpd_active_lan)
     );
     // NPD module
     NextPixelDriver #(

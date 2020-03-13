@@ -20,6 +20,7 @@
  * different tetromino remainin the in the bag.
  *
  * LEDR[9] indicates a T-spin is detected
+ * SW[7:3] lines of garbage pending to be loaded (temporary)
  */
 `default_nettype none
 
@@ -687,6 +688,7 @@ module TetrisTop
         .time_centiseconds  (time_centiseconds),
         .time_milliseconds  (time_milliseconds),
         .hold_piece_type    (hold_piece_type),
+        .pending_garbage    (SW[7:3]),
         .output_color       (graphics_color)
     );
 

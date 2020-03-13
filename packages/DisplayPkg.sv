@@ -80,6 +80,13 @@ package DisplayPkg;
     parameter TIMER_VSTART          = LINES_VSTART - 20;
     parameter TIMER_VEND            = LINES_VSTART;
 
+    parameter PENDING_HSTART        = BORDER_USER_HSTART - 30;
+    parameter PENDING_HEND          = BORDER_USER_HSTART;
+    parameter PENDING_VSTART        = HOLD_USER_VEND + 2;
+    parameter PENDING_VEND          = TIMER_VSTART - 10;
+    parameter PENDING_HEIGHT        = PENDING_VEND - PENDING_VSTART;
+    parameter PENDING_TICK          = PENDING_HEIGHT / 20;
+
     parameter BG_COLOR              = 24'h40_4040;
     parameter BORDER_COLOR          = 24'hff_ffff;
     parameter BORDER_COLOR_ALT      = 24'h00_ffff;
