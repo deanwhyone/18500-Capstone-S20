@@ -129,6 +129,7 @@ module TetrisTop
     logic           hold_swap;
 
     logic           falling_piece_lock;
+    logic           load_garbage;
     logic           tspin_detected;
 
     logic [ 9:0]    lines_cleared;
@@ -447,6 +448,7 @@ module TetrisTop
         .ghost_row          (hard_drop_row_new),
         .ghost_col          (hard_drop_col_new),
         .falling_piece_lock (falling_piece_lock),
+        .load_garbage       (load_garbage),
         .new_tetromino      (new_tetromino)
     );
 

@@ -25,6 +25,7 @@ module GameStatesFSM
     input  logic [ 4:0] ghost_row,
     input  logic [ 4:0] ghost_col,
     output logic        falling_piece_lock,
+    output logic        load_garbage,
     output logic        new_tetromino
 );
     game_states_t   state;
@@ -65,6 +66,9 @@ module GameStatesFSM
                 end
             end
             PIECE_LOCK: begin
+                next_state = LOAD_GARBAGE;
+            end
+            LOAD_GARBAGE: begin
                 next_state = NEW_PIECE;
             end
         endcase
