@@ -69,7 +69,10 @@ package GamePkg;
 
     // lock delay is typically 30 frames, or 0.5 seconds. Can be shorter (TGM)
     // number of cycles at 50 MHz
-    parameter LOCK_DELAY = 25000000;
+    parameter LOCK_DELAY        = 25000000;
+    // Garbage delay is 5 seconds
+    parameter GARBAGE_DELAY     = 250000000;
+
 
     typedef enum logic [2:0] {
         START_SCREEN,
@@ -80,11 +83,12 @@ package GamePkg;
         GAME_LOST
     } game_screens_t;
 
-    typedef enum logic [1:0] {
+    typedef enum logic [2:0] {
         IDLE,
         NEW_PIECE,
         PIECE_FALLING,
-        PIECE_LOCK
+        PIECE_LOCK,
+        LOAD_GARBAGE
     } game_states_t;
 endpackage // GamePkg
 
