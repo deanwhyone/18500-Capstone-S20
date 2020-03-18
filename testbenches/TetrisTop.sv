@@ -1,5 +1,4 @@
-/*
- * 18500 Capstone S20
+/* 18500 Capstone S20
  * Eric Chen, Alton Olsen, Deanyone Su
  *
  * This is the top module for Tetris: a Frame Perfect Game Adventure.
@@ -13,7 +12,7 @@
  * KEY[0] is
  *      hard drop when SW[0] is low
  *      hold when SW[0] is high
- * SW[9] loads in the VGA testpattern when high, otherwise should run Tetris
+ * SW[8] loads in the VGA testpattern when high, otherwise should run Tetris
  * SW[10] is a hard reset.
  *
  * LEDR[6:0] illuminate the state of the seven bag, each light represents a
@@ -21,7 +20,9 @@
  *
  * LEDR[9] indicates a T-spin is detected
  * SW[7:3] lines of garbage pending to be loaded (temporary)
+ * SW[2]   signals that values on SW[7:3] are valid (temporary)
  */
+
 `default_nettype none
 
 module TetrisTop
@@ -129,13 +130,24 @@ module TetrisTop
     logic           hold_swap;
 
     logic           falling_piece_lock;
-    logic           load_garbage;
+    logic           new_lines_valid;
+
     logic           tspin_detected;
 
     logic [ 9:0]    lines_cleared;
     logic [ 9:0]    lines_sent;
+    logic [ 9:0]    lines_sent_new;
     logic           lines_full          [PLAYFIELD_ROWS];
     logic           lines_empty         [PLAYFIELD_ROWS];
+
+    logic           load_garbage;
+    logic           load_garbage_pf;
+    logic           network_trigger;
+    logic [ 9:0]    pending_garbage;
+    logic [ 9:0]    garbage_attack;
+
+    logic           network_valid;
+    logic [ 9:0]    lines_network_new;
 
     logic [ 4:0]    time_hours;
     logic           time_hours_en;
@@ -355,6 +367,23 @@ module TetrisTop
                     locked_state[ftr_rows[i]][ftr_cols[i]] <= falling_type;
                 end
             end
+            if (load_garbage_pf) begin
+                for (int i = 0; i < PLAYFIELD_ROWS - 1; i++) begin
+                    locked_state[i] <= locked_state[i + 1];
+                end
+                locked_state[PLAYFIELD_ROWS - 1] <= '{
+                    GARBAGE,
+                    BLANK,
+                    GARBAGE,
+                    GARBAGE,
+                    GARBAGE,
+                    GARBAGE,
+                    GARBAGE,
+                    GARBAGE,
+                    GARBAGE,
+                    GARBAGE
+                };
+            end
         end
     end
 
@@ -374,6 +403,36 @@ module TetrisTop
         end
     end
 
+    // temporarily instantiate a DAS for network valid. We just want the CD
+    DelayedAutoShiftFSM DAS_network_valid_inst (
+        .clk            (clk),
+        .rst_l          (rst_l),
+        .action_user    (SW[2]),
+        .action_valid   (1'b1),
+        .action_out     (network_valid)
+    );
+
+    // GarbageManager module computes lines to load into PF and attack garbage
+    GarbageManager gm_inst (
+        .clk                (clk),
+        .rst_l              (rst_l),
+        .game_start         (game_start_tetris),
+        .load_garbage       (load_garbage),
+        .network_valid      (network_valid),
+        .lines_network_new  (lines_network_new),
+        .valid_local        (new_lines_valid),
+        .lines_local_new    (lines_sent_new),
+        .lines_to_pf        (pending_garbage),
+        .lines_to_network   (garbage_attack),
+        .lines_send         (network_trigger),
+        .lines_load         (load_garbage_pf)
+    );
+
+    // assign network_valid        = 1'b0; // no network, so never valid
+    // assign lines_network_new    = '0; // no network, so no lines from network
+    // for debugging
+    assign lines_network_new    = SW[7:3];
+
     // LinesManager module manages lines cleared and lines sent
     LinesManager lm_inst (
         .clk                (clk),
@@ -384,6 +443,8 @@ module TetrisTop
         .lines_full         (lines_full),
         .lines_cleared      (lines_cleared),
         .lines_sent         (lines_sent),
+        .new_lines_valid    (new_lines_valid),
+        .lines_sent_new     (lines_sent_new),
         .combo_count        ()
     );
 
@@ -690,7 +751,7 @@ module TetrisTop
         .time_centiseconds  (time_centiseconds),
         .time_milliseconds  (time_milliseconds),
         .hold_piece_type    (hold_piece_type),
-        .pending_garbage    (SW[7:3]),
+        .pending_garbage    (pending_garbage),
         .output_color       (graphics_color)
     );
 

@@ -20,6 +20,8 @@ module LinesManager
     input  logic        lines_full          [PLAYFIELD_ROWS],
     output logic [ 9:0] lines_cleared,
     output logic [ 9:0] lines_sent,
+    output logic        new_lines_valid,
+    output logic [ 9:0] lines_sent_new,
     output logic [ 4:0] combo_count
 );
     enum logic {BREAK, COMBO}       state_combo, nstate_combo;
@@ -36,7 +38,6 @@ module LinesManager
     logic [ 9:0]    b2b_incr;
 
     logic [ 9:0]    lines_to_send;
-    logic [ 9:0]    lines_sent_new;
 
     // handle line clearing logic
     always_comb begin
@@ -145,7 +146,8 @@ module LinesManager
         lines_to_send = lines_to_send + combo_incr + b2b_incr;
     end
 
-    assign lines_sent_new = lines_sent + lines_to_send;
+    assign lines_sent_new   = lines_sent + lines_to_send;
+    assign new_lines_valid  = lines_sent != lines_sent_new;
 
     // register holds lines cleared for the pending game
     register #(

@@ -40,6 +40,9 @@ module GameStatesFSM
 
     logic           stable_piece;
 
+    logic [ 4:0]    garbage_tick;
+    logic           garbage_tick_ld;
+
     always_ff @ (posedge clk, negedge rst_l) begin
         if (!rst_l) begin
             state <= IDLE;
@@ -69,7 +72,10 @@ module GameStatesFSM
                 next_state = LOAD_GARBAGE;
             end
             LOAD_GARBAGE: begin
-                next_state = NEW_PIECE;
+                next_state = LOAD_GARBAGE;
+                if (garbage_tick == 5'd16) begin
+                    next_state = NEW_PIECE;
+                end
             end
         endcase
         if (game_end) next_state = IDLE;
@@ -82,6 +88,14 @@ module GameStatesFSM
 
         if (state == NEW_PIECE) new_tetromino = 1'b1;
         else                    new_tetromino = 1'b0;
+
+        if (state == LOAD_GARBAGE) begin
+            load_garbage    = 1'b1;
+            garbage_tick_ld = 1'b0;
+        end else begin
+            load_garbage    = 1'b0;
+            garbage_tick_ld = 1'b1;
+        end
     end
 
     // lock_counter should be enabled when falling tile is on the ground
@@ -123,5 +137,17 @@ module GameStatesFSM
         .up     (1'b1),
         .D      ('0),
         .Q      (lock_reset_count)
+    );
+
+    counter #(
+        .WIDTH  ($bits(garbage_tick))
+    ) garbage_tick_counter (
+        .clk    (clk),
+        .rst_l  (rst_l),
+        .en     (state == LOAD_GARBAGE),
+        .load   (garbage_tick_ld),
+        .up     (1'b1),
+        .D      ('0),
+        .Q      (garbage_tick)
     );
 endmodule // GameStatesFSM
