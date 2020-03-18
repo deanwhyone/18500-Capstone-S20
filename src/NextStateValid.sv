@@ -160,7 +160,8 @@ module NextStateValid
                 SOFT: begin
                     soft_drop_valid <= 1'b1;
                     for (int i = 0; i < 4; i++) begin
-                        if (soft_drop_rows[i] >= PLAYFIELD_ROWS ||
+                        if ((soft_drop_rows[i] >= PLAYFIELD_ROWS    &&
+                             soft_drop_rows[i] < 30)                ||
                             locked_state[soft_drop_rows[i]][soft_drop_cols[i]] != BLANK) begin
 
                             soft_drop_valid <= 1'b0;
