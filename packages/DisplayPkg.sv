@@ -13,6 +13,7 @@
 package DisplayPkg;
     parameter SVGA_WIDTH            = 800;
     parameter SVGA_HEIGHT           = 600;
+    parameter REFRESH_CLK_CYCLES    = 694445;
 
     parameter PLAYFIELD_ROWS        = 20;
     parameter PLAYFIELD_COLS        = 10;

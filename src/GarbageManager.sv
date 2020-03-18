@@ -10,7 +10,8 @@
 `default_nettype none
 
 module GarbageManager
-    import GamePkg::*;
+    import  DisplayPkg::*,
+            GamePkg::*;
 (
     input  logic        clk,
     input  logic        rst_l,
@@ -21,7 +22,7 @@ module GarbageManager
     input  logic        valid_local,
     input  logic [ 9:0] lines_local_new,
     output logic [ 9:0] lines_to_pf,
-    output logic [ 9:0] lines_to_network,
+    output logic [ 9:0] lines_to_lan,
     output logic        lines_send,
     output logic        lines_load
 );
@@ -29,6 +30,7 @@ module GarbageManager
 
     logic [31:0] garbage_timer;
     logic        garbage_timer_cl;
+    logic [20:0] lan_timer;
     logic [ 9:0] lines_to_pf_update;
     logic        lines_to_pf_cl;
     logic [ 9:0] lines_to_lan_update;
@@ -49,11 +51,12 @@ module GarbageManager
     always_comb begin
         next_state          = state;
         garbage_timer_cl    = 1'b0;
+        garbage_tick_ld     = 1'b1;
         lines_to_pf_cl      = 1'b0;
         lines_load          = 1'b0;
-        garbage_tick_ld     = 1'b1;
         case (state)
             IDLE: begin
+                garbage_timer_cl = lines_to_pf == '0;
                 if (garbage_timer >= GARBAGE_DELAY) begin
                     next_state          = LOAD;
                     garbage_timer_cl    = 1'b1;
@@ -77,7 +80,7 @@ module GarbageManager
     always_comb begin
         lines_to_lan_cl     = 1'b0;
         lines_send          = 1'b0;
-        if (garbage_timer == 694445) begin // 1 frame at 72 hz
+        if (lan_timer == REFRESH_CLK_CYCLES) begin // 1 frame at 72 hz
             lines_to_lan_cl = 1'b1;
             lines_send      = 1'b1;
         end
@@ -85,7 +88,7 @@ module GarbageManager
 
     always_comb begin
         lines_to_pf_update  = lines_to_pf;
-        lines_to_lan_update = lines_to_network;
+        lines_to_lan_update = lines_to_lan;
 
         if (valid_local) begin
             lines_to_lan_update = lines_to_lan_update + lines_local_new;
@@ -114,14 +117,14 @@ module GarbageManager
         .Q      (lines_to_pf)
     );
     register #(
-        .WIDTH      ($bits(lines_to_network))
+        .WIDTH      ($bits(lines_to_lan))
     ) lines_to_lan_reg_inst (
         .clk    (clk),
         .en     (1'b1),
         .rst_l  (rst_l),
         .clear  (lines_to_lan_cl || game_start),
         .D      (lines_to_lan_update),
-        .Q      (lines_to_network)
+        .Q      (lines_to_lan)
     );
 
     counter #(
@@ -135,16 +138,26 @@ module GarbageManager
         .D      ('0),
         .Q      (garbage_tick)
     );
-
     counter #(
         .WIDTH  ($bits(garbage_timer))
     ) garbage_timer_inst (
         .clk    (clk),
         .rst_l  (rst_l),
-        .en     (lines_to_pf != '0),
+        .en     (1'b1),
         .load   (garbage_timer_cl || game_start),
         .up     (1'b1),
         .D      ('0),
         .Q      (garbage_timer)
+    );
+    counter #(
+        .WIDTH  ($bits(lan_timer))
+    ) lan_timer_counter (
+        .clk    (clk),
+        .rst_l  (rst_l),
+        .en     (1'b1),
+        .load   (lines_send),
+        .up     (1'b1),
+        .D      ('0),
+        .Q      (lan_timer)
     );
 endmodule // GarbageManager

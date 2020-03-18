@@ -395,6 +395,7 @@ module TetrisTop
             for (int j = 0; j < PLAYFIELD_COLS; j++) begin
                 if (locked_state[i][j] == BLANK ||
                     locked_state[i][j] == GHOST) begin
+
                     lines_full[i] = 1'b0;
                 end else begin
                     lines_empty[i] = 1'b0;
@@ -411,6 +412,8 @@ module TetrisTop
         .action_valid   (1'b1),
         .action_out     (network_valid)
     );
+    // for testing
+    assign lines_network_new    = SW[7:3];
 
     // GarbageManager module computes lines to load into PF and attack garbage
     GarbageManager gm_inst (
@@ -423,15 +426,10 @@ module TetrisTop
         .valid_local        (new_lines_valid),
         .lines_local_new    (lines_sent_new),
         .lines_to_pf        (pending_garbage),
-        .lines_to_network   (garbage_attack),
+        .lines_to_lan       (garbage_attack),
         .lines_send         (network_trigger),
         .lines_load         (load_garbage_pf)
     );
-
-    // assign network_valid        = 1'b0; // no network, so never valid
-    // assign lines_network_new    = '0; // no network, so no lines from network
-    // for debugging
-    assign lines_network_new    = SW[7:3];
 
     // LinesManager module manages lines cleared and lines sent
     LinesManager lm_inst (
