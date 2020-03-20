@@ -122,6 +122,7 @@ module TetrisTop
     game_screens_t  tetris_screen;
 
     tile_type_t     next_pieces_queue   [NEXT_PIECES_COUNT];
+    logic [ 3:0]    random_src;
     logic           new_tetromino;
     logic           randomizer_race;
 
@@ -145,6 +146,7 @@ module TetrisTop
     logic           network_trigger;
     logic [ 9:0]    pending_garbage;
     logic [ 9:0]    garbage_attack;
+    logic [ 3:0]    garbage_line        [PLAYFIELD_COLS];
 
     logic           network_valid;
     logic [ 9:0]    lines_network_new;
@@ -371,18 +373,7 @@ module TetrisTop
                 for (int i = 0; i < PLAYFIELD_ROWS - 1; i++) begin
                     locked_state[i] <= locked_state[i + 1];
                 end
-                locked_state[PLAYFIELD_ROWS - 1] <= '{
-                    GARBAGE,
-                    BLANK,
-                    GARBAGE,
-                    GARBAGE,
-                    GARBAGE,
-                    GARBAGE,
-                    GARBAGE,
-                    GARBAGE,
-                    GARBAGE,
-                    GARBAGE
-                };
+                locked_state[PLAYFIELD_ROWS - 1] <= garbage_line;
             end
         end
     end
@@ -430,6 +421,11 @@ module TetrisTop
         .lines_send         (network_trigger),
         .lines_load         (load_garbage_pf)
     );
+    // generate garbage line
+    always_comb begin
+        garbage_line = '{10{GARBAGE}};
+        garbage_line[random_src%10] = BLANK;
+    end
 
     // LinesManager module manages lines cleared and lines sent
     LinesManager lm_inst (
@@ -728,7 +724,8 @@ module TetrisTop
         .rst_l           (rst_l),
         .pieces_remove   (randomizer_race || new_tetromino || hold_bag_fetch),
         .pieces_queue    (next_pieces_queue),
-        .the_seven_bag   (LEDR[6:0])
+        .the_seven_bag   (LEDR[6:0]),
+        .random_src      (random_src)
     );
 
     // top level module for all graphics drivers
@@ -752,11 +749,11 @@ module TetrisTop
         .pending_garbage    (pending_garbage),
         .output_color       (graphics_color)
     );
-
+    // enable simple switching b/w 8-bit and 4-bit color
     always_comb begin
-        VGA_R = graphics_color[23:20];
-        VGA_G = graphics_color[15:12];
-        VGA_B = graphics_color[ 7: 4];
+        VGA_R = graphics_color[23:26];
+        VGA_G = graphics_color[15: 8];
+        VGA_B = graphics_color[ 7: 0];
     end
 
     // VGA module

@@ -20,7 +20,8 @@ module TheSevenBag
     input  logic        rst_l,
     input  logic        pieces_remove,
     output tile_type_t  pieces_queue    [NEXT_PIECES_COUNT],
-    output logic [ 6:0] the_seven_bag
+    output logic [ 6:0] the_seven_bag,
+    output logic [ 3:0] random_src
 );
     logic [$bits(tile_type_t) - 1:0]    pieces_intf     [NEXT_PIECES_COUNT];
     logic [$bits(tile_type_t) - 1:0]    piece_generate;
@@ -140,4 +141,5 @@ module TheSevenBag
             );
         end
     endgenerate
+    assign random_src = piece_generate[3:0];
 endmodule // TheSevenBag
