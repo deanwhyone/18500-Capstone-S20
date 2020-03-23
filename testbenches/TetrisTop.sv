@@ -751,7 +751,7 @@ module TetrisTop
     );
     // enable simple switching b/w 8-bit and 4-bit color
     always_comb begin
-        VGA_R = graphics_color[23:26];
+        VGA_R = graphics_color[23:16];
         VGA_G = graphics_color[15: 8];
         VGA_B = graphics_color[ 7: 0];
     end
