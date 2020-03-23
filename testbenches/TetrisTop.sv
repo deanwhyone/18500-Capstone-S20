@@ -137,7 +137,7 @@ module TetrisTop
 
     logic [ 9:0]    lines_cleared;
     logic [ 9:0]    lines_sent;
-    logic [ 9:0]    lines_sent_new;
+    logic [ 9:0]    lines_to_send;
     logic           lines_full          [PLAYFIELD_ROWS];
     logic           lines_empty         [PLAYFIELD_ROWS];
 
@@ -415,7 +415,7 @@ module TetrisTop
         .network_valid      (network_valid),
         .lines_network_new  (lines_network_new),
         .valid_local        (new_lines_valid),
-        .lines_local_new    (lines_sent_new),
+        .lines_local_new    (lines_to_send),
         .lines_to_pf        (pending_garbage),
         .lines_to_lan       (garbage_attack),
         .lines_send         (network_trigger),
@@ -437,8 +437,8 @@ module TetrisTop
         .lines_full         (lines_full),
         .lines_cleared      (lines_cleared),
         .lines_sent         (lines_sent),
+        .lines_to_send      (lines_to_send),
         .new_lines_valid    (new_lines_valid),
-        .lines_sent_new     (lines_sent_new),
         .combo_count        ()
     );
 

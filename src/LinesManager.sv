@@ -20,8 +20,8 @@ module LinesManager
     input  logic        lines_full          [PLAYFIELD_ROWS],
     output logic [ 9:0] lines_cleared,
     output logic [ 9:0] lines_sent,
+    output logic [ 9:0] lines_to_send,
     output logic        new_lines_valid,
-    output logic [ 9:0] lines_sent_new,
     output logic [ 4:0] combo_count
 );
     enum logic {BREAK, COMBO}       state_combo, nstate_combo;
@@ -37,7 +37,10 @@ module LinesManager
 
     logic [ 9:0]    b2b_incr;
 
-    logic [ 9:0]    lines_to_send;
+    logic [ 9:0]    lines_sent_new;
+    logic [ 9:0]    lines_to_send_pipe;
+
+    logic           new_lines_valid_pipe;
 
     // handle line clearing logic
     always_comb begin
@@ -130,24 +133,24 @@ module LinesManager
 
     always_comb begin
         if (tspin_detected) begin
-            lines_to_send = (lines_to_clear + 10'd1) << 1;
+            lines_to_send_pipe = (lines_to_clear + 10'd1) << 1;
         end else begin
             if (lines_to_clear == 5'd2) begin
-                lines_to_send = 10'd1;
+                lines_to_send_pipe = 10'd1;
             end else if (lines_to_clear == 5'd3) begin
-                lines_to_send = 10'd2;
+                lines_to_send_pipe = 10'd2;
             end else if (lines_to_clear == 5'd4) begin
-                lines_to_send = 10'd4;
+                lines_to_send_pipe = 10'd4;
             end else begin
-                lines_to_send = 10'd0;
+                lines_to_send_pipe = 10'd0;
             end
         end
 
-        lines_to_send = lines_to_send + combo_incr + b2b_incr;
+        lines_to_send_pipe = lines_to_send_pipe + combo_incr + b2b_incr;
     end
 
-    assign lines_sent_new   = lines_sent + lines_to_send;
-    assign new_lines_valid  = lines_sent != lines_sent_new;
+    assign lines_sent_new       = lines_sent + lines_to_send_pipe;
+    assign new_lines_valid_pipe = lines_to_send_pipe != lines_sent_new;
 
     // register holds lines cleared for the pending game
     register #(
@@ -159,5 +162,16 @@ module LinesManager
         .clear  (game_start),
         .D      (lines_sent_new),
         .Q      (lines_sent)
+    );
+    // pipelining the lines_to_send and valid signal for timing
+    register #(
+        .WIDTH  ($bits(lines_to_send) + 1)
+    ) lines_to_send_reg_inst (
+        .clk    (clk),
+        .en     (1'b1),
+        .rst_l  (rst_l),
+        .clear  (1'b0),
+        .D      ({lines_to_send_pipe, new_lines_valid_pipe}),
+        .Q      ({lines_to_send, new_lines_valid})
     );
 endmodule // LinesManager
