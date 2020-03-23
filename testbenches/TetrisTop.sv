@@ -35,9 +35,9 @@ module TetrisTop
     input  logic [ 3:0] KEY,
 
     output logic [ 9:0] LEDR,
-    output logic [ 3:0] VGA_R,
-    output logic [ 3:0] VGA_G,
-    output logic [ 3:0] VGA_B,
+    output logic [ 7:0] VGA_R,
+    output logic [ 7:0] VGA_G,
+    output logic [ 7:0] VGA_B,
 
     output logic        VGA_CLK,
     output logic        VGA_SYNC_N,
