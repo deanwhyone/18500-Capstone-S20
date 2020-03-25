@@ -1,30 +1,25 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # 18500 Capstone S20
 # Eric Chen, Alton Olsen, Deanyone Su
 #
 # Short python script to generate RGB values from a local image
 
-from scipy import misc
+import imageio
 from sys import argv
 
-# get filename from command line, get RGB(A) values
-img_matrix = misc.imread(argv[1])
+# get filename from command line, get RGB values
+img_matrix = imageio.imread(argv[1], as_gray=False, pilmode='RGB')
 color_matrix = []
 
 # scan through img_matrix and scale RGB values by A/255
 row_count = len(img_matrix)
 col_count = len(img_matrix[0])
 print("Ingested image dimensions: %d x %d" % (col_count, row_count))
-for i in xrange(row_count):
-    for j in xrange(col_count):
-        try:
-            alpha = img_matrix[i][j][3] / 255
-        except IndexError:
-            alpha = 1
-
-        red_value = hex(int(img_matrix[i][j][0] * alpha)).strip('0x').zfill(2)
-        green_value = hex(int(img_matrix[i][j][1] * alpha)).strip('0x').zfill(2)
-        blue_value = hex(int(img_matrix[i][j][2] * alpha)).strip('0x').zfill(2)
+for i in range(row_count):
+    for j in range(col_count):
+        red_value = hex(int(img_matrix[i][j][0])).strip('0x').zfill(2)
+        green_value = hex(int(img_matrix[i][j][1])).strip('0x').zfill(2)
+        blue_value = hex(int(img_matrix[i][j][2])).strip('0x').zfill(2)
         # print("Row %d, Col %d" % (i, j))
         # print(red_value)
         # print(green_value)
@@ -50,7 +45,7 @@ write_contents.append('ADDRESS_RADIX = DEC;\n')
 write_contents.append('DATA_RADIX = HEX;\n')
 write_contents.append('CONTENT BEGIN\n\n')
 
-for color_idx in xrange(len(color_matrix)):
+for color_idx in range(len(color_matrix)):
     write_contents.append("%d: %s;\n" % (color_idx, color_matrix[color_idx]))
 
 write_contents.append('\nEND;\n')
