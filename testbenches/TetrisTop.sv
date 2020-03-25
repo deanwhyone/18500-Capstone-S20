@@ -12,8 +12,8 @@
  * KEY[0] is
  *      hard drop when SW[0] is low
  *      hold when SW[0] is high
- * SW[8] loads in the VGA testpattern when high, otherwise should run Tetris
- * SW[10] is a hard reset.
+ * SW[16] loads in the VGA testpattern when high, otherwise should run Tetris
+ * SW[17] is a hard reset.
  *
  * LEDR[6:0] illuminate the state of the seven bag, each light represents a
  * different tetromino remainin the in the bag.
@@ -31,10 +31,10 @@ module TetrisTop
 (
     input  logic        CLOCK_50,
 
-    input  logic [ 9:0] SW,
+    input  logic [17:0] SW,
     input  logic [ 3:0] KEY,
 
-    output logic [ 9:0] LEDR,
+    output logic [17:0] LEDR,
     output logic [ 7:0] VGA_R,
     output logic [ 7:0] VGA_G,
     output logic [ 7:0] VGA_B,
@@ -48,7 +48,7 @@ module TetrisTop
     // abstract clk, rst_l signal for uniformity
     logic  clk, rst_l;
     assign clk      = CLOCK_50;
-    assign rst_l    = !SW[9];
+    assign rst_l    = !SW[17];
 
     // declare local variables
     logic           rotate_R;
@@ -730,6 +730,7 @@ module TetrisTop
 
     // top level module for all graphics drivers
     GraphicsTop graphics_inst (
+        .clk                (clk),
         .VGA_row            (VGA_row),
         .VGA_col            (VGA_col),
         .tile_type          (tile_type),
@@ -737,7 +738,7 @@ module TetrisTop
         .lines_cleared      (lines_cleared),
         .lines_sent         (lines_sent),
         .tspin_detected     (tspin_detected),
-        .testpattern_active (SW[8]),
+        .testpattern_active (SW[16]),
         .tetris_screen      (tetris_screen),
         .time_hours         (time_hours),
         .time_minutes       (time_minutes),

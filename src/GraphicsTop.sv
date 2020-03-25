@@ -12,6 +12,7 @@ module GraphicsTop
     import DisplayPkg::*,
            GamePkg::*;
 (
+    input  logic            clk,
     input  logic [ 9:0]     VGA_row,
     input  logic [ 9:0]     VGA_col,
     input  tile_type_t      tile_type           [PLAYFIELD_ROWS][PLAYFIELD_COLS],
@@ -45,6 +46,8 @@ module GraphicsTop
     logic           tpd_active;
     logic [23:0]    ppd_output_color;
     logic           ppd_active;
+    logic [23:0]    sspd_output_color;
+    logic           sspd_active;
 
     logic [23:0]    pfpd_output_color_lan;
     logic           pfpd_active_lan;
@@ -58,8 +61,8 @@ module GraphicsTop
         if (!testpattern_active) begin
             unique case (tetris_screen)
                 START_SCREEN: begin
-                    if (VGA_row < 10'd240) begin
-                        output_color    = TETROMINO_I_COLOR;
+                    if (sspd_active) begin
+                        output_color = sspd_output_color;
                     end
                 end
                 SPRINT_MODE: begin
@@ -162,6 +165,15 @@ module GraphicsTop
             end
         end
     end
+
+    // SSPD module
+    StartScreenPixelDriver sspd_inst (
+        .clk            (clk),
+        .VGA_row        (VGA_row),
+        .VGA_col        (VGA_col),
+        .output_color   (sspd_output_color),
+        .active         (sspd_active)
+    );
 
     // PFPD module
     PlayfieldPixelDriver #(

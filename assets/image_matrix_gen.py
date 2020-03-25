@@ -7,16 +7,21 @@
 from scipy import misc
 from sys import argv
 
-# get filename from command line, get RGBA values
+# get filename from command line, get RGB(A) values
 img_matrix = misc.imread(argv[1])
 color_matrix = []
 
 # scan through img_matrix and scale RGB values by A/255
 row_count = len(img_matrix)
 col_count = len(img_matrix[0])
+print("Ingested image dimensions: %d x %d" % (col_count, row_count))
 for i in xrange(row_count):
     for j in xrange(col_count):
-        alpha = img_matrix[i][j][3] / 255
+        try:
+            alpha = img_matrix[i][j][3] / 255
+        except IndexError:
+            alpha = 1
+
         red_value = hex(int(img_matrix[i][j][0] * alpha)).strip('0x').zfill(2)
         green_value = hex(int(img_matrix[i][j][1] * alpha)).strip('0x').zfill(2)
         blue_value = hex(int(img_matrix[i][j][2] * alpha)).strip('0x').zfill(2)
@@ -26,11 +31,12 @@ for i in xrange(row_count):
         # print(blue_value)
         # print("\n")
         color_matrix.append("".join([red_value, green_value, blue_value]))
-# write .mif file
+# write file
 if (argv[2][-4:] != '.mif'):
     print('Provided output file is not .mif file')
     exit()
-mif_file = open(argv[2], 'w');
+data_file = open(argv[2], 'w');
+write_contents = []
 write_contents = ['%\n']
 write_contents.append('18500 Capstone S20\n')
 write_contents.append('Eric Chen, Alton Olsen, Deanyone Su\n\n')
@@ -45,8 +51,8 @@ write_contents.append('DATA_RADIX = HEX;\n')
 write_contents.append('CONTENT BEGIN\n\n')
 
 for color_idx in xrange(len(color_matrix)):
-    write_contents.append("%d : %s;\n" % (color_idx, color_matrix[color_idx]))
+    write_contents.append("%d: %s;\n" % (color_idx, color_matrix[color_idx]))
 
 write_contents.append('\nEND;\n')
-mif_file.writelines(write_contents)
-mif_file.close()
+data_file.writelines(write_contents)
+data_file.close()
