@@ -20,9 +20,9 @@ for i in range(row_count):
         red_value = hex(int(img_matrix[i][j][0])).strip('0x').zfill(2)
         green_value = hex(int(img_matrix[i][j][1])).strip('0x').zfill(2)
         blue_value = hex(int(img_matrix[i][j][2])).strip('0x').zfill(2)
-        if (int(red_value, 16) > 250 and \
-            int(green_value, 16) > 250 and \
-            int(blue_value, 16) > 250):
+        if (int(red_value, 16) > 240 and \
+            int(green_value, 16) > 240 and \
+            int(blue_value, 16) > 240):
             red_value='40'
             green_value='40'
             blue_value='40'
