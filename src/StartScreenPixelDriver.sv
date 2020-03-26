@@ -114,10 +114,10 @@ module StartScreenPixelDriver
         VGA_col_LA = VGA_col + 10'd1;
         if (VGA_col_LA == SVGA_WIDTH) begin
             VGA_row_LA = VGA_row + 10'd1;
-            VGA_col_LA = '0;
             if (VGA_col_LA == SVGA_HEIGHT) begin
                 VGA_row_LA = '0;
             end
+            VGA_col_LA = '0;
         end
     end
 
