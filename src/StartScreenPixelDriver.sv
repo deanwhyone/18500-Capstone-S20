@@ -137,7 +137,7 @@ module StartScreenPixelDriver
     always_comb begin
         word_1      = '{"A"};
         word_2      = '{"F", "R", "A", "M", "E"};
-        word_3      = '{"P", "E", "R", "F", "C", "T"};
+        word_3      = '{"P", "E", "R", "F", "E", "C", "T"};
         word_4      = '{"G", "A", "M", "E"};
         word_5      = '{"A", "D", "V", "E", "N", "T", "U", "R", "E"};
         credit_1    = '{"T", "E", "A", "M"};
@@ -319,7 +319,7 @@ module StartScreenPixelDriver
             );
         end
 
-        for (g = 0; g < THANK_LENGTH_1; g++) begin : STRING_CREDIT_1_G
+        for (g = 0; g < THANK_LENGTH_1; g++) begin : STRING_THANK_1_G
             AlphanumeralRender #(
                 .SCALE      (2),
                 .ORIGIN_ROW (195),
@@ -331,7 +331,7 @@ module StartScreenPixelDriver
                 .active     (actives_thank_1[g])
             );
         end
-        for (g = 0; g < THANK_LENGTH_2; g++) begin : STRING_CREDIT_2_G
+        for (g = 0; g < THANK_LENGTH_2; g++) begin : STRING_THANK_2_G
             AlphanumeralRender #(
                 .SCALE      (2),
                 .ORIGIN_ROW (210),
@@ -343,7 +343,7 @@ module StartScreenPixelDriver
                 .active     (actives_thank_2[g])
             );
         end
-        for (g = 0; g < THANK_LENGTH_3; g++) begin : STRING_CREDIT_3_G
+        for (g = 0; g < THANK_LENGTH_3; g++) begin : STRING_THANK_3_G
             AlphanumeralRender #(
                 .SCALE      (2),
                 .ORIGIN_ROW (225),
@@ -355,7 +355,7 @@ module StartScreenPixelDriver
                 .active     (actives_thank_3[g])
             );
         end
-        for (g = 0; g < THANK_LENGTH_4F; g++) begin : STRING_CREDIT_4F_G
+        for (g = 0; g < THANK_LENGTH_4F; g++) begin : STRING_THANK_4F_G
             AlphanumeralRender #(
                 .SCALE      (2),
                 .ORIGIN_ROW (240),
@@ -367,7 +367,7 @@ module StartScreenPixelDriver
                 .active     (actives_thank_4F[g])
             );
         end
-        for (g = 0; g < THANK_LENGTH_4L; g++) begin : STRING_CREDIT_4L_G
+        for (g = 0; g < THANK_LENGTH_4L; g++) begin : STRING_THANK_4L_G
             AlphanumeralRender #(
                 .SCALE      (2),
                 .ORIGIN_ROW (255),
@@ -379,7 +379,7 @@ module StartScreenPixelDriver
                 .active     (actives_thank_4L[g])
             );
         end
-        for (g = 0; g < THANK_LENGTH_5F; g++) begin : STRING_CREDIT_5F_G
+        for (g = 0; g < THANK_LENGTH_5F; g++) begin : STRING_THANK_5F_G
             AlphanumeralRender #(
                 .SCALE      (2),
                 .ORIGIN_ROW (270),
@@ -391,7 +391,7 @@ module StartScreenPixelDriver
                 .active     (actives_thank_5F[g])
             );
         end
-        for (g = 0; g < THANK_LENGTH_5L; g++) begin : STRING_CREDIT_5L_G
+        for (g = 0; g < THANK_LENGTH_5L; g++) begin : STRING_THANK_5L_G
             AlphanumeralRender #(
                 .SCALE      (2),
                 .ORIGIN_ROW (285),
@@ -403,7 +403,7 @@ module StartScreenPixelDriver
                 .active     (actives_thank_5L[g])
             );
         end
-        for (g = 0; g < THANK_LENGTH_6F; g++) begin : STRING_CREDIT_6F_G
+        for (g = 0; g < THANK_LENGTH_6F; g++) begin : STRING_THANK_6F_G
             AlphanumeralRender #(
                 .SCALE      (2),
                 .ORIGIN_ROW (300),
@@ -415,7 +415,7 @@ module StartScreenPixelDriver
                 .active     (actives_thank_6F[g])
             );
         end
-        for (g = 0; g < THANK_LENGTH_6L; g++) begin : STRING_CREDIT_6L_G
+        for (g = 0; g < THANK_LENGTH_6L; g++) begin : STRING_THANK_6L_G
             AlphanumeralRender #(
                 .SCALE      (2),
                 .ORIGIN_ROW (315),
