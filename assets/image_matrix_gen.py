@@ -4,36 +4,31 @@
 #
 # Short python script to generate RGB values from a local image
 
-import imageio
+import cv2
 from sys import argv
 
 # get filename from command line, get RGB values
-img_matrix = imageio.imread(argv[1], as_gray=False, pilmode='RGB')
+img_matrix = cv2.imread(argv[1])
+img_matrix = cv2.fastNlMeansDenoisingColored(img_matrix, None, 10, 10, 7, 15)
 color_matrix = []
 
 # scan through img_matrix and scale RGB values by A/255
 row_count = len(img_matrix)
 col_count = len(img_matrix[0])
 print("Ingested image dimensions: %d x %d" % (col_count, row_count))
+blue_value, green_value, red_value = cv2.split(img_matrix)
 for i in range(row_count):
     for j in range(col_count):
-        red_value = bin(int(img_matrix[i][j][0])).strip('0b')\
-            .zfill(8)[:5]
-        green_value = bin(int(img_matrix[i][j][1])).strip('0b')\
-            .zfill(8)[:6]
-        blue_value = bin(int(img_matrix[i][j][2])).strip('0b')\
-            .zfill(8)[:5]
-        # print("Row %d, Col %d" % (i, j))
-        # print(red_value)
-        # print(green_value)
-        # print(blue_value)
-        if (int(img_matrix[i][j][0]) > 231 and\
-            int(img_matrix[i][j][1]) > 231 and\
-            int(img_matrix[i][j][2]) > 231):
-            red_value = '01000'
-            green_value = '010000'
-            blue_value = '01000'
-        color_matrix.append("".join([red_value, green_value, blue_value]))
+        r_value = hex(red_value[i][j]).strip('0x').zfill(2)
+        g_value = hex(green_value[i][j]).strip('0x').zfill(2)
+        b_value = hex(blue_value[i][j]).strip('0x').zfill(2)
+        if (red_value[i][j] > 231 and \
+            green_value[i][j] > 231 and \
+            blue_value[i][j] > 231):
+            r_value = '40'
+            g_value = '40'
+            b_value = '40'
+        color_matrix.append(r_value + g_value + b_value)
 # write file
 if (argv[2][-4:] != '.mif'):
     print('Provided output file is not .mif file')
