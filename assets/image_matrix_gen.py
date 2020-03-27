@@ -27,9 +27,9 @@ for i in range(row_count):
         # print(red_value)
         # print(green_value)
         # print(blue_value)
-        if (int(img_matrix[i][j][0]) > 220 and\
-            int(img_matrix[i][j][1]) > 220 and\
-            int(img_matrix[i][j][2]) > 220):
+        if (int(img_matrix[i][j][0]) > 231 and\
+            int(img_matrix[i][j][1]) > 231 and\
+            int(img_matrix[i][j][2]) > 231):
             red_value = '01000'
             green_value = '010000'
             blue_value = '01000'
