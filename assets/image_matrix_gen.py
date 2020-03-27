@@ -17,9 +17,9 @@ col_count = len(img_matrix[0])
 print("Ingested image dimensions: %d x %d" % (col_count, row_count))
 for i in range(row_count):
     for j in range(col_count):
-        red_value = hex(int(img_matrix[i][j][0])).strip('0x').zfill(2)
-        green_value = hex(int(img_matrix[i][j][1])).strip('0x').zfill(2)
-        blue_value = hex(int(img_matrix[i][j][2])).strip('0x').zfill(2)
+        red_value = hex(16 * (round(int(img_matrix[i][j][0])/16))).strip('0x').ljust(2, '0')
+        green_value = hex(16 * (round(int(img_matrix[i][j][1])/16))).strip('0x').ljust(2, '0')
+        blue_value = hex(16 * (round(int(img_matrix[i][j][2])/16))).strip('0x').ljust(2, '0')
         if (int(red_value, 16) > 240 and \
             int(green_value, 16) > 240 and \
             int(blue_value, 16) > 240):
@@ -31,7 +31,7 @@ for i in range(row_count):
         # print(green_value)
         # print(blue_value)
         # print("\n")
-        color_matrix.append("".join([red_value[0], "0", green_value[0], "0", blue_value[0], "0"]))
+        color_matrix.append("".join([red_value, green_value, blue_value]))
 # write file
 if (argv[2][-4:] != '.mif'):
     print('Provided output file is not .mif file')
