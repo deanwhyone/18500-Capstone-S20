@@ -22,8 +22,13 @@ module StartScreenPixelDriver
 );
     localparam LOGO_ROWS        = 187;
     localparam LOGO_COLS        = 269;
-    localparam LOGO_ORIGIN_ROW  = 412;
-    localparam LOGO_ORIGIN_COL  = 530;
+    localparam LOGO_ORIGIN_ROW  = 402;
+    localparam LOGO_ORIGIN_COL  = 522;
+
+    localparam QR_ORIGIN_ROW    = 439;
+    localparam QR_ORIGIN_COL    = 226;
+    localparam QR_DIM           = 37;
+    localparam QR_SCALE         = 4;
 
     localparam WORD_LENGTH_1    = 1; // A
     localparam WORD_LENGTH_2    = 5; // FRAME
@@ -109,6 +114,13 @@ module StartScreenPixelDriver
 
     logic                           active_char;
 
+    logic [QR_DIM - 1:0]            qr_code_data        [QR_DIM];
+    logic [ 5:0]                    qr_row_count;
+    logic [ 5:0]                    qr_col_count;
+    logic [23:0]                    qr_color;
+    logic                           active_qr;
+
+
     always_comb begin
         VGA_row_LA = VGA_row;
         VGA_col_LA = VGA_col + 10'd1;
@@ -163,9 +175,9 @@ module StartScreenPixelDriver
     generate
         for (g = 0; g < WORD_LENGTH_1; g++) begin : STRING_WORD_1_G
             AlphanumeralRender #(
-                .SCALE      (2),
-                .ORIGIN_ROW (0),
-                .ORIGIN_COL (0 + 14 * g)
+                .SCALE      (8),
+                .ORIGIN_ROW (10),
+                .ORIGIN_COL (22 + 0 + 56 * g)
             ) ar_word_1_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -175,9 +187,9 @@ module StartScreenPixelDriver
         end
         for (g = 0; g < WORD_LENGTH_2; g++) begin : STRING_WORD_2_G
             AlphanumeralRender #(
-                .SCALE      (2),
-                .ORIGIN_ROW (15),
-                .ORIGIN_COL (0 + 14 * g)
+                .SCALE      (8),
+                .ORIGIN_ROW (10),
+                .ORIGIN_COL (15 + 1 * 56 + 1 * 28 + 56 * g)
             ) ar_word_2_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -187,9 +199,9 @@ module StartScreenPixelDriver
         end
         for (g = 0; g < WORD_LENGTH_3; g++) begin : STRING_WORD_3_G
             AlphanumeralRender #(
-                .SCALE      (2),
-                .ORIGIN_ROW (30),
-                .ORIGIN_COL (0 + 14 * g)
+                .SCALE      (8),
+                .ORIGIN_ROW (10),
+                .ORIGIN_COL (15 + 6 * 56 + 2 * 28 + 56 * g)
             ) ar_word_3_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -199,9 +211,9 @@ module StartScreenPixelDriver
         end
         for (g = 0; g < WORD_LENGTH_4; g++) begin : STRING_WORD_4_G
             AlphanumeralRender #(
-                .SCALE      (2),
-                .ORIGIN_ROW (45),
-                .ORIGIN_COL (0 + 14 * g)
+                .SCALE      (8),
+                .ORIGIN_ROW (10 + 60),
+                .ORIGIN_COL (22 + 56 * g)
             ) ar_word_4_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -211,9 +223,9 @@ module StartScreenPixelDriver
         end
         for (g = 0; g < WORD_LENGTH_5; g++) begin : STRING_WORD_5_G
             AlphanumeralRender #(
-                .SCALE      (2),
-                .ORIGIN_ROW (60),
-                .ORIGIN_COL (0 + 14 * g)
+                .SCALE      (8),
+                .ORIGIN_ROW (10 + 60),
+                .ORIGIN_COL (22 + 4 * 56 + 28 + 56 * g)
             ) ar_word_5_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -224,9 +236,9 @@ module StartScreenPixelDriver
 
         for (g = 0; g < CREDIT_LENGTH_1; g++) begin : STRING_CREDIT_1_G
             AlphanumeralRender #(
-                .SCALE      (2),
-                .ORIGIN_ROW (75),
-                .ORIGIN_COL (0 + 14 * g)
+                .SCALE      (4),
+                .ORIGIN_ROW (439),
+                .ORIGIN_COL (8 + 0 + 28 * g)
             ) ar_credit_1_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -236,9 +248,9 @@ module StartScreenPixelDriver
         end
         for (g = 0; g < CREDIT_LENGTH_2; g++) begin : STRING_CREDIT_2_G
             AlphanumeralRender #(
-                .SCALE      (2),
-                .ORIGIN_ROW (90),
-                .ORIGIN_COL (0 + 14 * g)
+                .SCALE      (4),
+                .ORIGIN_ROW (439),
+                .ORIGIN_COL (8 + 5 * 28 + 28 * g)
             ) ar_credit_2_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -249,8 +261,8 @@ module StartScreenPixelDriver
         for (g = 0; g < CREDIT_LENGTH_3F; g++) begin : STRING_CREDIT_3F_G
             AlphanumeralRender #(
                 .SCALE      (2),
-                .ORIGIN_ROW (105),
-                .ORIGIN_COL (0 + 14 * g)
+                .ORIGIN_ROW (469),
+                .ORIGIN_COL (8 + 0 + 14 * g)
             ) ar_credit_3F_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -261,8 +273,8 @@ module StartScreenPixelDriver
         for (g = 0; g < CREDIT_LENGTH_3L; g++) begin : STRING_CREDIT_3L_G
             AlphanumeralRender #(
                 .SCALE      (2),
-                .ORIGIN_ROW (120),
-                .ORIGIN_COL (0 + 14 * g)
+                .ORIGIN_ROW (469),
+                .ORIGIN_COL (8 + 6 * 14 + 14 * g)
             ) ar_credit_3L_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -273,8 +285,8 @@ module StartScreenPixelDriver
         for (g = 0; g < CREDIT_LENGTH_4F; g++) begin : STRING_CREDIT_4F_G
             AlphanumeralRender #(
                 .SCALE      (2),
-                .ORIGIN_ROW (135),
-                .ORIGIN_COL (0 + 14 * g)
+                .ORIGIN_ROW (484),
+                .ORIGIN_COL (8 + 0 + 14 * g)
             ) ar_credit_4F_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -285,8 +297,8 @@ module StartScreenPixelDriver
         for (g = 0; g < CREDIT_LENGTH_4L; g++) begin : STRING_CREDIT_4L_G
             AlphanumeralRender #(
                 .SCALE      (2),
-                .ORIGIN_ROW (150),
-                .ORIGIN_COL (0 + 14 * g)
+                .ORIGIN_ROW (484),
+                .ORIGIN_COL (8 + 9 * 14 + 14 * g)
             ) ar_credit_4L_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -297,8 +309,8 @@ module StartScreenPixelDriver
         for (g = 0; g < CREDIT_LENGTH_5F; g++) begin : STRING_CREDIT_5F_G
             AlphanumeralRender #(
                 .SCALE      (2),
-                .ORIGIN_ROW (165),
-                .ORIGIN_COL (0 + 14 * g)
+                .ORIGIN_ROW (499),
+                .ORIGIN_COL (8 + 0 + 14 * g)
             ) ar_credit_5F_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -309,8 +321,8 @@ module StartScreenPixelDriver
         for (g = 0; g < CREDIT_LENGTH_5L; g++) begin : STRING_CREDIT_5L_G
             AlphanumeralRender #(
                 .SCALE      (2),
-                .ORIGIN_ROW (180),
-                .ORIGIN_COL (0 + 14 * g)
+                .ORIGIN_ROW (499),
+                .ORIGIN_COL (8 + 5 * 14 + 14 * g)
             ) ar_credit_5L_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -322,8 +334,8 @@ module StartScreenPixelDriver
         for (g = 0; g < THANK_LENGTH_1; g++) begin : STRING_THANK_1_G
             AlphanumeralRender #(
                 .SCALE      (2),
-                .ORIGIN_ROW (195),
-                .ORIGIN_COL (0 + 14 * g)
+                .ORIGIN_ROW (529),
+                .ORIGIN_COL (8 + 0 + 14 * g)
             ) ar_thank_1_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -334,8 +346,8 @@ module StartScreenPixelDriver
         for (g = 0; g < THANK_LENGTH_2; g++) begin : STRING_THANK_2_G
             AlphanumeralRender #(
                 .SCALE      (2),
-                .ORIGIN_ROW (210),
-                .ORIGIN_COL (0 + 14 * g)
+                .ORIGIN_ROW (529),
+                .ORIGIN_COL (8 + 8 * 14 + 14 * g)
             ) ar_thank_2_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -346,8 +358,8 @@ module StartScreenPixelDriver
         for (g = 0; g < THANK_LENGTH_3; g++) begin : STRING_THANK_3_G
             AlphanumeralRender #(
                 .SCALE      (2),
-                .ORIGIN_ROW (225),
-                .ORIGIN_COL (0 + 14 * g)
+                .ORIGIN_ROW (529),
+                .ORIGIN_COL (8 + 15 * 14 + 14 * g)
             ) ar_thank_3_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -358,8 +370,8 @@ module StartScreenPixelDriver
         for (g = 0; g < THANK_LENGTH_4F; g++) begin : STRING_THANK_4F_G
             AlphanumeralRender #(
                 .SCALE      (2),
-                .ORIGIN_ROW (240),
-                .ORIGIN_COL (0 + 14 * g)
+                .ORIGIN_ROW (544),
+                .ORIGIN_COL (8 + 0 + 14 * g)
             ) ar_thank_4F_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -370,8 +382,8 @@ module StartScreenPixelDriver
         for (g = 0; g < THANK_LENGTH_4L; g++) begin : STRING_THANK_4L_G
             AlphanumeralRender #(
                 .SCALE      (2),
-                .ORIGIN_ROW (255),
-                .ORIGIN_COL (0 + 14 * g)
+                .ORIGIN_ROW (544),
+                .ORIGIN_COL (8 + 5 * 14 + 14 * g)
             ) ar_thank_4L_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -382,8 +394,8 @@ module StartScreenPixelDriver
         for (g = 0; g < THANK_LENGTH_5F; g++) begin : STRING_THANK_5F_G
             AlphanumeralRender #(
                 .SCALE      (2),
-                .ORIGIN_ROW (270),
-                .ORIGIN_COL (0 + 14 * g)
+                .ORIGIN_ROW (559),
+                .ORIGIN_COL (8 + 0 + 14 * g)
             ) ar_thank_5F_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -394,8 +406,8 @@ module StartScreenPixelDriver
         for (g = 0; g < THANK_LENGTH_5L; g++) begin : STRING_THANK_5L_G
             AlphanumeralRender #(
                 .SCALE      (2),
-                .ORIGIN_ROW (285),
-                .ORIGIN_COL (0 + 14 * g)
+                .ORIGIN_ROW (559),
+                .ORIGIN_COL (8 + 5 * 14 + 14 * g)
             ) ar_thank_5L_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -406,8 +418,8 @@ module StartScreenPixelDriver
         for (g = 0; g < THANK_LENGTH_6F; g++) begin : STRING_THANK_6F_G
             AlphanumeralRender #(
                 .SCALE      (2),
-                .ORIGIN_ROW (300),
-                .ORIGIN_COL (0 + 14 * g)
+                .ORIGIN_ROW (574),
+                .ORIGIN_COL (8 + 0 + 14 * g)
             ) ar_thank_6F_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -418,8 +430,8 @@ module StartScreenPixelDriver
         for (g = 0; g < THANK_LENGTH_6L; g++) begin : STRING_THANK_6L_G
             AlphanumeralRender #(
                 .SCALE      (2),
-                .ORIGIN_ROW (315),
-                .ORIGIN_COL (0 + 14 * g)
+                .ORIGIN_ROW (574),
+                .ORIGIN_COL (8 + 8 * 14 + 14 * g)
             ) ar_thank_6L_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -454,6 +466,27 @@ module StartScreenPixelDriver
                         (|actives_thank_6L);
     end
 
+    initial begin
+        $readmemb("../assets/blog_qr.mem", qr_code_data);
+     end
+
+     always_comb begin
+        active_qr       = 1'b0;
+        qr_row_count    = '0;
+        qr_col_count    = '0;
+        qr_color        = BG_COLOR;
+        if ((VGA_row >= QR_ORIGIN_ROW) &&
+            (VGA_col >= QR_ORIGIN_COL) &&
+            (VGA_row <  QR_ORIGIN_ROW + QR_DIM * QR_SCALE) &&
+            (VGA_col <  QR_ORIGIN_COL + QR_DIM * QR_SCALE)) begin
+
+            active_qr       = 1'b1;
+            qr_row_count    = 6'((VGA_row - QR_ORIGIN_ROW)/QR_SCALE);
+            qr_col_count    = 6'((VGA_col - QR_ORIGIN_COL)/QR_SCALE);
+            qr_color        = {24{!qr_code_data[qr_row_count][qr_col_count]}};
+        end
+    end
+
     always_comb begin
         active          = 1'b1;
         output_color    = BG_COLOR;
@@ -464,6 +497,8 @@ module StartScreenPixelDriver
             (VGA_col <  LOGO_ORIGIN_COL + LOGO_COLS)) begin
 
             output_color = logo_color;
+        end else if (active_qr) begin
+            output_color = qr_color;
         end else if (active_char) begin
             output_color = 24'hff_ffff;
         end
