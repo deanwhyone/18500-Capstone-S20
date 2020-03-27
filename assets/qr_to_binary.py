@@ -18,7 +18,6 @@ def chunks(lst, n):
     packed = []
     for i in range(0, len(lst), n):
         chunk = lst[i:i + n]
-        chunk.append('\n')
         block = ''.join(chunk)
         packed.append(block)
     return packed
@@ -68,5 +67,5 @@ for addr in range(len(tiles_binary)):
 write_contents.append('\nEND;\n')
 
 data_file = open(argv[2], 'w');
-data_file.writelines(tiles_binary)
+data_file.writelines(write_contents)
 data_file.close()
