@@ -9,7 +9,7 @@ from sys import argv
 
 # get filename from command line, get RGB values
 img_matrix = cv2.imread(argv[1])
-img_matrix = cv2.fastNlMeansDenoisingColored(img_matrix, None, 50, 10, 11, 33)
+img_matrix = cv2.fastNlMeansDenoisingColored(img_matrix, None, 50, 10, 7, 21)
 color_matrix = []
 
 # scan through img_matrix and scale RGB values by A/255
