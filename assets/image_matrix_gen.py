@@ -30,9 +30,9 @@ for i in range(row_count):
         if (int(img_matrix[i][j][0]) > 220 and\
             int(img_matrix[i][j][0]) > 220 and\
             int(img_matrix[i][j][0]) > 220):
-            red_value = '00100'
-            green_value = '000100'
-            blue_value = '00100'
+            red_value = '01000'
+            green_value = '010000'
+            blue_value = '01000'
         color_matrix.append("".join([red_value, green_value, blue_value]))
 # write file
 if (argv[2][-4:] != '.mif'):
