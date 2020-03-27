@@ -7,9 +7,9 @@ provided local image
 %
 
 DEPTH = 50303;
-WIDTH = 16;
+WIDTH = 24;
 ADDRESS_RADIX = DEC;
-DATA_RADIX = BIN;
+DATA_RADIX = HEX;
 CONTENT BEGIN
 
 0: 6387e5;
