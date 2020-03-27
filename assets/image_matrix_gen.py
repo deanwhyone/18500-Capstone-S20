@@ -31,7 +31,7 @@ for i in range(row_count):
         # print(green_value)
         # print(blue_value)
         # print("\n")
-        color_matrix.append("".join([red_value, green_value, blue_value]))
+        color_matrix.append("".join([red_value[0], "0", green_value[0], "0", blue_value[0], "0"]))
 # write file
 if (argv[2][-4:] != '.mif'):
     print('Provided output file is not .mif file')
