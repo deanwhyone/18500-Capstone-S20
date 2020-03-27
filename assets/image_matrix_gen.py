@@ -9,7 +9,7 @@ from sys import argv
 
 # get filename from command line, get RGB values
 img_matrix = cv2.imread(argv[1])
-img_matrix = cv2.fastNlMeansDenoisingColored(img_matrix, None, 20, 10, 7, 15)
+img_matrix = cv2.fastNlMeansDenoisingColored(img_matrix, None, 50, 10, 11, 33)
 color_matrix = []
 
 # scan through img_matrix and scale RGB values by A/255
@@ -22,9 +22,9 @@ for i in range(row_count):
         r_value = hex(red_value[i][j]).strip('0x').zfill(2)
         g_value = hex(green_value[i][j]).strip('0x').zfill(2)
         b_value = hex(blue_value[i][j]).strip('0x').zfill(2)
-        if (red_value[i][j] > 231 and \
-            green_value[i][j] > 231 and \
-            blue_value[i][j] > 231):
+        if (int(red_value[i][j]) + \
+            int(green_value[i][j]) + \
+            int(blue_value[i][j]) > 660):
             r_value = '40'
             g_value = '40'
             b_value = '40'
