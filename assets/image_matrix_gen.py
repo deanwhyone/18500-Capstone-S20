@@ -18,11 +18,11 @@ print("Ingested image dimensions: %d x %d" % (col_count, row_count))
 for i in range(row_count):
     for j in range(col_count):
         red_value = bin(int(img_matrix[i][j][0])).strip('0b')\
-            .ljust(8, '0')[:5]
+            .zfill(8)[:5]
         green_value = bin(int(img_matrix[i][j][1])).strip('0b')\
-            .ljust(8, '0')[:6]
+            .zfill(8)[:6]
         blue_value = bin(int(img_matrix[i][j][2])).strip('0b')\
-            .ljust(8, '0')[:5]
+            .zfill(8)[:5]
         # print("Row %d, Col %d" % (i, j))
         # print(red_value)
         # print(green_value)
