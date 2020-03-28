@@ -19,9 +19,9 @@ print("Ingested image dimensions: %d x %d" % (col_count, row_count))
 blue_value, green_value, red_value = cv2.split(img_matrix)
 for i in range(row_count):
     for j in range(col_count):
-        r_value = hex(red_value[i][j]).strip('0x').zfill(2)
-        g_value = hex(green_value[i][j]).strip('0x').zfill(2)
-        b_value = hex(blue_value[i][j]).strip('0x').zfill(2)
+        r_value = hex(red_value[i][j])[2:].zfill(2)
+        g_value = hex(green_value[i][j])[2:].zfill(2)
+        b_value = hex(blue_value[i][j])[2:].zfill(2)
         if (int(red_value[i][j]) + \
             int(green_value[i][j]) + \
             int(blue_value[i][j]) < 40):
