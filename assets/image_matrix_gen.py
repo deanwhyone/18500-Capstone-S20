@@ -24,7 +24,7 @@ for i in range(row_count):
         b_value = hex(blue_value[i][j]).strip('0x').zfill(2)
         if (int(red_value[i][j]) + \
             int(green_value[i][j]) + \
-            int(blue_value[i][j]) < 30):
+            int(blue_value[i][j]) < 40):
             r_value = '40'
             g_value = '40'
             b_value = '40'
