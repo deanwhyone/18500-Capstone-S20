@@ -21,12 +21,12 @@ module StartScreenPixelDriver
     output logic        active
 );
     localparam LOGO_ROWS        = 187;
-    localparam LOGO_COLS        = 269;
-    localparam LOGO_ORIGIN_ROW  = 402;
-    localparam LOGO_ORIGIN_COL  = 522;
+    localparam LOGO_COLS        = 282;
+    localparam LOGO_ORIGIN_ROW  = 412;
+    localparam LOGO_ORIGIN_COL  = 509;
 
     localparam QR_ORIGIN_ROW    = 439;
-    localparam QR_ORIGIN_COL    = 226;
+    localparam QR_ORIGIN_COL    = 269;
     localparam QR_DIM           = 37;
     localparam QR_SCALE         = 4;
 
@@ -114,10 +114,9 @@ module StartScreenPixelDriver
 
     logic                           active_char;
 
-    logic [QR_DIM - 1:0]            qr_code_data        [QR_DIM];
+    logic [ 0:QR_DIM - 1]           qr_code_data;
     logic [ 5:0]                    qr_row_count;
     logic [ 5:0]                    qr_col_count;
-    logic [23:0]                    qr_color;
     logic                           active_qr;
 
 
@@ -177,7 +176,7 @@ module StartScreenPixelDriver
             AlphanumeralRender #(
                 .SCALE      (8),
                 .ORIGIN_ROW (10),
-                .ORIGIN_COL (22 + 0 + 56 * g)
+                .ORIGIN_COL (14 + 0 + 56 * g)
             ) ar_word_1_inst (
                 .VGA_row    (VGA_row),
                 .VGA_col    (VGA_col),
@@ -466,24 +465,22 @@ module StartScreenPixelDriver
                         (|actives_thank_6L);
     end
 
-    initial begin
-        $readmemb("../assets/blog_qr.mem", qr_code_data);
-     end
+    qr_rom qr_rom_inst (
+        .clock      (clk),
+        .address    (qr_row_count),
+        .q          (qr_code_data)
+    );
 
-     always_comb begin
+    assign qr_row_count    = 6'((VGA_row_LA - QR_ORIGIN_ROW)/QR_SCALE);
+    assign qr_col_count    = 6'((VGA_col - QR_ORIGIN_COL)/QR_SCALE);
+
+    always_comb begin
         active_qr       = 1'b0;
-        qr_row_count    = '0;
-        qr_col_count    = '0;
-        qr_color        = BG_COLOR;
-        if ((VGA_row >= QR_ORIGIN_ROW) &&
-            (VGA_col >= QR_ORIGIN_COL) &&
-            (VGA_row <  QR_ORIGIN_ROW + QR_DIM * QR_SCALE) &&
-            (VGA_col <  QR_ORIGIN_COL + QR_DIM * QR_SCALE)) begin
-
+        if ((VGA_row_LA >= QR_ORIGIN_ROW) &&
+            (VGA_col_LA >= QR_ORIGIN_COL) &&
+            (VGA_row_LA <  QR_ORIGIN_ROW + QR_DIM * QR_SCALE) &&
+            (VGA_col_LA <  QR_ORIGIN_COL + QR_DIM * QR_SCALE)) begin
             active_qr       = 1'b1;
-            qr_row_count    = 6'((VGA_row - QR_ORIGIN_ROW)/QR_SCALE);
-            qr_col_count    = 6'((VGA_col - QR_ORIGIN_COL)/QR_SCALE);
-            qr_color        = {24{!qr_code_data[qr_row_count][qr_col_count]}};
         end
     end
 
@@ -498,7 +495,7 @@ module StartScreenPixelDriver
 
             output_color = logo_color;
         end else if (active_qr) begin
-            output_color = qr_color;
+            output_color = {24{qr_code_data[qr_col_count]}};
         end else if (active_char) begin
             output_color = 24'hff_ffff;
         end
