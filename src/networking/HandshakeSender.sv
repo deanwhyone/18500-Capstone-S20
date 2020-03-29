@@ -13,13 +13,15 @@
  *  - rst_l			reset
  *  - send_start	1-cycle pulse on state transition, indicates data can be
  *					loaded in and sending can begin
+ *  - game_active   indicates game is in progress, don't send if not asserted
  *  - data_in 		hamming encoded header, consists of pid and sequence number
  *					and their bitwise complement
  * 
  * OUTPUTS:
  *  - send_done		indicates all data has been sent, stays high until 
  *					send_start is asserted again
- *  - serial_out	serial data out, wired to MSB of shift register
+ *  - serial_out	serial data out, wired to MSB of shift register, or 0 when 
+ *					inactive
  **/
  `default_nettype none
 
@@ -30,6 +32,7 @@ module HandshakeSender
 	input  logic 					 clk,
 	input  logic 					 rst_l,
 	input  logic 					 send_start,
+	input  logic 					 game_active,
 	input  logic [ENC_HEAD_BITS-1:0] data_in,
 	output logic 					 send_done,
 	output logic 					 serial_out
@@ -40,6 +43,10 @@ module HandshakeSender
 
 	always_ff @(posedge clk, negedge rst_l) begin
 		if(!rst_l) begin
+			send_en    <= 1'b0;
+			serial_out <= 1'b0;
+		end
+		else if(!game_active) begin
 			send_en    <= 1'b0;
 			serial_out <= 1'b0;
 		end

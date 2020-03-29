@@ -14,8 +14,8 @@ package NetworkPkg;
 	//number of data wires
 	parameter NUM_DATA_LINES = 4;
 
-	//# PID bits after hamming encoding
-	parameter ENC_HEAD_BITS  = 7;
+	//# header bits after hamming encoding (pid + sequence #)
+	parameter ENC_HEAD_BITS  = 8;
 
 	//# bits for garbage lines sent
 	parameter GBG_BITS  	 = 4;
@@ -33,13 +33,13 @@ package NetworkPkg;
 	parameter SYNC_BITS 	 = 8;
 
 	//# total data bits
-	parameter DATA_BITS 	 = GBG_BITS + HLD_BITS + PQ_BITS + PFD_BITS;
+	parameter DATA_BITS 	 = GBG_BITS + HLD_BITS + PQ_BITS + PFD_BITS + 4;
 
 	//# data bits per wire
-	parameter PAR_DATA_BITS  = DATA_BITS / NUM_DATA_LINES;
+	parameter PAR_DATA_BITS  = (DATA_BITS / NUM_DATA_LINES);
 
-	//# data bits per wire after hamming encoding, hardcoded to 8 parity bits
-	parameter ENC_DATA_BITS  = PAR_DATA_BITS + 8;
+	//# data bits per wire after hamming encoding, hardcoded to 9 parity bits
+	parameter ENC_DATA_BITS  = PAR_DATA_BITS + 9;
 
 	//# bits in a data packet
 	parameter DATA_PKT_BITS  = ENC_DATA_BITS + SYNC_BITS;
@@ -80,6 +80,7 @@ package NetworkPkg;
 
 	//overall decoded data packet
 	typedef struct packed {
+		logic [3:0]				  seqNum;
 		logic [GBG_BITS-1:0] 	  garbage;
 		logic [HLD_BITS-1:0] 	  hold;
 		logic [PQ_BITS-1:0]  	  piece_queue;

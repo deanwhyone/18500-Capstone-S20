@@ -13,12 +13,14 @@
  *  - rst_l			reset
  *  - send_start	1-cycle pulse on state transition, indicates data can be
  *					loaded in and sending can begin
+ *  - game_active   indicates game is in progress, don't send if not asserted
  *  - data_in 		encoded data
  * 
  * OUTPUTS:
  *  - send_done		indicates all data has been sent, stays high until 
  *					send_start is asserted again
- *  - serial_out	serial data out, wired to MSB of shift register
+ *  - serial_out	serial data out, wired to MSB of shift register, or 0 when 
+ *					inactive
  **/
  `default_nettype none
 
@@ -29,6 +31,7 @@ module DataSender
 	input  logic 					 clk,
 	input  logic 					 rst_l,
 	input  logic 					 send_start,
+	input  logic 					 game_active,
 	input  logic [ENC_DATA_BITS-1:0] data_in,
 	output logic 					 send_done,
 	output logic 					 serial_out
@@ -42,6 +45,10 @@ module DataSender
 			send_en    <= 1'b0;
 			serial_out <= 1'b0;
 		end
+		else if(!game_active) begin
+			send_en    <= 1'b0;
+			serial_out <= 1'b0;
+		end
 		else if(send_start) begin
 			send_en    <= 1'b1;
 			serial_out <= 1'b0;
@@ -52,7 +59,7 @@ module DataSender
 		end
 	end
 
-	//left shift register
+	//left shift register, loads in syncword and data on send_start
 	shift_reg #(.WIDTH(DATA_PKT_BITS)) send_reg (
 		.clk(clk), 
 		.rst_l(rst_l),
@@ -63,7 +70,7 @@ module DataSender
 		.Q(data_reg)
 	);
 
-	//sent bits counter
+	//sent bits counter, resets on send_start
 	counter #(.WIDTH(8)) sent_counter (
 		.clk(clk),
 		.rst_l(rst_l),
