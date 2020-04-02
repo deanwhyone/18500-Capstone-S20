@@ -120,6 +120,7 @@ module TetrisTop
     logic           opponent_game_end;
     logic           opponent_battle_ready;
     game_screens_t  tetris_screen;
+    logic           status_in_game;
 
     tile_type_t     next_pieces_queue   [NEXT_PIECES_COUNT];
     logic [ 3:0]    random_src;
@@ -180,35 +181,35 @@ module TetrisTop
         .clk            (clk),
         .rst_l          (rst_l),
         .action_user    (!SW[0] && !KEY[1]),
-        .action_valid   (move_R_valid),
+        .action_valid   (move_R_valid || !status_in_game),
         .action_out     (move_R)
     );
     DelayedAutoShiftFSM DAS_move_L_inst (
         .clk            (clk),
         .rst_l          (rst_l),
         .action_user    (!SW[0] && !KEY[3]),
-        .action_valid   (move_L_valid),
+        .action_valid   (move_L_valid || !status_in_game),
         .action_out     (move_L)
     );
     DelayedAutoShiftFSM DAS_rotate_R_inst (
         .clk            (clk),
         .rst_l          (rst_l),
         .action_user    (SW[0] && !KEY[1]),
-        .action_valid   (rotate_R_valid),
+        .action_valid   (rotate_R_valid || !status_in_game),
         .action_out     (rotate_R)
     );
     DelayedAutoShiftFSM DAS_rotate_L_inst (
         .clk            (clk),
         .rst_l          (rst_l),
         .action_user    (SW[0] && !KEY[3]),
-        .action_valid   (rotate_L_valid),
+        .action_valid   (rotate_L_valid || !status_in_game),
         .action_out     (rotate_L)
     );
     DelayedAutoShiftFSM DAS_soft_drop_inst (
         .clk            (clk),
         .rst_l          (rst_l),
         .action_user    (!KEY[2]),
-        .action_valid   (soft_drop_valid),
+        .action_valid   (soft_drop_valid || !status_in_game),
         .action_out     (soft_drop)
     );
     DelayedAutoShiftFSM DAS_hard_drop_inst (
@@ -222,9 +223,12 @@ module TetrisTop
         .clk            (clk),
         .rst_l          (rst_l),
         .action_user    (SW[0] && !KEY[0]),
-        .action_valid   (hold_valid),
+        .action_valid   (hold_valid || !status_in_game),
         .action_out     (hold)
     );
+
+    assign status_in_game = tetris_screen == SPRINT_MODE ||
+                            tetris_screen == MP_MODE;
 
     // set tile_type to drive pattern into playfield
     always_comb begin
@@ -295,7 +299,7 @@ module TetrisTop
         .clk    (clk),
         .en     (state_update_user),
         .rst_l  (rst_l),
-        .clear  (falling_piece_lock || hold),
+        .clear  (game_start_tetris || falling_piece_lock || hold),
         .D      (origin_row_update),
         .Q      (origin_row)
     );
@@ -306,7 +310,7 @@ module TetrisTop
         .clk    (clk),
         .en     (state_update_user),
         .rst_l  (rst_l),
-        .clear  (falling_piece_lock || hold),
+        .clear  (game_start_tetris || falling_piece_lock || hold),
         .D      (origin_col_update),
         .Q      (origin_col)
     );
@@ -317,7 +321,7 @@ module TetrisTop
         .clk    (clk),
         .en     (state_update_user),
         .rst_l  (rst_l),
-        .clear  (falling_piece_lock || hold),
+        .clear  (game_start_tetris || falling_piece_lock || hold),
         .D      (falling_orientation_update),
         .Q      (falling_orientation)
     );
@@ -475,10 +479,10 @@ module TetrisTop
         .falling_orientation(falling_orientation),
         .falling_type       (falling_type),
         .falling_piece_lock (falling_piece_lock),
-        .start_sprint       (!KEY[2]),
+        .start_sprint       (soft_drop),
         .lines_cleared      (lines_cleared),
-        .battle_ready       (!KEY[3]),
-        .ready_withdraw     (!KEY[0]),
+        .battle_ready       (move_L || rotate_L),
+        .ready_withdraw     (move_R || rotate_R),
         .opponent_ready     (opponent_battle_ready), // receive network ready
         .opponent_lost      (opponent_game_end), // receive network top-out
         .top_out            (), // communicate local user lost to network
@@ -509,8 +513,7 @@ module TetrisTop
 
     // handle timer logic
     always_comb begin
-        time_clk_en             = (tetris_screen == SPRINT_MODE) ||
-                                  (tetris_screen == MP_MODE);
+        time_clk_en             = status_in_game; // SPRINT_MODE or MP_MODE
         time_clk_ld             = time_clk == 16'd50_000;
 
         time_milliseconds_en    = time_clk_ld;
