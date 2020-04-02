@@ -107,12 +107,12 @@ module GameScreensFSM
                 end
             end
             GAME_WON: begin
-                if (start_sprint || battle_ready) begin
+                if (battle_ready) begin
                     next_state = START_SCREEN;
                 end
             end
             GAME_LOST: begin
-                if (start_sprint || battle_ready) begin
+                if (battle_ready) begin
                     next_state = START_SCREEN;
                 end
             end
