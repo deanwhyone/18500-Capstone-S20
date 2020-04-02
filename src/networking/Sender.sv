@@ -160,6 +160,30 @@ module Sender
 	assign enc_data_3 = {SYNCWORD, 8'b0, data_packet[211:0]};
 	assign enc_data_h = {SYNCWORD, 4'b0, hnd_packet};
 
+	//Convert unpacked inputs to packed arrays
+	logic [799:0] playfield_packed;
+	logic [23:0]  piece_queue_packed;
+	genvar i, j;
+	generate
+		for(i = 0; i < NEXT_PIECES_COUNT; i++) begin:unpack_pq_0
+			for(j = 0; j < 4; j++) begin:unpack_pq_1
+				assign piece_queue_packed[4*i + j] = piece_queue[i][j];
+			end
+		end
+	endgenerate
+
+	genvar n, m, k;
+	generate
+		for(n = 0; n < PLAYFIELD_ROWS; n++) begin:unpack_playfield_0
+			for(m = 0; m < PLAYFIELD_COLS; m++) begin:unpack_playfield_1
+				for(k = 0; k < 4; k++) begin:unpack_playfield_2
+					assign playfield_packed[4*PLAYFIELD_COLS*n + 4*m + k] = playfield[n][m][k];
+				end
+			end
+		end
+	endgenerate
+
+
 	//data packet logic
 	always_ff @(posedge clk, negedge rst_l) begin
 		if(!rst_l) begin
@@ -172,8 +196,8 @@ module Sender
 			data_packet.seqNum <= {4{seqNum}};
 			data_packet.garbage <= garbage;
 			data_packet.hold <= hold;
-			data_packet.piece_queue <= {>>{piece_queue}};
-			data_packet.playfield <= {>>{playfield}};
+			data_packet.piece_queue <= piece_queue_packed;
+			data_packet.playfield <= playfield_packed;
 		end
 	end
 

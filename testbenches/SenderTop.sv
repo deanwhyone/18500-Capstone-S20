@@ -34,7 +34,7 @@ module SenderTop
     assign game_active = 1'b1;
 
     assign update_data = KEY[3];
-    assign send_ready_ack = KEY[2];
+    assign send_ready_ACK = KEY[2];
     assign send_game_lost = KEY[1];
 
     always_comb begin
