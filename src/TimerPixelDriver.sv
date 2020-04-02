@@ -44,7 +44,6 @@ module TimerPixelDriver
     logic           space_ms_active;
     logic           space_sp_active;
 
-
     AlphanumeralRender #(
         .SCALE      (1),
         .ORIGIN_ROW (TIMER_VSTART),
