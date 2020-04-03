@@ -18,7 +18,7 @@
  * LEDR[6:0] illuminate the state of the seven bag, each light represents a
  * different tetromino remainin the in the bag.
  *
- * LEDR[9] indicates a T-spin is detected
+ * LEDR[17] indicates a T-spin is detected
  * SW[7:3] lines of garbage pending to be loaded (temporary)
  * SW[2]   signals that values on SW[7:3] are valid (temporary)
  */
@@ -494,6 +494,8 @@ module TetrisTop
     assign opponent_battle_ready    = 1'b0; // no network, opponent never ready
     assign opponent_game_end        = 1'b0; // no network, opponent never ends
 
+    assign LEDR[16:14] = tetris_screen;
+
     // GameStatesFSM
     GameStatesFSM game_states_fsm_inst (
         .clk                (clk),
@@ -647,7 +649,7 @@ module TetrisTop
         .falling_piece_lock (falling_piece_lock),
         .tspin_detected     (tspin_detected)
     );
-    assign LEDR[9] = tspin_detected;
+    assign LEDR[17] = tspin_detected;
 
     // SUV module
     NextStateValid nsv_inst (

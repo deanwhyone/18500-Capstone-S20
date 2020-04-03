@@ -46,8 +46,10 @@ module GraphicsTop
     logic           tpd_active;
     logic [23:0]    ppd_output_color;
     logic           ppd_active;
-    logic [23:0]    sspd_output_color;
-    logic           sspd_active;
+    logic [23:0]    mspd_output_color;
+    logic           mspd_active;
+    logic [23:0]    gepd_output_color;
+    logic           gepd_active;
 
     logic [23:0]    pfpd_output_color_lan;
     logic           pfpd_active_lan;
@@ -60,9 +62,9 @@ module GraphicsTop
         output_color    = BG_COLOR;
         if (!testpattern_active) begin
             unique case (tetris_screen)
-                START_SCREEN: begin
-                    if (sspd_active) begin
-                        output_color = sspd_output_color;
+                START_SCREEN, MP_READY: begin
+                    if (mspd_active) begin
+                        output_color = mspd_output_color;
                     end
                 end
                 SPRINT_MODE: begin
@@ -122,24 +124,14 @@ module GraphicsTop
                         output_color    = hpd_output_color_lan;
                     end
                 end
-                MP_READY: begin
-                    if (VGA_row < 10'd240) begin
-                        output_color    = TETROMINO_T_COLOR;
-                    end
-                end
                 MP_MODE: begin
                     if (VGA_row < 10'd240) begin
                         output_color    = TETROMINO_T_COLOR;
                     end
                 end
-                GAME_WON: begin
-                    if (VGA_row < 10'd240) begin
-                        output_color    = TETROMINO_S_COLOR;
-                    end
-                end
-                GAME_LOST: begin
-                    if (VGA_row < 10'd240) begin
-                        output_color    = TETROMINO_Z_COLOR;
+                GAME_WON, GAME_LOST: begin
+                    if (gepd_active) begin
+                        output_color = gepd_output_color;
                     end
                 end
             endcase
@@ -166,13 +158,32 @@ module GraphicsTop
         end
     end
 
-    // SSPD module
-    StartScreenPixelDriver sspd_inst (
+    // mspd module
+    MenuScreenPixelDriver mspd_inst (
         .clk            (clk),
         .VGA_row        (VGA_row),
         .VGA_col        (VGA_col),
-        .output_color   (sspd_output_color),
-        .active         (sspd_active)
+        .tetris_screen  (tetris_screen),
+        .output_color   (mspd_output_color),
+        .active         (mspd_active)
+    );
+
+    // gepd module
+    GameEndPixelDriver gepd_inst (
+        .clk                (clk),
+        .VGA_row            (VGA_row),
+        .VGA_col            (VGA_col),
+        .tetris_screen      (tetris_screen),
+        .time_hours         (time_hours),
+        .time_minutes       (time_minutes),
+        .time_seconds       (time_seconds),
+        .time_deciseconds   (time_deciseconds),
+        .time_centiseconds  (time_centiseconds),
+        .time_milliseconds  (time_milliseconds),
+        .lines_cleared      (lines_cleared),
+        .lines_sent         (lines_sent),
+        .output_color       (gepd_output_color),
+        .active             (gepd_active)
     );
 
     // PFPD module
