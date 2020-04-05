@@ -55,16 +55,19 @@ module Sender
 	output logic 	  			serial_out_0,
 	output logic 	  			serial_out_1,
 	output logic 	  			serial_out_2,
-	output logic 	  			serial_out_3
+	output logic 	  			serial_out_3,
+	output logic 	  			send_done,
+	output logic 	  			send_done_h
 );
 	//Serial data sender signals
 	logic send_start;
-	logic send_done, send_done_0, send_done_1, send_done_2, send_done_3;
+	//logic send_done;
+	logic send_done_0, send_done_1, send_done_2, send_done_3;
 	assign send_done = send_done_0 & send_done_1 & send_done_2 & send_done_3;
 
 	//Serial handshake sender signals
 	logic send_start_h;
-	logic send_done_h;
+	//logic send_done_h;
 
 	//timeout counter
 	logic timeout, timeout_cnt_en;

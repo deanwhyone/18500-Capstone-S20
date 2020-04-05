@@ -14,8 +14,11 @@ package NetworkPkg;
 	//number of data wires
 	parameter NUM_DATA_LINES = 4;
 
-	//# header bits after hamming encoding (pid + sequence #)
-	parameter ENC_HEAD_BITS  = 8;
+	//# header bits before encoding
+	parameter HEAD_BITS 	 = 4;
+
+	//# header bits after hamming encoding (pid + sequence #), 4 parity bits
+	parameter ENC_HEAD_BITS  = HEAD_BITS + 4;
 
 	//# bits for garbage lines sent
 	parameter GBG_BITS  	 = 4;
