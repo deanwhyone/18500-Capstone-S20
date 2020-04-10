@@ -12,16 +12,17 @@
  */
 `default_nettype none
 
-module DelayedAutoShiftFSM (
+module DelayedAutoShiftFSM #(
+    parameter CD_SHORT      = 7_500_000,
+    parameter CD_LONG       = 10_000_000,
+    parameter BUFFER_LENGTH = 3
+) (
     input  logic clk,
     input  logic rst_l,
     input  logic action_user,
     input  logic action_valid,
     output logic action_out
 );
-    localparam CD_SHORT = 5_000_000;
-    localparam CD_LONG  = 10_000_000;
-
     logic           action_trigger;
     logic           action_sync;
 
@@ -32,7 +33,9 @@ module DelayedAutoShiftFSM (
 
     logic           action_armed;
 
-    enum logic {LONG_WAIT, SHORT_WAIT} state, next_state;
+    logic [$clog2(BUFFER_LENGTH) - 1:0] buffer_time;
+
+    enum logic [1:0] {LONG_WAIT, BUFFER, SHORT_WAIT} state, next_state;
 
     // synchronizing chain
     always_ff @ (posedge clk) begin
@@ -51,11 +54,26 @@ module DelayedAutoShiftFSM (
 
     // next_state logic
     always_comb begin
-        if (action_cd_ld && action_trigger) begin
-            next_state = SHORT_WAIT;
-        end else begin
-            next_state = LONG_WAIT;
-        end
+        next_state = state;
+        case (state)
+            LONG_WAIT: begin
+                if (action_cd_ld) begin
+                    next_state = BUFFER;
+                end
+            end
+            SHORT_WAIT: begin
+                if (action_cd_ld) begin
+                    next_state = BUFFER;
+                end
+            end
+            BUFFER: begin
+                if (action_trigger) begin
+                    next_state = SHORT_WAIT;
+                end else if (buffer_time >= BUFFER_LENGTH) begin
+                    next_state = LONG_WAIT;
+                end
+            end
+        endcase
     end
 
     // output logic
@@ -85,4 +103,16 @@ module DelayedAutoShiftFSM (
 
     assign action_armed = action_cd == '0 && action_valid;
     assign action_out   = action_armed && action_trigger;
+
+    counter #(
+        .WIDTH  ($bits(buffer_time))
+    ) buffer_ctr_inst (
+        .clk    (clk),
+        .rst_l  (rst_l),
+        .en     (state == BUFFER),
+        .load   (state != BUFFER),
+        .up     (1'b1),
+        .D      ('0),
+        .Q      (buffer_time)
+    );
 endmodule // DelayedAutoShiftFSM
