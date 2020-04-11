@@ -13,6 +13,8 @@
  *  - ack_received		indicates an ACK was received, can send again
  *  - send_done			indicates all data has been sent
  *  - game_active		indicates game is in progress
+ *  - update_data_done  indicates update date is complete, new data is on
+ *                      data_in of sender so transition to send can occur
  *
  * OUTPUTS:
  *  - timeout_cnt_en	enable signal for timeout counter
@@ -38,6 +40,7 @@
 	input  logic ack_received,
 	input  logic send_done,
 	input  logic game_active,
+    input  logic update_data_done,
 	output logic timeout_cnt_en,
 	output logic send_start
 );
@@ -61,7 +64,7 @@
     always_comb begin
     	unique case (state)
     		IDLE: begin
-    			if(game_active) begin
+    			if(game_active && update_data_done) begin
     				next_state     = SEND;
     				timeout_cnt_en = 1'b0;
     				send_start     = 1'b1;
@@ -95,11 +98,16 @@
     				timeout_cnt_en = 1'b0;
     				send_start     = 1'b0;
     			end
-    			else if(timeout || ack_received) begin
+    			else if(timeout || update_data_done) begin
     				next_state     = SEND;
     				timeout_cnt_en = 1'b0;
     				send_start     = 1'b1;
     			end
+                else if(ack_received) begin
+                    next_state     = WAIT;
+                    timeout_cnt_en = 1'b0;
+                    send_start     = 1'b0;
+                end
     			else begin
     				next_state     = WAIT;
     				timeout_cnt_en = 1'b1;

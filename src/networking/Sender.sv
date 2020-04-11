@@ -61,6 +61,7 @@ module Sender
 );
 	//Serial data sender signals
 	logic send_start;
+	logic update_data_done;
 	//logic send_done;
 	logic send_done_0, send_done_1, send_done_2, send_done_3;
 	assign send_done = send_done_0 & send_done_1 & send_done_2 & send_done_3;
@@ -99,6 +100,7 @@ module Sender
 		.ack_received(ack_received),
 		.send_done(send_done),
 		.game_active(game_active),
+		.update_data_done(update_data_done),
 		.timeout_cnt_en(timeout_cnt_en),
 		.send_start(send_start)
 	);
@@ -157,19 +159,19 @@ module Sender
 	logic seqNum;
 
 	//TODO encoders
-	assign enc_data_0 = {SYNCWORD, 8'b0, data_packet[835:628]};
-	assign enc_data_1 = {SYNCWORD, 8'b0, data_packet[627:420]};
-	assign enc_data_2 = {SYNCWORD, 8'b0, data_packet[419:212]};
-	assign enc_data_3 = {SYNCWORD, 8'b0, data_packet[211:0]};
-	assign enc_data_h = {SYNCWORD, 4'b0, hnd_packet};
+	assign enc_data_0 = {9'b0, data_packet[835:627]};
+	assign enc_data_1 = {9'b0, data_packet[626:418]};
+	assign enc_data_2 = {9'b0, data_packet[417:209]};
+	assign enc_data_3 = {9'b0, data_packet[208:0]};
+	assign enc_data_h = {4'b0, hnd_packet};
 
 	//Convert unpacked inputs to packed arrays
 	logic [799:0] playfield_packed;
 	logic [23:0]  piece_queue_packed;
 	genvar i, j;
 	generate
-		for(i = 0; i < NEXT_PIECES_COUNT; i++) begin:unpack_pq_0
-			for(j = 0; j < 4; j++) begin:unpack_pq_1
+		for(i = 0; i < NEXT_PIECES_COUNT; i++) begin:pack_pq_0
+			for(j = 0; j < 4; j++) begin:pack_pq_1
 				assign piece_queue_packed[4*i + j] = piece_queue[i][j];
 			end
 		end
@@ -177,9 +179,9 @@ module Sender
 
 	genvar n, m, k;
 	generate
-		for(n = 0; n < PLAYFIELD_ROWS; n++) begin:unpack_playfield_0
-			for(m = 0; m < PLAYFIELD_COLS; m++) begin:unpack_playfield_1
-				for(k = 0; k < 4; k++) begin:unpack_playfield_2
+		for(n = 0; n < PLAYFIELD_ROWS; n++) begin:pack_playfield_0
+			for(m = 0; m < PLAYFIELD_COLS; m++) begin:pack_playfield_1
+				for(k = 0; k < 4; k++) begin:pack_playfield_2
 					assign playfield_packed[4*PLAYFIELD_COLS*n + 4*m + k] = playfield[n][m][k];
 				end
 			end
@@ -190,8 +192,9 @@ module Sender
 	//data packet logic
 	always_ff @(posedge clk, negedge rst_l) begin
 		if(!rst_l) begin
-			data_packet  <= 'b0;
-			seqNum 		 <= 'b0;
+			data_packet  	 <= 'b0;
+			seqNum 		 	 <= 'b0;
+			update_data_done <= 'b0;
 		end
 		//update data packet
 		else if(update_data) begin
@@ -201,6 +204,10 @@ module Sender
 			data_packet.hold <= hold;
 			data_packet.piece_queue <= piece_queue_packed;
 			data_packet.playfield <= playfield_packed;
+			update_data_done <= 1'b1;
+		end
+		else if(update_data_done) begin
+			update_data_done <= 1'b0;
 		end
 	end
 

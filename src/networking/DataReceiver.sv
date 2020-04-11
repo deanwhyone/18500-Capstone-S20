@@ -72,7 +72,7 @@ module DataReceiver
 	);
 
 	//received bits counter
-	counter #(.WIDTH(8)) sent_counter (
+	counter #(.WIDTH(8)) rec_counter (
 		.clk(clk),
 		.rst_l(rst_l),
 		.en(sync_done & !receive_done),
