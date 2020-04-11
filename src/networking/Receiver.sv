@@ -33,7 +33,8 @@ module Receiver
 	output tile_type_t 			opponent_playfield		[PLAYFIELD_ROWS][PLAYFIELD_COLS],
 	output logic	   			opponent_ready,
 	output logic	   			opponent_lost,
-	output logic 				receive_done
+	output logic 				receive_done,
+	output logic [3:0]			packets_received_cnt
 );
 	//Serial data receiver signals
 	logic receive_start;
@@ -110,7 +111,7 @@ module Receiver
 	data_pkt_t data_packet;
 	hnd_head_t hnd_packet;	
 
-	logic seqNum;
+	logic seqNum, received_seqNum;
 	assign ack_seqNum = seqNum;
 
 	//TODO decoders
@@ -132,10 +133,10 @@ module Receiver
 
 	//update_opponent_data should be asserted one cycle after receive_done as output 
 	//data takes one cycle to update
-	always_ff @(posedge clk, negedge rst_l) begin
+	/*always_ff @(posedge clk, negedge rst_l) begin
 		if(!rst_l) update_opponent_data <= 'b0;
 		else update_opponent_data <= receive_done_posedge;
-	end
+	end*/
 
 	//convert packed arrays to unpacked outputs for game logic
 	tile_type_t 	piece_queue_unpacked[NEXT_PIECES_COUNT];
@@ -167,10 +168,12 @@ module Receiver
 			opponent_playfield 	 <= '{PLAYFIELD_ROWS{'{PLAYFIELD_COLS{BLANK}}}};
 			seqNum 				 <= 'b0;
 			send_ready_ACK		 <= 'b0;
+			update_opponent_data <= 'b0;
+			packets_received_cnt <= 'b0;
 		end 
 		else if(receive_done_posedge) begin
 			//Sequence number check - if they match, increment seqNum and update outputs
-			if(data_packet.seqNum == seqNum) begin
+			if(received_seqNum == seqNum) begin
 				opponent_garbage	 <= data_packet.garbage;
 				opponent_hold		 <= tile_type_t'(data_packet.hold);
 				opponent_lost		 <= 'b0;
@@ -179,13 +182,18 @@ module Receiver
 				opponent_playfield 	 <= playfield_unpacked;
 				seqNum 				 <= seqNum + 1'b1;
 				send_ready_ACK		 <= 1'b1;
+				update_opponent_data <= 1'b1;
+				packets_received_cnt <= packets_received_cnt + 1'b1;
 			end
 		end
-		//make send_ready_ACK a 1-cycle pulse
-		else if(send_ready_ACK == 1'b1) begin
+		//make send_ready_ACK and update_opponent_data 1-cycle pulses
+		else if((send_ready_ACK == 1'b1) && (update_opponent_data == 1'b1)) begin
 			send_ready_ACK <= 1'b0;
+			update_opponent_data <= 1'b0;
 		end
 	end
+
+	assign received_seqNum = (data_packet.seqNum == 4'b1111) ? 1'b1 : 1'b0;
 
 	//TODO opponent lost/ready
 

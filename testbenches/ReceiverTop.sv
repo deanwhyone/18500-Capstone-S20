@@ -9,7 +9,12 @@ module ReceiverTop
 	input  logic [17:0] SW,
 	input  logic [3:0]  KEY,
 	output logic [17:0] LEDR,
-	output logic [0:35] GPIO
+	output logic [0:35] GPIO,
+    output logic [6:0]  HEX0,
+    output logic [6:0]  HEX4,
+    output logic [6:0]  HEX3,
+    output logic [6:0]  HEX2,
+    output logic [6:0]  HEX6
 );
     logic clk, clk_gpio, rst_l, send_ready_ACK, send_game_lost, game_active, update_data, ack_received, ack_seqNum;
     logic send_done, send_done_h, receive_done;
@@ -22,35 +27,23 @@ module ReceiverTop
 
     logic receiver_send_ack, receiver_ack_received, receiver_ack_seqNum, update_opponent_data;
 
+    logic [3:0] packets_received_cnt;
+
+    logic sender_seqNum;
+
 	Sender sender_inst(.*);
 
-    /*input  logic              clk,
-    input  logic                clk_gpio,
-    input  logic                rst_l,
-    input  logic                game_active,
-    input  logic                serial_in_h,
-    input  logic                serial_in_0,
-    input  logic                serial_in_1,
-    input  logic                serial_in_2,
-    input  logic                serial_in_3,
-    output logic                send_ready_ACK,
-    output logic                ack_received,
-    output logic                ack_seqNum,
-    output logic                update_opponent_data,
-    output logic [GBG_BITS-1:0] opponent_garbage,
-    output tile_type_t          opponent_hold,
-    output tile_type_t          opponent_piece_queue    [NEXT_PIECES_COUNT],
-    output tile_type_t          opponent_playfield      [PLAYFIELD_ROWS][PLAYFIELD_COLS],
-    output logic                opponent_ready,
-    output logic                opponent_lost*/
     Receiver receiver_inst(.serial_in_h(serial_out_h), .serial_in_0(serial_out_0), .serial_in_1(serial_out_1), 
                  .serial_in_2(serial_out_2), .serial_in_3(serial_out_3), .send_ready_ACK(receiver_send_ack), 
                  .ack_received(receiver_ack_received), .ack_seqNum(receiver_ack_seqNum), .*);
 
 	assign clk      = CLOCK_50;
 	assign clk_gpio = CLOCK_50;
-    assign rst_l    = !SW[17];
-    assign game_active = SW[16];
+    always_comb begin
+        rst_l    = !SW[17];
+        game_active = SW[16];
+        garbage[3:0] = SW[3:0];
+    end
 
     /*assign GPIO[10] = clk;
     assign GPIO[11] = serial_out_h;
@@ -72,6 +65,15 @@ module ReceiverTop
     	LEDR[1] = send_done_h;
     	LEDR[0] = send_done;
     end
+
+    BCDtoSevenSegment sevenseg4(.bcd(opponent_garbage), .seg(HEX4));
+    BCDtoSevenSegment sevenseg6(.bcd(garbage), .seg(HEX6));
+    BCDtoSevenSegment sevenseg0(.bcd(packets_received_cnt), .seg(HEX0));
+
+    BCDtoSevenSegment sevenSeg3(.bcd({3'b0, sender_seqNum}), .seg(HEX3));
+    BCDtoSevenSegment sevenSeg2(.bcd({3'b0, receiver_ack_seqNum}), .seg(HEX2));
+
+
 
 
 endmodule : ReceiverTop

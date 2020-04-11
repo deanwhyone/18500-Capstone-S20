@@ -57,7 +57,8 @@ module Sender
 	output logic 	  			serial_out_2,
 	output logic 	  			serial_out_3,
 	output logic 	  			send_done,
-	output logic 	  			send_done_h
+	output logic 	  			send_done_h,
+	output logic 				sender_seqNum
 );
 	//Serial data sender signals
 	logic send_start;
@@ -188,6 +189,7 @@ module Sender
 		end
 	endgenerate
 
+	assign sender_seqNum = seqNum;
 
 	//data packet logic
 	always_ff @(posedge clk, negedge rst_l) begin
