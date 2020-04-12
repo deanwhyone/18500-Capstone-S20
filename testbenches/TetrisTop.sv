@@ -57,8 +57,18 @@ module TetrisTop
     logic           move_L;
     logic           soft_drop;
     logic           hard_drop;
-    logic           auto_drop;
     logic           hold;
+
+    // abstract out physical pins
+    logic           rotate_R_input;
+    logic           rotate_L_input;
+    logic           move_R_input;
+    logic           move_L_input;
+    logic           soft_drop_input;
+    logic           hard_drop_input;
+    logic           hold_input;
+
+    logic           auto_drop;
     logic           state_update_user;
 
     logic           rotate_R_valid;
@@ -176,53 +186,62 @@ module TetrisTop
 
     logic [23:0]    graphics_color;
 
+    // assign abstracted variables
+    assign rotate_R_input    = (SW[0] && !KEY[1]);  // ||;
+    assign rotate_L_input    = (SW[0] && !KEY[3]);  // ||;
+    assign move_R_input      = (!SW[0] && !KEY[1]); // ||;
+    assign move_L_input      = (!SW[0] && !KEY[3]); // ||;
+    assign soft_drop_input   = (!KEY[2]);           // ||;
+    assign hard_drop_input   = (!SW[0] && !KEY[0]); // ||;
+    assign hold_input        = (SW[0] && !KEY[0]);  // ||;
+
     // DAS modules handle input sync chain and cooldown
-    DelayedAutoShiftFSM DAS_move_R_inst (
-        .clk            (clk),
-        .rst_l          (rst_l),
-        .action_user    (!SW[0] && !KEY[1]),
-        .action_valid   (move_R_valid || !status_in_game),
-        .action_out     (move_R)
-    );
-    DelayedAutoShiftFSM DAS_move_L_inst (
-        .clk            (clk),
-        .rst_l          (rst_l),
-        .action_user    (!SW[0] && !KEY[3]),
-        .action_valid   (move_L_valid || !status_in_game),
-        .action_out     (move_L)
-    );
     DelayedAutoShiftFSM DAS_rotate_R_inst (
         .clk            (clk),
         .rst_l          (rst_l),
-        .action_user    (SW[0] && !KEY[1]),
+        .action_user    (rotate_R_input),
         .action_valid   (rotate_R_valid || !status_in_game),
         .action_out     (rotate_R)
     );
     DelayedAutoShiftFSM DAS_rotate_L_inst (
         .clk            (clk),
         .rst_l          (rst_l),
-        .action_user    (SW[0] && !KEY[3]),
+        .action_user    (rotate_L_input),
         .action_valid   (rotate_L_valid || !status_in_game),
         .action_out     (rotate_L)
+    );
+    DelayedAutoShiftFSM DAS_move_R_inst (
+        .clk            (clk),
+        .rst_l          (rst_l),
+        .action_user    (move_R_input),
+        .action_valid   (move_R_valid || !status_in_game),
+        .action_out     (move_R)
+    );
+    DelayedAutoShiftFSM DAS_move_L_inst (
+        .clk            (clk),
+        .rst_l          (rst_l),
+        .action_user    (move_L_input),
+        .action_valid   (move_L_valid || !status_in_game),
+        .action_out     (move_L)
     );
     DelayedAutoShiftFSM DAS_soft_drop_inst (
         .clk            (clk),
         .rst_l          (rst_l),
-        .action_user    (!KEY[2]),
+        .action_user    (soft_drop_input),
         .action_valid   (soft_drop_valid || !status_in_game),
         .action_out     (soft_drop)
     );
     DelayedAutoShiftFSM DAS_hard_drop_inst (
         .clk            (clk),
         .rst_l          (rst_l),
-        .action_user    (!SW[0] && !KEY[0]),
+        .action_user    (hard_drop_input),
         .action_valid   (1'b1),
         .action_out     (hard_drop)
     );
     DelayedAutoShiftFSM DAS_hold_inst (
         .clk            (clk),
         .rst_l          (rst_l),
-        .action_user    (SW[0] && !KEY[0]),
+        .action_user    (hold_input),
         .action_valid   (hold_valid || !status_in_game),
         .action_out     (hold)
     );
