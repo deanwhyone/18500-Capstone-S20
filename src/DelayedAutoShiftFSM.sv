@@ -97,7 +97,7 @@ module DelayedAutoShiftFSM #(
         .en     (action_cd_en),
         .load   (action_cd_ld),
         .up     (1'b1),
-        .D      (32'd0),
+        .D      ('0),
         .Q      (action_cd)
     );
 
