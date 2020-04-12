@@ -127,3 +127,24 @@ module BCDtoSevenSegment(input logic [3:0] bcd, output logic [6:0] seg);
         endcase
     end
 endmodule: BCDtoSevenSegment
+
+//generates 100kHz clock from 50mHz
+module ClkDivider
+    (input logic clk, rst_l,
+     output logic clk_100kHz
+    );
+    logic [31:0] counter;
+    always_ff @(posedge clk, negedge rst_l) begin
+        if(!rst_l) begin
+            clk_100kHz <= 'b0;
+            counter    <= 'b0;
+        end
+        else begin
+            counter <= counter + 1;
+            if(counter == 250) begin
+                clk_100kHz <= ~clk_100kHz;
+                counter <= 'b0;
+            end
+        end
+    end
+endmodule
