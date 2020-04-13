@@ -12,11 +12,14 @@
  * KEY[0] is
  *      hard drop when SW[0] is low
  *      hold when SW[0] is high
- * SW[16] loads in the VGA testpattern when high, otherwise should run Tetris
+ * SW[15] loads in the VGA testpattern when high, otherwise should run Tetris
+ * SW[16] enables the external controller
  * SW[17] is a hard reset.
  *
  * LEDR[6:0] illuminate the state of the seven bag, each light represents a
  * different tetromino remainin the in the bag.
+ *
+ * HEX6~0 displays the input latency of the most recent input
  *
  * LEDR[17] indicates a T-spin is detected
  * SW[7:3] lines of garbage pending to be loaded (temporary)
@@ -33,8 +36,16 @@ module TetrisTop
 
     input  logic [17:0] SW,
     input  logic [ 3:0] KEY,
+    input  logic [35:0] GPIO,
 
     output logic [17:0] LEDR,
+    output logic [ 6:0] HEX0,
+    output logic [ 6:0] HEX1,
+    output logic [ 6:0] HEX2,
+    output logic [ 6:0] HEX3,
+    output logic [ 6:0] HEX4,
+    output logic [ 6:0] HEX5,
+
     output logic [ 7:0] VGA_R,
     output logic [ 7:0] VGA_G,
     output logic [ 7:0] VGA_B,
@@ -187,13 +198,24 @@ module TetrisTop
     logic [23:0]    graphics_color;
 
     // assign abstracted variables
-    assign rotate_R_input    = (SW[0] && !KEY[1]);  // ||;
-    assign rotate_L_input    = (SW[0] && !KEY[3]);  // ||;
-    assign move_R_input      = (!SW[0] && !KEY[1]); // ||;
-    assign move_L_input      = (!SW[0] && !KEY[3]); // ||;
-    assign soft_drop_input   = (!KEY[2]);           // ||;
-    assign hard_drop_input   = (!SW[0] && !KEY[0]); // ||;
-    assign hold_input        = (SW[0] && !KEY[0]);  // ||;
+    always_comb begin
+        rotate_R_input    = (SW[0] && !KEY[1]);
+        rotate_L_input    = (SW[0] && !KEY[3]);
+        move_R_input      = (!SW[0] && !KEY[1]);
+        move_L_input      = (!SW[0] && !KEY[3]);
+        soft_drop_input   = (!KEY[2]);
+        hard_drop_input   = (!SW[0] && !KEY[0]);
+        hold_input        = (SW[0] && !KEY[0]);
+        if (SW[16]) begin
+            rotate_R_input    = rotate_R_input    || GPIO[24];
+            rotate_L_input    = rotate_L_input    || GPIO[22];
+            move_R_input      = move_R_input      || GPIO[35];
+            move_L_input      = move_L_input      || GPIO[32];
+            soft_drop_input   = soft_drop_input   || GPIO[34];
+            hard_drop_input   = hard_drop_input   || GPIO[33];
+            hold_input        = hold_input        || GPIO[20] || GPIO[26];
+        end
+    end
 
     // DAS modules handle input sync chain and cooldown
     DelayedAutoShiftFSM DAS_rotate_R_inst (
@@ -513,8 +535,6 @@ module TetrisTop
     assign opponent_battle_ready    = 1'b0; // no network, opponent never ready
     assign opponent_game_end        = 1'b0; // no network, opponent never ends
 
-    assign LEDR[16:14] = tetris_screen;
-
     // GameStatesFSM
     GameStatesFSM game_states_fsm_inst (
         .clk                (clk),
@@ -762,7 +782,7 @@ module TetrisTop
         .lines_cleared      (lines_cleared),
         .lines_sent         (lines_sent),
         .tspin_detected     (tspin_detected),
-        .testpattern_active (SW[16]),
+        .testpattern_active (SW[15]),
         .tetris_screen      (tetris_screen),
         .time_hours         (time_hours),
         .time_minutes       (time_minutes),
@@ -794,4 +814,19 @@ module TetrisTop
     assign VGA_CLK      = !clk;
     assign VGA_BLANK_N  = !VGA_BLANK;
     assign VGA_SYNC_N   = 1'b0;
+
+    // metrics module
+    // handles couters for tracking delays from input to latching onto VGA pins
+    MetricsHandler metrics_inst (
+        .clk            (clk),
+        .rst_l          (rst_l),
+        .state_update   (state_update_user),
+        .V_SYNC         (VGA_VS),
+        .HEX0           (HEX0),
+        .HEX1           (HEX1),
+        .HEX2           (HEX2),
+        .HEX3           (HEX3),
+        .HEX4           (HEX4),
+        .HEX5           (HEX5)
+    );
 endmodule // TetrisTop
