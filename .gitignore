@@ -6,7 +6,9 @@
 !*.py
 !*.png
 !*.mif
+!*.mem
 !src/
+!src/music
 !testbenches/
 !packages/
 !assets/
