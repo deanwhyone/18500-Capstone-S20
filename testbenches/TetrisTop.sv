@@ -36,8 +36,8 @@ module TetrisTop
 
     input  logic [17:0] SW,
     input  logic [ 3:0] KEY,
-    input  logic [35:0] GPIO,
-
+    // controller GPIO pins
+    inout        [35:0] GPIO,
     output logic [17:0] LEDR,
     output logic [ 6:0] HEX0,
     output logic [ 6:0] HEX1,
@@ -828,5 +828,20 @@ module TetrisTop
         .HEX3           (HEX3),
         .HEX4           (HEX4),
         .HEX5           (HEX5)
+    );
+
+    // music module
+    // integrating with Alton's branch
+    music music_inst (
+        .clk        (clk),
+        .rst_l      (rst_l),
+        .GPIO_29    (GPIO[29]),
+        .GPIO_27    (GPIO[27]),
+        .GPIO_25    (GPIO[25]),
+        .GPIO_23    (GPIO[23]),
+        .GPIO_21    (GPIO[21]),
+        .GPIO_19    (GPIO[19]),
+        .GPIO_17    (GPIO[17]),
+        .GPIO_15    (GPIO[15])
     );
 endmodule // TetrisTop
