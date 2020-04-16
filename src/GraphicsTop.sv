@@ -15,7 +15,7 @@ module GraphicsTop
     input  logic            clk,
     input  logic [ 9:0]     VGA_row,
     input  logic [ 9:0]     VGA_col,
-    input  tile_type_t      tile_type           [PLAYFIELD_ROWS][PLAYFIELD_COLS],
+    input  tile_type_t      playfield_data      [PLAYFIELD_ROWS][PLAYFIELD_COLS],
     input  tile_type_t      next_pieces_queue   [NEXT_PIECES_COUNT],
     input  logic [ 9:0]     lines_cleared,
     input  logic [ 9:0]     lines_sent,
@@ -31,6 +31,9 @@ module GraphicsTop
     input  tile_type_t      hold_piece_type,
     input  logic            hold_piece_valid,
     input  logic [ 4:0]     pending_garbage,
+    input  tile_type_t      opponent_playfield  [PLAYFIELD_ROWS][PLAYFIELD_COLS],
+    input  tile_type_t      opponent_pq         [NEXT_PIECES_COUNT],
+    input  tile_type_t      opponent_hold,
     output logic [23:0]     output_color
 );
 
@@ -51,12 +54,16 @@ module GraphicsTop
     logic [23:0]    gepd_output_color;
     logic           gepd_active;
 
+    tile_type_t     secondary_playfield  [PLAYFIELD_ROWS][PLAYFIELD_COLS];
+    tile_type_t     secondary_pq         [NEXT_PIECES_COUNT];
+    tile_type_t     secondary_hold;
     logic [23:0]    pfpd_output_color_lan;
     logic           pfpd_active_lan;
     logic [23:0]    npd_output_color_lan;
     logic           npd_active_lan;
     logic [23:0]    hpd_output_color_lan;
     logic           hpd_active_lan;
+
 
     always_comb begin
         output_color    = BG_COLOR;
@@ -193,7 +200,7 @@ module GraphicsTop
     ) pfpd_inst (
         .VGA_row        (VGA_row),
         .VGA_col        (VGA_col),
-        .tile_type      (tile_type),
+        .playfield_data (playfield_data),
         .output_color   (pfpd_output_color),
         .active         (pfpd_active)
     );
@@ -255,7 +262,19 @@ module GraphicsTop
         .active         (ppd_active)
     );
 
-    // Opponent HUD
+    // Secondary HUD
+
+    always_comb begin
+        if (tetris_screen == MP_MODE) begin
+            secondary_playfield = opponent_playfield;
+            secondary_pq        = opponent_pq;
+            secondary_hold      = opponent_hold;
+        end else begin
+            secondary_playfield = '{20{'{10{tile_type_t'(BLANK)}}}};
+            secondary_pq        = '{NEXT_PIECES_COUNT{tile_type_t'(T)}};
+            secondary_hold      = tile_type_t'(T);
+        end
+    end
 
     // PFPD module
     PlayfieldPixelDriver #(
@@ -264,7 +283,7 @@ module GraphicsTop
     ) pfpd_lan_inst (
         .VGA_row        (VGA_row),
         .VGA_col        (VGA_col),
-        .tile_type      ('{20{'{10{BLANK}}}}),
+        .playfield_data (secondary_playfield),
         .output_color   (pfpd_output_color_lan),
         .active         (pfpd_active_lan)
     );
@@ -275,7 +294,7 @@ module GraphicsTop
     ) npd_lan_inst (
         .VGA_row        (VGA_row),
         .VGA_col        (VGA_col),
-        .pieces_queue   ('{NEXT_PIECES_COUNT{T}}),
+        .pieces_queue   (secondary_pq),
         .output_color   (npd_output_color_lan),
         .active         (npd_active_lan)
     );
@@ -286,7 +305,7 @@ module GraphicsTop
     ) hpd_lan_inst (
         .VGA_row            (VGA_row),
         .VGA_col            (VGA_col),
-        .hold_piece_type    (tile_type_t'(T)),
+        .hold_piece_type    (secondary_hold),
         .output_color       (hpd_output_color_lan),
         .active             (hpd_active_lan)
     );

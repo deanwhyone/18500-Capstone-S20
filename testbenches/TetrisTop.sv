@@ -17,13 +17,11 @@
  * SW[17] is a hard reset.
  *
  * LEDR[6:0] illuminate the state of the seven bag, each light represents a
- * different tetromino remainin the in the bag.
+ * different tetromino remaining the in the bag.
  *
  * HEX6~0 displays the input latency of the most recent input
  *
  * LEDR[17] indicates a T-spin is detected
- * SW[7:3] lines of garbage pending to be loaded (temporary)
- * SW[2]   signals that values on SW[7:3] are valid (temporary)
  */
 
 `default_nettype none
@@ -93,15 +91,15 @@ module TetrisTop
     logic [ 9:0]    VGA_col;
     logic           VGA_BLANK;
 
-    tile_type_t     tile_type           [PLAYFIELD_ROWS][PLAYFIELD_COLS];
+    tile_type_t     playfield_data          [PLAYFIELD_ROWS][PLAYFIELD_COLS];
 
     logic [ 4:0]    origin_row;
     logic [ 4:0]    origin_row_update;
     logic [ 4:0]    origin_col;
     logic [ 4:0]    origin_col_update;
 
-    logic [ 4:0]    ftr_rows            [4];
-    logic [ 4:0]    ftr_cols            [4];
+    logic [ 4:0]    ftr_rows                [4];
+    logic [ 4:0]    ftr_cols                [4];
 
     tile_type_t     falling_type;
     tile_type_t     falling_type_update;
@@ -131,10 +129,10 @@ module TetrisTop
     logic [ 4:0]    hard_drop_col_new;
     orientation_t   hard_drop_orientation_new;
 
-    logic [ 4:0]    ghost_rows          [4];
-    logic [ 4:0]    ghost_cols          [4];
+    logic [ 4:0]    ghost_rows              [4];
+    logic [ 4:0]    ghost_cols              [4];
 
-    logic [ 3:0]    locked_state        [PLAYFIELD_ROWS][PLAYFIELD_COLS];
+    logic [ 3:0]    locked_state            [PLAYFIELD_ROWS][PLAYFIELD_COLS];
 
     logic           game_start_tetris;
     logic           game_end_tetris;
@@ -143,7 +141,7 @@ module TetrisTop
     game_screens_t  tetris_screen;
     logic           status_in_game;
 
-    tile_type_t     next_pieces_queue   [NEXT_PIECES_COUNT];
+    tile_type_t     next_pieces_queue       [NEXT_PIECES_COUNT];
     logic [ 3:0]    random_src;
     logic           new_tetromino;
     logic           randomizer_race;
@@ -160,18 +158,33 @@ module TetrisTop
     logic [ 9:0]    lines_cleared;
     logic [ 9:0]    lines_sent;
     logic [ 9:0]    lines_to_send;
-    logic           lines_full          [PLAYFIELD_ROWS];
-    logic           lines_empty         [PLAYFIELD_ROWS];
+    logic           lines_full              [PLAYFIELD_ROWS];
+    logic           lines_empty             [PLAYFIELD_ROWS];
 
     logic           load_garbage;
     logic           load_garbage_pf;
     logic           network_trigger;
     logic [ 9:0]    pending_garbage;
     logic [ 9:0]    garbage_attack;
-    logic [ 3:0]    garbage_line        [PLAYFIELD_COLS];
+    logic [ 3:0]    garbage_line            [PLAYFIELD_COLS];
 
     logic           network_valid;
     logic [ 9:0]    lines_network_new;
+    logic           receiver_send_ack;
+    logic           receiver_ack_received;
+    logic           receiver_ack_seqNum;
+
+    tile_type_t     network_hold;
+    tile_type_t     network_pq              [NEXT_PIECES_COUNT];
+    tile_type_t     network_playfield       [PLAYFIELD_ROWS][PLAYFIELD_COLS];
+    tile_type_t     opponent_hold;
+    tile_type_t     opponent_pq             [NEXT_PIECES_COUNT];
+    tile_type_t     opponent_playfield      [PLAYFIELD_ROWS][PLAYFIELD_COLS];
+
+    logic           network_ready; // currently nonfunctional
+    logic           network_lost; // currently nonfunctional
+    logic           opponent_ready; // currently nonfunctional
+    logic           opponent_lost; // currently nonfunctional
 
     logic [ 4:0]    time_hours;
     logic           time_hours_en;
@@ -271,21 +284,21 @@ module TetrisTop
     assign status_in_game = tetris_screen == SPRINT_MODE ||
                             tetris_screen == MP_MODE;
 
-    // set tile_type to drive pattern into playfield
+    // set playfield_data to drive pattern into playfield
     always_comb begin
         // default to locked state rendering into playfield
         for (int i = 0; i < PLAYFIELD_ROWS; i++) begin
             for (int j = 0; j < PLAYFIELD_COLS; j++) begin
-                tile_type[i][j] = tile_type_t'(locked_state[i][j]);
+                playfield_data[i][j] = tile_type_t'(locked_state[i][j]);
             end
         end
         // then render ghost tiles (should never overlap on locked state)
         for (int i = 0; i < 4; i++) begin
-            tile_type[ghost_rows[i]][ghost_cols[i]] = GHOST;
+            playfield_data[ghost_rows[i]][ghost_cols[i]] = GHOST;
         end
         // render falling tetromino on top of ghost tiles
         for (int i = 0; i < 4; i++) begin
-            tile_type[ftr_rows[i]][ftr_cols[i]]     = falling_type;
+            playfield_data[ftr_rows[i]][ftr_cols[i]] = falling_type;
         end
     end
 
@@ -440,17 +453,6 @@ module TetrisTop
         end
     end
 
-    // temporarily instantiate a DAS for network valid. We just want the CD
-    DelayedAutoShiftFSM DAS_network_valid_inst (
-        .clk            (clk),
-        .rst_l          (rst_l),
-        .action_user    (SW[2]),
-        .action_valid   (1'b1),
-        .action_out     (network_valid)
-    );
-    // for testing
-    assign lines_network_new    = SW[7:3];
-
     // GarbageManager module computes lines to load into PF and attack garbage
     GarbageManager gm_inst (
         .clk                (clk),
@@ -532,7 +534,7 @@ module TetrisTop
         .current_screen     (tetris_screen),
         .randomizer_race    (randomizer_race)
     );
-    assign opponent_battle_ready    = 1'b0; // no network, opponent never ready
+    assign opponent_battle_ready    = 1'b1; // no network, opponent never ready
     assign opponent_game_end        = 1'b0; // no network, opponent never ends
 
     // GameStatesFSM
@@ -777,7 +779,7 @@ module TetrisTop
         .clk                (clk),
         .VGA_row            (VGA_row),
         .VGA_col            (VGA_col),
-        .tile_type          (tile_type),
+        .playfield_data     (playfield_data),
         .next_pieces_queue  (next_pieces_queue),
         .lines_cleared      (lines_cleared),
         .lines_sent         (lines_sent),
@@ -792,6 +794,9 @@ module TetrisTop
         .time_milliseconds  (time_milliseconds),
         .hold_piece_type    (hold_piece_type),
         .pending_garbage    (pending_garbage),
+        .opponent_playfield (),
+        .opponent_pq        (),
+        .opponent_hold      (),
         .output_color       (graphics_color)
     );
     // enable simple switching b/w 8-bit and 4-bit color
@@ -844,4 +849,51 @@ module TetrisTop
         .GPIO_17    (GPIO[17]),
         .GPIO_15    (GPIO[15])
     );
+
+    // networking
+    // integrating with Eric's branch
+    Receiver receiver_inst(
+        .clk                    (clk),
+        .rst_l                  (rst_l),
+        .clk_gpio               (GPIO[0]),
+        .game_active            (tetris_screen == MP_MODE),
+        .serial_in_h            (GPIO[6]),
+        .serial_in_0            (GPIO[7]),
+        .serial_in_1            (GPIO[8]),
+        .serial_in_2            (GPIO[9]),
+        .serial_in_3            (GPIO[10]),
+        .send_ready_ACK         (receiver_send_ack),
+        .ack_received           (receiver_ack_received),
+        .ack_seqNum             (receiver_ack_seqNum),
+        .update_opponent_data   (network_valid),
+        .opponent_garbage       (lines_network_new),
+        .opponent_hold          (network_hold),
+        .opponent_piece_queue   (network_pq),
+        .opponent_playfield     (network_playfield),
+        .opponent_ready         (network_ready),
+        .opponent_lost          (network_lost),
+        .receive_done           (),
+        .packets_received_cnt   (),
+    );
+
+    always_ff @ (posedge clk) begin
+        if (network_valid) begin
+            opponent_hold           <= network_hold;
+            opponent_pq             <= network_pq;
+            opponent_playfield      <= network_playfield;
+            opponent_ready          <= network_ready;
+            opponent_lost           <= network_lost;
+        end
+    end
+
+    /*
+     * TODO:
+     * DONE: Set up registers to hold the values coming over the network
+     * DONE: synchronize updates on each register based on
+     * DONE: "update_opponent_data"
+     * DONE: Route signals into the graphics module to display.
+     * DONE: Sender cannot generate ready signal, so hardwire opponent ready logic
+     * Need to test in NC (no monitors)
+     * DONE: Update GPIO pins for networking to Alton's spec
+     */
 endmodule // TetrisTop
