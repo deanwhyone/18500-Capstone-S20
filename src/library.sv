@@ -251,3 +251,26 @@ module SevenSegmentDigit
             segment = decoded;
     end
 endmodule // SevenSegmentDigit
+
+/*
+ * Generates 100 KHz clock from 50 MHz
+ */
+module ClkDivider
+    (input logic clk, rst_l,
+     output logic clk_100kHz
+    );
+    logic [31:0] counter;
+    always_ff @(posedge clk, negedge rst_l) begin
+        if(!rst_l) begin
+            clk_100kHz <= 'b0;
+            counter    <= 'b0;
+        end
+        else begin
+            counter <= counter + 1;
+            if(counter == 250) begin
+                clk_100kHz <= ~clk_100kHz;
+                counter <= 'b0;
+            end
+        end
+    end
+endmodule // ClkDivider
