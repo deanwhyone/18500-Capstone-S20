@@ -19,7 +19,7 @@ module PlayfieldPixelDriver
     input  logic [ 9:0] VGA_row,
     input  logic [ 9:0] VGA_col,
 
-    input  tile_type_t  tile_type       [PLAYFIELD_ROWS][PLAYFIELD_COLS],
+    input  tile_type_t  playfield_data  [PLAYFIELD_ROWS][PLAYFIELD_COLS],
 
     output logic [23:0] output_color,
     output logic        active
@@ -37,7 +37,7 @@ module PlayfieldPixelDriver
                     VGA_col >= (HSTART + TILE_WIDTH * j)        &&
                     VGA_col < (HSTART + TILE_WIDTH * (j + 1))) begin
                     active = 1'b1;
-                    case (tile_type[i][j])
+                    case (playfield_data[i][j])
                         GARBAGE:    output_color = TILE_GARBAGE_COLOR;
                         GHOST:      output_color = TILE_GHOST_COLOR;
                         I:          output_color = TETROMINO_I_COLOR;
