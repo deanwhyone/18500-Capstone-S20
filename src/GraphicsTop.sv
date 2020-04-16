@@ -74,7 +74,7 @@ module GraphicsTop
                         output_color = mspd_output_color;
                     end
                 end
-                SPRINT_MODE: begin
+                SPRINT_MODE, MP_MODE: begin
                     // border color
                     if (VGA_row >= BORDER_USER_VSTART &&
                         VGA_row <  BORDER_USER_VEND   &&
@@ -129,11 +129,6 @@ module GraphicsTop
                     end
                     if (hpd_active_lan) begin
                         output_color    = hpd_output_color_lan;
-                    end
-                end
-                MP_MODE: begin
-                    if (VGA_row < 10'd240) begin
-                        output_color    = TETROMINO_T_COLOR;
                     end
                 end
                 GAME_WON, GAME_LOST: begin
