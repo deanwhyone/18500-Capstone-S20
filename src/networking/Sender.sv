@@ -4,25 +4,29 @@
  * 
  *								Sender.sv
  * Overall sender module to encode and transmit data serially across 5 wires.
- * Receives inputs from game logic, receiver, control FSM. On update_data, 
- * constructs, divides, and encodes packets, passing them to individual serial
- * data senders for each line. Includes individual sender modules and their 
- * control FSMs, as well as packet construction logic.
+ * Receives inputs from game logic, receiver, control FSM. Outputs to GPIO.
+ * On update_data, constructs, divides, and encodes packets, passing them 
+ * to individual serial data senders for each line. Includes individual 
+ * sender modules and their control FSMs, as well as packet construction logic.
  * 
  * INPUTS:
  *  - clk 				clock
  *  - clk_gpio			GPIO clock for serial senders
  *  - rst_l				reset
- *  - send_ready_ACK	indicates ACK should be sent over handshake line, 
+ *  - send_ready_ACK	indicates ACK should be sent over handshake line
  *  - send_game_lost	indicates game end should be sent over handshake line
  *  - game_active 		indicates game is in progress, do nothing if not high
  *  - update_data		1-cycle pulse, indicates there is fresh data on garbage, 
- *						hold, piece_queue, playfield.
+ *						hold, piece_queue, playfield
  *  - garbage			number of garbage lines being sent
  *  - hold				content of player hold register
  *  - piece_queue		content of player piece queue
  *	- playfield			content of player playfield
- *  - ack_received		indicates an ACK was received
+ *  - ack_received		indicates an ACK was received, used to reset the 
+ *						timeout counter
+ *  - ack_seqNum 		sequence number to be sent with ACK packet, equivalent
+ * 						to received seqNum + 1. Sampled on send_ready_ACK or 
+ *						send_game_lost
  * 
  * OUTPUTS:
  *  - serial_out_h		serial data out for handshaking line
@@ -30,6 +34,9 @@
  *  - serial_out_1		serial data out for data 1 line
  *  - serial_out_2		serial data out for data 2 line
  *  - serial_out_3		serial data out for data 3 line
+ *  - send_done 		data send complete signal for testbench purposes
+ *  - send_done_h		handshake send complete signal for testbench purposes
+ *  - sender_seqnum 	sequence number output for testbench purposes
  **/
  `default_nettype none
 

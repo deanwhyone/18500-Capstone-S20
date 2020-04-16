@@ -4,7 +4,38 @@
  * 
  *								Receiver.sv
  * Overall receiver module to decode and receive data serially across 5 wires.
- * Interfaces with game logic
+ * Takes inputs from GPIO, control FSM. Outputs to game logic and sender. 
+ * When game is active, listens for syncword on transmission wires. Decodes
+ * and reconstructs received packets. On completion, asserts a send signal for
+ * the sender, or update_opponent_data for the game logic.
+ *
+ * INPUTS:
+ *  - clk 					clock
+ *  - clk_gpio				GPIO clock for serial receivers
+ *  - rst_l					reset
+ *  - game_active 			indicates game is in progress, do nothing if not high
+ *	- serial_in_h 			serial data in for handshaking line
+ *	- serial_in_0 			serial data in for data 0 line
+ *	- serial_in_1			serial data in for data 1 line
+ *	- serial_in_2			serial data in for data 2 line
+ *	- serial_in_3 			serial data in for data 3 line
+ * 
+ * OUTPUTS:
+ *  - send_ready_ACK		indicates ACK should be sent over handshake line
+ *  - send_game_lost		indicates game end should be sent over handshake line
+ *  - ack_received			indicates an ACK was received
+ *  - ack_seqNum			sequence number of received data packet + 1, provided 
+ *							for sender to include with handshake packet
+ *  - update_opponent_data	1-cycle pulse, indicates there is fresh data on garbage, 
+ *							hold, piece_queue, playfield.
+ *  - opponent_garbage		number of garbage lines being sent
+ *  - opponent_hold			content of opponent's hold register
+ *  - opponent_piece_queue	content of opponent's piece queue
+ *	- opponent_playfield	content of opponent's playfield
+ *  - opponent_ready		indicates opponent is ready to begin game
+ * 	- opponent_lost			indicates opponent topped out
+ *  - receive_done 			data receive complete signal for testbench purposes
+ *  - packets_received_cnt	received packets counter for testbench purposes
  * 
  **/
  `default_nettype none
@@ -130,13 +161,6 @@ module Receiver
 		receive_done_delay <= receive_done;
 	end
 	assign receive_done_posedge = receive_done & ~receive_done_delay;
-
-	//update_opponent_data should be asserted one cycle after receive_done as output 
-	//data takes one cycle to update
-	/*always_ff @(posedge clk, negedge rst_l) begin
-		if(!rst_l) update_opponent_data <= 'b0;
-		else update_opponent_data <= receive_done_posedge;
-	end*/
 
 	//convert packed arrays to unpacked outputs for game logic
 	tile_type_t 	piece_queue_unpacked[NEXT_PIECES_COUNT];

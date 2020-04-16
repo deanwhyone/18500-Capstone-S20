@@ -1,3 +1,17 @@
+/**
+ * 18500 Capstone S20
+ * Eric Chen, Alton Olsen, Deanyone Su
+ * 
+ * Top level sender testbench. Switch 17 resets, switch 16 
+ * must be kept high for the game to be active. Key 3 will 
+ * send a packet. GPIO clock frequency is 100kHz. Leftmost
+ * hex display is the number of garbage lines being sent, 
+ * middle display is the current sequence number. Switches
+ * 7-4 toggle the piece filling the playfield, 3-0 toggle 
+ * the number of garbage lines to send.
+ * 
+ **/
+
 `default_nettype none
 
 module SenderTop
@@ -24,16 +38,25 @@ module SenderTop
 
     logic sender_seqNum;
 
+    tile_type_t playfield_piece;
+
 	Sender sender_inst(.*);
 
     ClkDivider(.clk(clk), .rst_l(rst_l), .clk_100kHz(clk_gpio));
 
-	assign clk      = CLOCK_50;
+	assign clk          = CLOCK_50;
 
     always_comb begin
-        rst_l    = !SW[17];
-        game_active = SW[16];
-        garbage[3:0] = SW[3:0];
+        rst_l           = !SW[17];
+        game_active     = SW[16];
+        garbage[3:0]    = SW[3:0];
+        playfield_piece = tile_type_t'(SW[7:4]);
+
+        for(int i = 0; i < PLAYFIELD_ROWS; i++) begin
+            for(int j = 0; j < PLAYFIELD_COLS; j++) begin
+                playfield[i][j] = playfield_piece;
+            end
+        end
     end
 
     assign GPIO[10] = clk_gpio;
