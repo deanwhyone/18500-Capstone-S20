@@ -63,12 +63,12 @@ module SenderTop
         end
     end
 
-    assign GPIO[10] = clk_gpio;
-    assign GPIO[11] = serial_out_h;
-    assign GPIO[12] = serial_out_0;
-    assign GPIO[13] = serial_out_1;
-    assign GPIO[14] = serial_out_2;
-    assign GPIO[15] = serial_out_3;
+    assign GPIO[0] = clk_gpio;
+    assign GPIO[6] = serial_out_h;
+    assign GPIO[7] = serial_out_0;
+    assign GPIO[8] = serial_out_1;
+    assign GPIO[9] = serial_out_2;
+    assign GPIO[10] = serial_out_3;
 
     assign update_data = !KEY[3];
     assign send_ready_ACK = !KEY[2];
