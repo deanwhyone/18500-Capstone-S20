@@ -9,6 +9,7 @@
 !*.mem
 !src/
 !src/music
+!src/networking
 !testbenches/
 !packages/
 !assets/
