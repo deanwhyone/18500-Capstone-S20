@@ -54,6 +54,8 @@ module TetrisTop
     output logic        VGA_HS,
     output logic        VGA_VS
 );
+    parameter GLOBAL_INPUT_CD = 15;
+
     // abstract clk, rst_l signal for uniformity
     logic  clk, rst_l;
     assign clk      = CLOCK_50;
@@ -86,6 +88,9 @@ module TetrisTop
     logic           move_L_valid;
     logic           soft_drop_valid;
     logic           hold_valid;
+
+    logic [ 3:0]    global_cd_count;
+    logic           inputs_cool;
 
     logic [ 9:0]    VGA_row;
     logic [ 9:0]    VGA_col;
@@ -235,7 +240,7 @@ module TetrisTop
         .clk            (clk),
         .rst_l          (rst_l),
         .action_user    (rotate_R_input),
-        .action_valid   (rotate_R_valid || !status_in_game),
+        .action_valid   (rotate_R_valid && inputs_cool || !status_in_game),
         .action_out     (rotate_R)
     );
     DelayedAutoShiftFSM DAS_rotate_L_inst (
@@ -249,37 +254,51 @@ module TetrisTop
         .clk            (clk),
         .rst_l          (rst_l),
         .action_user    (move_R_input),
-        .action_valid   (move_R_valid || !status_in_game),
+        .action_valid   (move_R_valid && inputs_cool || !status_in_game),
         .action_out     (move_R)
     );
     DelayedAutoShiftFSM DAS_move_L_inst (
         .clk            (clk),
         .rst_l          (rst_l),
         .action_user    (move_L_input),
-        .action_valid   (move_L_valid || !status_in_game),
+        .action_valid   (move_L_valid && inputs_cool || !status_in_game),
         .action_out     (move_L)
     );
     DelayedAutoShiftFSM DAS_soft_drop_inst (
         .clk            (clk),
         .rst_l          (rst_l),
         .action_user    (soft_drop_input),
-        .action_valid   (soft_drop_valid || !status_in_game),
+        .action_valid   (soft_drop_valid && inputs_cool || !status_in_game),
         .action_out     (soft_drop)
     );
     DelayedAutoShiftFSM DAS_hard_drop_inst (
         .clk            (clk),
         .rst_l          (rst_l),
         .action_user    (hard_drop_input),
-        .action_valid   (1'b1),
+        .action_valid   (inputs_cool),
         .action_out     (hard_drop)
     );
     DelayedAutoShiftFSM DAS_hold_inst (
         .clk            (clk),
         .rst_l          (rst_l),
         .action_user    (hold_input),
-        .action_valid   (hold_valid || !status_in_game),
+        .action_valid   (hold_valid && inputs_cool || !status_in_game),
         .action_out     (hold)
     );
+
+    // global cd on inputs to prevent mashing
+    counter #(
+        .WIDTH  ($bits(global_cd_count))
+    ) global_cd_inst (
+        .clk    (clk),
+        .rst_l  (rst_l),
+        .en     ((global_cd_count != '0) || state_update_user),
+        .load   (global_cd_count >= GLOBAL_INPUT_CD),
+        .up     (1'b1),
+        .D      ('0),
+        .Q      (global_cd_count)
+    );
+    assign inputs_cool = global_cd_count == '0;
 
     assign status_in_game = tetris_screen == SPRINT_MODE ||
                             tetris_screen == MP_MODE;
