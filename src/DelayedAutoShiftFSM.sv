@@ -15,7 +15,8 @@
 module DelayedAutoShiftFSM #(
     parameter CD_SHORT      = 7_500_000,
     parameter CD_LONG       = 10_000_000,
-    parameter BUFFER_LENGTH = 3
+    parameter BUFFER_LENGTH = 3,
+    parameter INPUT_LENGTH  = 3
 ) (
     input  logic clk,
     input  logic rst_l,
@@ -23,8 +24,11 @@ module DelayedAutoShiftFSM #(
     input  logic action_valid,
     output logic action_out
 );
-    logic           action_trigger;
     logic           action_sync;
+    logic           action_recv;
+    logic           action_trigger;
+
+    logic [3:0]    crosstalk_count;
 
     logic [31:0]    action_cd;
     logic [31:0]    cd_choice;
@@ -39,9 +43,25 @@ module DelayedAutoShiftFSM #(
 
     // synchronizing chain
     always_ff @ (posedge clk) begin
-        action_sync     <= action_user;
-        action_trigger  <= action_sync;
+        action_sync <= action_user;
+        action_recv <= action_sync;
     end
+
+    // due to crosstalk in the controller need to see consecutive cycles to
+    // register an "input"
+    counter #(
+        .WIDTH  ($bits(crosstalk_count))
+    ) crosstalk_ctr_inst (
+        .clk    (clk),
+        .rst_l  (rst_l),
+        .en     ((crosstalk_count != '0) || action_recv),
+        .load   (crosstalk_count >= INPUT_LENGTH || !action_recv),
+        .up     (1'b1),
+        .D      ('0),
+        .Q      (crosstalk_count)
+    );
+
+    assign action_trigger = action_recv >= INPUT_LENGTH;
 
     // state machine
     always_ff @ (posedge clk, negedge rst_l) begin
