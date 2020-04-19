@@ -86,7 +86,7 @@ module DelayedAutoShiftFSM #(
 
     always_comb begin
         action_cd_en = (action_cd != '0) || action_trigger;
-        action_cd_ld = action_cd == cd_choice;
+        action_cd_ld = action_cd >= cd_choice;
     end
 
     counter #(
