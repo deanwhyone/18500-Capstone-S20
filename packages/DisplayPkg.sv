@@ -88,6 +88,11 @@ package DisplayPkg;
     parameter PENDING_HEIGHT        = PENDING_VEND - PENDING_VSTART;
     parameter PENDING_TICK          = PENDING_HEIGHT / 20;
 
+    parameter FRAMES_HSTART         = 0;
+    parameter FRAMES_HEND           = 45;
+    parameter FRAMES_VSTART         = 0;
+    parameter FRAMES_VEND           = 15;
+
     parameter BG_COLOR              = 24'h40_4040;
     parameter BORDER_COLOR          = 24'hff_ffff;
     parameter BORDER_COLOR_ALT      = 24'h00_ffff;
