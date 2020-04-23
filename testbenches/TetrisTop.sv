@@ -43,6 +43,7 @@ module TetrisTop
     output logic [ 6:0] HEX3,
     output logic [ 6:0] HEX4,
     output logic [ 6:0] HEX5,
+    output logic [ 6:0] HEX7,
 
     output logic [ 7:0] VGA_R,
     output logic [ 7:0] VGA_G,
@@ -214,6 +215,10 @@ module TetrisTop
     logic           time_clk_ld;
 
     logic [23:0]    graphics_color;
+
+    logic [ 7:0]    frame_count;
+    logic           frame_en;
+    logic           VSYNC_PAST;
 
     // assign abstracted variables
     always_comb begin
@@ -813,9 +818,11 @@ module TetrisTop
         .time_milliseconds  (time_milliseconds),
         .hold_piece_type    (hold_piece_type),
         .pending_garbage    (pending_garbage),
-        .opponent_playfield (),
-        .opponent_pq        (),
-        .opponent_hold      (),
+        .opponent_playfield (opponent_playfield),
+        .opponent_pq        (opponent_pq),
+        .opponent_hold      (opponent_hold),
+        .frames_en          (SW[14]),
+        .frame_count        (frame_count),
         .output_color       (graphics_color)
     );
     // enable simple switching b/w 8-bit and 4-bit color
@@ -824,6 +831,23 @@ module TetrisTop
         VGA_G = graphics_color[15: 8];
         VGA_B = graphics_color[ 7: 0];
     end
+
+    // 8-bit frame counter
+    counter #(
+        .WIDTH      ($bits(frame_count))
+    ) frame_ctr_inst (
+        .clk    (clk),
+        .rst_l  (rst_l),
+        .en     (frame_en),
+        .load   (1'b0),
+        .up     (1'b1),
+        .D      ('0),
+        .Q      (frame_count)
+    );
+    always_ff @ (posedge clk) begin
+        VSYNC_PAST <= VGA_VS;
+    end
+    assign frame_en = !VSYNC_PAST && VGA_VS;
 
     // VGA module
     SVGA svga_inst (
@@ -876,11 +900,11 @@ module TetrisTop
         .rst_l                  (rst_l),
         .clk_gpio               (GPIO[0]),
         .game_active            (tetris_screen == MP_MODE),
-        .serial_in_h            (GPIO[6]),
-        .serial_in_0            (GPIO[7]),
-        .serial_in_1            (GPIO[8]),
-        .serial_in_2            (GPIO[9]),
-        .serial_in_3            (GPIO[10]),
+        .serial_in_h            (GPIO[1]),
+        .serial_in_0            (GPIO[2]),
+        .serial_in_1            (GPIO[3]),
+        .serial_in_2            (GPIO[4]),
+        .serial_in_3            (GPIO[5]),
         .send_ready_ACK         (receiver_send_ack),
         .ack_received           (receiver_ack_received),
         .ack_seqNum             (receiver_ack_seqNum),
@@ -892,7 +916,7 @@ module TetrisTop
         .opponent_ready         (network_ready),
         .opponent_lost          (network_lost),
         .receive_done           (),
-        .packets_received_cnt   (),
+        .packets_received_cnt   ()
     );
 
     always_ff @ (posedge clk) begin
@@ -905,14 +929,11 @@ module TetrisTop
         end
     end
 
-    /*
-     * TODO:
-     * DONE: Set up registers to hold the values coming over the network
-     * DONE: synchronize updates on each register based on
-     * DONE: "update_opponent_data"
-     * DONE: Route signals into the graphics module to display.
-     * DONE: Sender cannot generate ready signal, so hardwire opponent ready logic
-     * Need to test in NC (no monitors)
-     * DONE: Update GPIO pins for networking to Alton's spec
-     */
+    logic received_seqNum;
+    // for debugging: HEX7 shows packet seqnum
+    SevenSegmentDigit seqnum_display_inst (
+        .bch({3'd0, receiver_ack_seqNum}),
+        .segment(HEX7),
+        .blank(1'b0)
+    );
 endmodule // TetrisTop
