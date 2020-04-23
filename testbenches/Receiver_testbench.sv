@@ -29,11 +29,14 @@ module Receiver_testbench
 	output tile_type_t 			opponent_piece_queue	[NEXT_PIECES_COUNT],
 	output tile_type_t 			opponent_playfield		[PLAYFIELD_ROWS][PLAYFIELD_COLS],
 	output logic	   			opponent_ready,
-	output logic	   			opponent_lost*/
+	output logic	   			opponent_lost,
+	output logic 				receive_done,
+	output logic [3:0]			packets_received_cnt,
+	output logic [3:0]			acks_received_cnt*/
 
 
 	logic clk, clk_gpio, rst_l, send_ready_ACK, send_game_lost, game_active, update_data, ack_received, ack_seqNum;
-	logic send_done, send_done_h;
+	logic send_done, send_done_h, sender_seqNum;
 	logic opponent_ready, opponent_lost;
 	logic [GBG_BITS-1:0] garbage, opponent_garbage;
 	tile_type_t hold, opponent_hold;
@@ -42,6 +45,8 @@ module Receiver_testbench
 	logic serial_out_h, serial_out_0, serial_out_1, serial_out_2, serial_out_3;
 
 	logic receiver_send_ack, receiver_ack_received, receiver_ack_seqNum, update_opponent_data;
+	logic receive_done;
+	logic [3:0] packets_received_cnt, acks_received_cnt;
 
 	default clocking cb_main @(posedge clk); endclocking
 
@@ -71,6 +76,11 @@ module Receiver_testbench
 		##1 send_ready_ACK <= 1'b0;
 	endtask
 
+	task sendGE;
+		send_game_lost <= 1'b1;
+		##1 send_game_lost <= 1'b0;
+	endtask
+
 	function displayDataPacket;
 		$display("seq num: %b, garbage: %0d, hold: %b, piece_queue: %h\nplayfield: %h", 
 			s.data_packet.seqNum, s.data_packet.garbage, s.data_packet.hold,
@@ -90,6 +100,11 @@ module Receiver_testbench
 		$display("seq num: %b, garbage: %0d, hold: %b, piece_queue: %h\nplayfield: %h", 
 			dut.data_packet.seqNum, dut.data_packet.garbage, dut.data_packet.hold,
 			dut.data_packet.piece_queue, dut.data_packet.playfield);
+	endfunction
+
+	function displayReceivedHndPacket;
+		$display("seq num: %b, seq num_n: %b, pid: %b, pid_n: %b", 
+			dut.hnd_packet.seqNum, dut.hnd_packet.seqNum_n, dut.hnd_packet.pid, dut.hnd_packet.pid_n);
 	endfunction
 
 
@@ -147,6 +162,21 @@ module Receiver_testbench
 		for(int i = 0; i < 1000; i++) begin
 			##1;
 		end
+		doReset;
+		##1;
+		sendAck;
+		while(!dut.receive_done_h) begin
+			##1;
+		end
+		$display("received handshake packet: ");
+		displayReceivedHndPacket;
+		##1;
+		sendGE;
+		while(!dut.receive_done_h) begin
+			##1;
+		end
+		$display("received handshake packet: ");
+		displayReceivedHndPacket;
 		$finish();
 
 	end

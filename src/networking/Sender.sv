@@ -16,7 +16,6 @@
  *  - send_ready_ACK	indicates ACK should be sent over handshake line
  *  - send_game_lost	indicates game end should be sent over handshake line
  *  - game_active 		indicates game is in progress, do nothing if not high
- *  - game_ready 		indicates 
  *  - update_data		1-cycle pulse, indicates there is fresh data on garbage, 
  *						hold, piece_queue, playfield
  *  - garbage			number of garbage lines being sent
@@ -53,7 +52,6 @@ module Sender
 	input  logic 				send_ready_ACK,
 	input  logic				send_game_lost,
 	input  logic		  		game_active,
-	input  logic 				game_ready,
 	input  logic       			update_data,
 	input  logic [GBG_BITS-1:0] garbage,
 	input  tile_type_t 			hold,
@@ -121,7 +119,7 @@ module Sender
 		.clk(clk_gpio), 
 		.rst_l(rst_l), 
 		.send_start(send_start_h),
-		.game_active(game_active || game_ready),
+		.game_active(game_active),
 		.data_in(enc_data_h),
 		.send_done(send_done_h),
 		.serial_out(serial_out_h)
@@ -243,7 +241,7 @@ module Sender
 	end
 
 	//seqNum logic
-	always_ff @(posedge clk, negedge, rst_l) begin
+	always_ff @(posedge clk, negedge rst_l) begin
 		if(!rst_l) begin
 			seqNum <= 1'b0;
 		end

@@ -90,7 +90,7 @@ module SenderFSM
     		GAME_LOST: begin
     			send_ready_ACK = 1'b0;
     			send_game_lost = 1'b1;
-    			game_active    = 1'b0;
+    			game_active    = 1'b1;
     		end
     	endcase // state
     end

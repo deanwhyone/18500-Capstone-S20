@@ -67,7 +67,7 @@ module Receiver
 	output logic	   			opponent_lost,
 	output logic 				receive_done,
 	output logic [3:0]			packets_received_cnt,
-	output logic [3:0]			acks_received_cnt,
+	output logic [3:0]			acks_received_cnt
 );
 	//Serial data receiver signals
 	logic receive_start;
@@ -90,6 +90,14 @@ module Receiver
 		.receive_done(receive_done),
 		.game_active(game_active),
 		.receive_start(receive_start)
+	);
+
+	DataReceiverFSM hnd_FSM (
+		.clk(clk_gpio),
+		.rst_l(rst_l),
+		.receive_done(receive_done_h),
+		.game_active(game_active),
+		.receive_start(receive_start_h)
 	);
 
 	//Serial Receivers
@@ -160,6 +168,7 @@ module Receiver
 	assign dec_data_1 = enc_data_1[ENC_DATA_BITS-9:0];
 	assign dec_data_2 = enc_data_2[ENC_DATA_BITS-9:0];
 	assign dec_data_3 = enc_data_3[ENC_DATA_BITS-9:0];
+	assign dec_data_h = enc_data_h[ENC_HEAD_BITS-4:0];
 
 	assign data_packet = {dec_data_0, dec_data_1, dec_data_2, dec_data_3};
 	assign hnd_packet  = dec_data_h;
@@ -196,8 +205,6 @@ module Receiver
 		if(!rst_l || !game_active) begin
 			opponent_garbage	 <= 'b0;
 			opponent_hold		 <=  BLANK;
-			opponent_lost		 <= 'b0;
-			opponent_ready 		 <= 'b0;
 			opponent_piece_queue <= '{NEXT_PIECES_COUNT{BLANK}};
 			opponent_playfield 	 <= '{PLAYFIELD_ROWS{'{PLAYFIELD_COLS{BLANK}}}};
 			seqNum 				 <= 'b0;
@@ -210,8 +217,6 @@ module Receiver
 			if(received_seqNum == seqNum) begin
 				opponent_garbage	 <= data_packet.garbage;
 				opponent_hold		 <= tile_type_t'(data_packet.hold);
-				opponent_lost		 <= 'b0;
-				opponent_ready 		 <= 'b0;
 				opponent_piece_queue <= piece_queue_unpacked;
 				opponent_playfield 	 <= playfield_unpacked;
 				seqNum 				 <= seqNum + 1'b1;
@@ -220,9 +225,9 @@ module Receiver
 				packets_received_cnt <= packets_received_cnt + 1'b1;
 			end
 		end
-		//make send_ready_ACK and update_opponent_data 1-cycle pulses
-		else if((send_ready_ACK == 1'b1) && (update_opponent_data == 1'b1)) begin
-			send_ready_ACK <= 1'b0;
+		//make send_ACK and update_opponent_data 1-cycle pulses
+		else if((send_ACK == 1'b1) && (update_opponent_data == 1'b1)) begin
+			send_ACK <= 1'b0;
 			update_opponent_data <= 1'b0;
 		end
 	end
@@ -244,7 +249,6 @@ module Receiver
 	end
 	assign receive_done_h_posedge = receive_done_h & ~receive_done_h_delay;
 
-
 	always_ff @(posedge clk, negedge rst_l) begin
 		if(!rst_l || !game_active) begin
 			ack_received      <= 1'b0;
@@ -259,7 +263,7 @@ module Receiver
 				acks_received_cnt <= acks_received_cnt + 1'b1;
 			end
             //check if game end
-            else if((hnd_packed.pid == 1'b0) && (hnd_packet.pid_n == 1'b1)) begin
+            else if((hnd_packet.pid == 1'b0) && (hnd_packet.pid_n == 1'b1)) begin
                 opponent_lost <= 1'b1;
                 send_ready <= 1'b1;
             end
@@ -269,5 +273,7 @@ module Receiver
 			ack_received <= 1'b0;
 		end
 	end
+
+	assign opponent_ready = ack_received;
 
 endmodule // Receiver
