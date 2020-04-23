@@ -1,10 +1,10 @@
 /**
  * 18500 Capstone S20
  * Eric Chen, Alton Olsen, Deanyone Su
- * 
+ *
  *								Receiver.sv
  * Overall receiver module to decode and receive data serially across 5 wires.
- * Takes inputs from GPIO, control FSM. Outputs to game logic and sender. 
+ * Takes inputs from GPIO, control FSM. Outputs to game logic and sender.
  * When game is active, listens for syncword on transmission wires. Decodes
  * and reconstructs received packets. On completion, asserts a send signal for
  * the sender, or update_opponent_data for the game logic.
@@ -19,14 +19,14 @@
  *	- serial_in_1			serial data in for data 1 line
  *	- serial_in_2			serial data in for data 2 line
  *	- serial_in_3 			serial data in for data 3 line
- * 
+ *
  * OUTPUTS:
  *  - send_ready_ACK		indicates ACK should be sent over handshake line
  *  - send_game_lost		indicates game end should be sent over handshake line
  *  - ack_received			indicates an ACK was received
- *  - ack_seqNum			sequence number of received data packet + 1, provided 
+ *  - ack_seqNum			sequence number of received data packet + 1, provided
  *							for sender to include with handshake packet
- *  - update_opponent_data	1-cycle pulse, indicates there is fresh data on garbage, 
+ *  - update_opponent_data	1-cycle pulse, indicates there is fresh data on garbage,
  *							hold, piece_queue, playfield.
  *  - opponent_garbage		number of garbage lines being sent
  *  - opponent_hold			content of opponent's hold register
@@ -36,7 +36,7 @@
  * 	- opponent_lost			indicates opponent topped out
  *  - receive_done 			data receive complete signal for testbench purposes
  *  - packets_received_cnt	received packets counter for testbench purposes
- * 
+ *
  **/
  `default_nettype none
 
@@ -140,9 +140,10 @@ module Receiver
 	logic [PAR_DATA_BITS-1:0] dec_data_0, dec_data_1, dec_data_2, dec_data_3;
 	logic [HEAD_BITS-1:0] dec_data_h;
 	data_pkt_t data_packet;
-	hnd_head_t hnd_packet;	
+	hnd_head_t hnd_packet;
 
-	logic seqNum, received_seqNum;
+	logic received_seqNum;
+	logic seqNum;
 	assign ack_seqNum = seqNum;
 
 	//TODO decoders
@@ -194,7 +195,7 @@ module Receiver
 			send_ready_ACK		 <= 'b0;
 			update_opponent_data <= 'b0;
 			packets_received_cnt <= 'b0;
-		end 
+		end
 		else if(receive_done_posedge) begin
 			//Sequence number check - if they match, increment seqNum and update outputs
 			if(received_seqNum == seqNum) begin
@@ -217,7 +218,12 @@ module Receiver
 		end
 	end
 
-	assign received_seqNum = (data_packet.seqNum == 4'b1111) ? 1'b1 : 1'b0;
+	//seqNum decoder
+    logic [2:0] seqNum_set_bits;
+    always_comb begin
+        seqNum_set_bits = data_packet.seqNum[0] + data_packet.seqNum[1] + data_packet.seqNum[2] + data_packet.seqNum[3];
+        received_seqNum = (seqNum_set_bits >= 2) ? 1'b1 : 1'b0;
+    end
 
 	//TODO opponent lost/ready
 
@@ -233,7 +239,7 @@ module Receiver
 	always_ff @(posedge clk, negedge rst_l) begin
 		if(!rst_l) begin
 			ack_received <= 'b0;
-		end 
+		end
 		else if(receive_done_h_posedge) begin
 			if((hnd_packet.pid == 1'b1) && (hnd_packet.pid_n == 1'b0)) begin
 				ack_received <= 1'b1;
