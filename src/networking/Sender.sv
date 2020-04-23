@@ -16,6 +16,7 @@
  *  - send_ready_ACK	indicates ACK should be sent over handshake line
  *  - send_game_lost	indicates game end should be sent over handshake line
  *  - game_active 		indicates game is in progress, do nothing if not high
+ *  - game_ready 		indicates 
  *  - update_data		1-cycle pulse, indicates there is fresh data on garbage, 
  *						hold, piece_queue, playfield
  *  - garbage			number of garbage lines being sent
@@ -23,7 +24,7 @@
  *  - piece_queue		content of player piece queue
  *	- playfield			content of player playfield
  *  - ack_received		indicates an ACK was received, used to reset the 
- *						timeout counter
+ *						timeout counter and increment seqNum
  *  - ack_seqNum 		sequence number to be sent with ACK packet, equivalent
  * 						to received seqNum + 1. Sampled on send_ready_ACK or 
  *						send_game_lost
@@ -36,7 +37,8 @@
  *  - serial_out_3		serial data out for data 3 line
  *  - send_done 		data send complete signal for testbench purposes
  *  - send_done_h		handshake send complete signal for testbench purposes
- *  - sender_seqnum 	sequence number output for testbench purposes
+ *  - sender_seqnum 	sequence number output for testbench purposes. increments
+ * 						on ack_received
  **/
  `default_nettype none
 
@@ -51,6 +53,7 @@ module Sender
 	input  logic 				send_ready_ACK,
 	input  logic				send_game_lost,
 	input  logic		  		game_active,
+	input  logic 				game_ready,
 	input  logic       			update_data,
 	input  logic [GBG_BITS-1:0] garbage,
 	input  tile_type_t 			hold,
@@ -118,7 +121,7 @@ module Sender
 		.clk(clk_gpio), 
 		.rst_l(rst_l), 
 		.send_start(send_start_h),
-		.game_active(game_active),
+		.game_active(game_active || game_ready),
 		.data_in(enc_data_h),
 		.send_done(send_done_h),
 		.serial_out(serial_out_h)
@@ -202,12 +205,10 @@ module Sender
 	always_ff @(posedge clk, negedge rst_l) begin
 		if(!rst_l) begin
 			data_packet  	 <= 'b0;
-			seqNum 		 	 <= 'b0;
 			update_data_done <= 'b0;
 		end
 		//update data packet
 		else if(update_data) begin
-			seqNum <= seqNum + 1;
 			data_packet.seqNum <= {4{seqNum}};
 			data_packet.garbage <= garbage;
 			data_packet.hold <= hold;
@@ -238,6 +239,16 @@ module Sender
 		else if(send_game_lost) begin
 			hnd_packet   <= {1'b0, ack_seqNum, 1'b1, ~ack_seqNum};
 			send_start_h <= 1'b1;
+		end
+	end
+
+	//seqNum logic
+	always_ff @(posedge clk, negedge, rst_l) begin
+		if(!rst_l) begin
+			seqNum <= 1'b0;
+		end
+		else if(ack_received) begin
+			seqNum <= seqNum + 1'b1;
 		end
 	end
 

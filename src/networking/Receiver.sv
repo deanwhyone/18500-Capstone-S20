@@ -36,6 +36,7 @@
  * 	- opponent_lost			indicates opponent topped out
  *  - receive_done 			data receive complete signal for testbench purposes
  *  - packets_received_cnt	received packets counter for testbench purposes
+ *  - acks_received_cnt		received acks counter for testbench purposes
  * 
  **/
  `default_nettype none
@@ -65,7 +66,8 @@ module Receiver
 	output logic	   			opponent_ready,
 	output logic	   			opponent_lost,
 	output logic 				receive_done,
-	output logic [3:0]			packets_received_cnt
+	output logic [3:0]			packets_received_cnt,
+	output logic [3:0]			acks_received_cnt,
 );
 	//Serial data receiver signals
 	logic receive_start;
@@ -95,6 +97,7 @@ module Receiver
 		.clk(clk_gpio),
 		.rst_l(rst_l),
 		.receive_start(receive_start_h),
+        .game_active(game_active),
 		.serial_in(serial_in_h),
 		.data_out(enc_data_h),
 		.receive_done(receive_done_h)
@@ -104,6 +107,7 @@ module Receiver
 		.clk(clk_gpio),
 		.rst_l(rst_l),
 		.receive_start(receive_start),
+        .game_active(game_active),
 		.serial_in(serial_in_0),
 		.data_out(enc_data_0),
 		.receive_done(receive_done_0)
@@ -113,6 +117,7 @@ module Receiver
 		.clk(clk_gpio),
 		.rst_l(rst_l),
 		.receive_start(receive_start),
+        .game_active(game_active),
 		.serial_in(serial_in_1),
 		.data_out(enc_data_1),
 		.receive_done(receive_done_1)
@@ -122,6 +127,7 @@ module Receiver
 		.clk(clk_gpio),
 		.rst_l(rst_l),
 		.receive_start(receive_start),
+        .game_active(game_active),
 		.serial_in(serial_in_2),
 		.data_out(enc_data_2),
 		.receive_done(receive_done_2)
@@ -131,6 +137,7 @@ module Receiver
 		.clk(clk_gpio),
 		.rst_l(rst_l),
 		.receive_start(receive_start),
+        .game_active(game_active),
 		.serial_in(serial_in_3),
 		.data_out(enc_data_3),
 		.receive_done(receive_done_3)
@@ -141,6 +148,9 @@ module Receiver
 	logic [HEAD_BITS-1:0] dec_data_h;
 	data_pkt_t data_packet;
 	hnd_head_t hnd_packet;	
+
+    logic send_ACK, send_ready;
+    assign send_ready_ACK = send_ACK || send_ready;
 
 	logic seqNum, received_seqNum;
 	assign ack_seqNum = seqNum;
@@ -183,7 +193,7 @@ module Receiver
 
 	//Data Packet Logic
 	always_ff @(posedge clk, negedge rst_l) begin
-		if(!rst_l) begin
+		if(!rst_l || !game_active) begin
 			opponent_garbage	 <= 'b0;
 			opponent_hold		 <=  BLANK;
 			opponent_lost		 <= 'b0;
@@ -191,7 +201,7 @@ module Receiver
 			opponent_piece_queue <= '{NEXT_PIECES_COUNT{BLANK}};
 			opponent_playfield 	 <= '{PLAYFIELD_ROWS{'{PLAYFIELD_COLS{BLANK}}}};
 			seqNum 				 <= 'b0;
-			send_ready_ACK		 <= 'b0;
+			send_ACK		     <= 'b0;
 			update_opponent_data <= 'b0;
 			packets_received_cnt <= 'b0;
 		end 
@@ -205,7 +215,7 @@ module Receiver
 				opponent_piece_queue <= piece_queue_unpacked;
 				opponent_playfield 	 <= playfield_unpacked;
 				seqNum 				 <= seqNum + 1'b1;
-				send_ready_ACK		 <= 1'b1;
+				send_ACK		     <= 1'b1;
 				update_opponent_data <= 1'b1;
 				packets_received_cnt <= packets_received_cnt + 1'b1;
 			end
@@ -217,7 +227,12 @@ module Receiver
 		end
 	end
 
-	assign received_seqNum = (data_packet.seqNum == 4'b1111) ? 1'b1 : 1'b0;
+    //seqNum decoder
+    logic [2:0] seqNum_set_bits;
+    always_comb begin
+        seqNum_set_bits = data_packet.seqNum[0] + data_packet.seqNum[1] + data_packet.seqNum[2] + data_packet.seqNum[3];
+        received_seqNum = (seqNum_set_bits >= 2) ? 1'b1 : 1'b0;
+    end
 
 	//TODO opponent lost/ready
 
@@ -231,13 +246,23 @@ module Receiver
 
 
 	always_ff @(posedge clk, negedge rst_l) begin
-		if(!rst_l) begin
-			ack_received <= 'b0;
+		if(!rst_l || !game_active) begin
+			ack_received      <= 1'b0;
+            opponent_lost     <= 1'b0;
+            send_ready        <= 1'b0;
+            acks_received_cnt <= 4'b0;
 		end 
 		else if(receive_done_h_posedge) begin
+			//check if ack
 			if((hnd_packet.pid == 1'b1) && (hnd_packet.pid_n == 1'b0)) begin
 				ack_received <= 1'b1;
+				acks_received_cnt <= acks_received_cnt + 1'b1;
 			end
+            //check if game end
+            else if((hnd_packed.pid == 1'b0) && (hnd_packet.pid_n == 1'b1)) begin
+                opponent_lost <= 1'b1;
+                send_ready <= 1'b1;
+            end
 		end
 		//make ack_received a 1-cycle pulse
 		else if(ack_received == 1'b1) begin

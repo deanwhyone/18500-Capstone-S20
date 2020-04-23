@@ -13,14 +13,15 @@
  *						ACK until game start
  *  - player_unready	indicates player has cancelled multiplayer game
  *  - top_out			indicates game has ended (player lost), from game logic
- *  - game_start		indicates an ACK has been received from the opponent
+ *  - ACK_received		indicates an ACK has been received from the opponent
  *						and the game can begin
  *  - game_end			indicates game has ended (player won), from receiver
  *
  * OUTPUTS:
  *  - send_ready_ACK	indicates ACK should be sent over handshake line
  *  - send_game_lost	indicates game end should be sent over handshake line
- *  - game_active		indicates game is in progress
+ *  - game_active		indicates game is in progress, also asserted in ready
+ *                      state so ACKs can be sent
  *
  * STATES:
  *  - IDLE				idle state, do nothing until player readies for
@@ -44,7 +45,7 @@ module SenderFSM
 	input  logic player_ready,
 	input  logic player_unready,
 	input  logic top_out,
-	input  logic game_start,
+	input  logic ACK_received,
 	input  logic game_end,
 	output logic send_ready_ACK,
 	output logic send_game_lost,
@@ -79,7 +80,7 @@ module SenderFSM
     		GAME_READY: begin
     			send_ready_ACK = 1'b1;
     			send_game_lost = 1'b0;
-    			game_active    = 1'b0;
+    			game_active    = 1'b1;
     		end
     		IN_GAME: begin
     			send_ready_ACK = 1'b0;
@@ -106,7 +107,7 @@ module SenderFSM
     		GAME_READY: begin
     			if(player_unready)
     				next_state = IDLE;
-    			else if(game_start)
+    			else if(ACK_received)
     				next_state = IN_GAME;
     			else
     				next_state = GAME_READY;
@@ -120,7 +121,7 @@ module SenderFSM
     				next_state = IN_GAME;
     		end
     		GAME_LOST: begin
-    			if(game_end)
+    			if(ACK_received)
     				next_state = IDLE;
     			else
     				next_state = GAME_LOST;
