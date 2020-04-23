@@ -34,6 +34,8 @@ module GraphicsTop
     input  tile_type_t      opponent_playfield  [PLAYFIELD_ROWS][PLAYFIELD_COLS],
     input  tile_type_t      opponent_pq         [NEXT_PIECES_COUNT],
     input  tile_type_t      opponent_hold,
+    input  logic            frames_en,
+    input  logic [ 7:0]     frame_count,
     output logic [23:0]     output_color
 );
 
@@ -53,6 +55,8 @@ module GraphicsTop
     logic           mspd_active;
     logic [23:0]    gepd_output_color;
     logic           gepd_active;
+    logic [23:0]    fpd_output_color;
+    logic           fpd_active;
 
     tile_type_t     secondary_playfield  [PLAYFIELD_ROWS][PLAYFIELD_COLS];
     tile_type_t     secondary_pq         [NEXT_PIECES_COUNT];
@@ -137,7 +141,10 @@ module GraphicsTop
                     end
                 end
             endcase
-
+            // frame counter goes above all screens
+            if (frames_en && fpd_active) begin
+                output_color = fpd_output_color;
+            end
         end else begin
             // default to generating test pattern
             if (VGA_row < 10'd240) begin
@@ -255,6 +262,19 @@ module GraphicsTop
         .pending_garbage(pending_garbage),
         .output_color   (ppd_output_color),
         .active         (ppd_active)
+    );
+    // FPD module
+    FramesPixelDriver #(
+        .HSTART (FRAMES_HSTART),
+        .HEND   (FRAMES_HEND),
+        .VSTART (FRAMES_VSTART),
+        .VEND   (FRAMES_VEND)
+    ) fpd_inst (
+        .VGA_row        (VGA_row),
+        .VGA_col        (VGA_col),
+        .frame_count    (frame_count),
+        .output_color   (fpd_output_color),
+        .active         (fpd_active)
     );
 
     // Secondary HUD
