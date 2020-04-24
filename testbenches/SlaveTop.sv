@@ -26,6 +26,7 @@ module SlaveTop
     output logic [6:0]  HEX5,
     output logic [6:0]  HEX6
 );
+    //sender signals
     logic clk, clk_gpio, rst_l, send_ready_ACK, send_ready, send_game_lost, game_active, update_data, ack_received, ack_seqNum;
     logic [GBG_BITS-1:0] garbage;
     tile_type_t hold;
@@ -36,20 +37,13 @@ module SlaveTop
     logic sender_seqNum;
     tile_type_t playfield_piece;
 
+    //fsm signals
     logic player_ready, player_unready;
     logic top_out;
     logic ingame, gamelost;
+    logic win_timeout;
 
-    SenderFSM send_fsm(.clk(clk), .rst_l(rst_l), .player_ready(player_ready), 
-                       .player_unready(player_unready), .top_out(top_out), 
-                       .ACK_received(ack_received), .game_end(opponent_lost),
-                       .send_ready(send_ready), .send_game_lost(send_game_lost),
-                       .game_active(game_active));
-
-    Sender sender_inst(.serial_out_h(miso_h), .serial_out_0(miso_0), .serial_out_1(miso_1),
-                       .serial_out_2(miso_2), .serial_out_3(miso_3), .send_ready_ACK(send_ready || send_ready_ACK), .*);
-
-
+    //receiver signals
     logic receive_done;
     logic opponent_ready, opponent_lost;
     logic [GBG_BITS-1:0] opponent_garbage;
@@ -61,6 +55,38 @@ module SlaveTop
     logic update_opponent_data;
 
     logic [3:0] packets_received_cnt, acks_received_cnt;
+
+
+    //posedge detector for opponent_lost
+    logic opponent_lost_posedge;
+    logic opponent_lost_delay;
+    always_ff @(posedge clk) begin
+        opponent_lost_delay <= opponent_lost;
+    end
+    assign opponent_lost_posedge = opponent_lost & ~opponent_lost_delay;
+
+    logic [9:0] win_timeout_cnt;
+    //win timeout counter
+    counter #(.WIDTH(10)) win_counter (
+        .clk(clk_gpio),
+        .rst_l(rst_l),
+        .en(opponent_lost),
+        .load(opponent_lost_posedge),
+        .up(1'b1),
+        .D(10'b0),
+        .Q(win_timeout_cnt)
+    );
+    assign win_timeout = (win_timeout_cnt >= WIN_TIMEOUT_CYCLES);
+
+    SenderFSM send_fsm(.clk(clk), .rst_l(rst_l), .player_ready(player_ready), 
+                       .player_unready(player_unready), .top_out(top_out), 
+                       .ACK_received(ack_received), .game_end(opponent_lost),
+                       .send_ready(send_ready), .send_game_lost(send_game_lost),
+                       .game_active(game_active), .ingame(ingame),
+                       .gamelost(gamelost), .timeout(win_timeout));
+
+    Sender sender_inst(.serial_out_h(miso_h), .serial_out_0(miso_0), .serial_out_1(miso_1),
+                       .serial_out_2(miso_2), .serial_out_3(miso_3), .send_ready_ACK(send_ready || send_ready_ACK), .*);
 
     Receiver receiver_inst(.send_ready_ACK(send_ready_ACK), .ack_received(ack_received), 
                            .ack_seqNum(ack_seqNum), .serial_in_h(mosi_h),

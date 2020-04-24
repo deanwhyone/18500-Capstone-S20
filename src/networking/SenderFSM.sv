@@ -32,6 +32,7 @@
  *  - GAME_LOST 		game over state, send GAME END over handshake line 
  *						until an ACK is received from the opponent, then return
  *						to IDLE
+ *  - GAME_WON          game won state, wait WIN_TIMEOUT_CYCLES then return to idle
  **/
  `default_nettype none
 
@@ -47,18 +48,20 @@ module SenderFSM
 	input  logic top_out,
 	input  logic ACK_received,
 	input  logic game_end,
-	output logic send_ready     ,
+    input  logic timeout,
+	output logic send_ready,
 	output logic send_game_lost,
 	output logic game_active,
     output logic ingame,
     output logic gamelost
 );
 
-	typedef enum logic [1:0] {
+	typedef enum logic [2:0] {
 		IDLE, 
 		GAME_READY, 
 		IN_GAME, 
-		GAME_LOST
+		GAME_LOST,
+        GAME_WON
 	} sender_states_t;
 
 	sender_states_t state, next_state;
@@ -102,6 +105,13 @@ module SenderFSM
                 ingame         = 1'b0;
                 gamelost       = 1'b1;
     		end
+            GAME_WON: begin
+                send_ready     = 1'b1;
+                send_game_lost = 1'b0;
+                game_active    = 1'b1;
+                ingame         = 1'b0;
+                gamelost       = 1'b0;
+            end
     	endcase // state
     end
 
@@ -124,7 +134,7 @@ module SenderFSM
     		end
     		IN_GAME: begin
     			if(game_end)
-    				next_state = IDLE;
+    				next_state = GAME_WON;
     			else if(top_out)
     				next_state = GAME_LOST;
     			else
@@ -136,6 +146,12 @@ module SenderFSM
     			else
     				next_state = GAME_LOST;
     		end
+            GAME_WON: begin
+                if(timeout)
+                    next_state = IDLE;
+                else
+                    next_state = GAME_WON;
+            end
     	endcase // state
     end
 
