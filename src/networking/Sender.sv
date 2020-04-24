@@ -77,6 +77,7 @@ module Sender
 
 	//Serial handshake sender signals
 	logic send_start_h;
+	logic update_data_done_h;
 	//logic send_done_h;
 
 	//timeout counter
@@ -112,6 +113,15 @@ module Sender
 		.update_data_done(update_data_done),
 		.timeout_cnt_en(timeout_cnt_en),
 		.send_start(send_start)
+	);
+
+	HandshakeSenderFSM   hnd_FSM (
+		.clk(clk_gpio),
+		.rst_l(rst_l),
+		.send_done(send_done_h),
+		.game_active(game_active),
+		.update_data_done(update_data_done_h),
+		.send_start(send_start_h)
 	);
 
 	//Serial senders
@@ -223,20 +233,18 @@ module Sender
 	always_ff @(posedge clk, negedge rst_l) begin
 		if(!rst_l) begin
 			hnd_packet <= 'b0;
-			send_start_h <= 'b0;
 		end
-		//deassert send start so its a 1-cycle pulse
-		else if(send_start_h == 1'b1) begin
-			send_start_h <= 1'b0;
-		end
-		//update handshake packet and assert send start
+		//update handshake packet
 		else if(send_ready_ACK) begin
 			hnd_packet   <= {1'b1, ack_seqNum, 1'b0, ~ack_seqNum};
-			send_start_h <= 1'b1;
+			update_data_done_h <= 1'b1;
 		end
 		else if(send_game_lost) begin
 			hnd_packet   <= {1'b0, ack_seqNum, 1'b1, ~ack_seqNum};
-			send_start_h <= 1'b1;
+			update_data_done_h <= 1'b1;
+		end
+		else if(update_data_done_h) begin
+			update_data_done_h <= 1'b0;
 		end
 	end
 

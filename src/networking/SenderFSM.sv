@@ -18,7 +18,7 @@
  *  - game_end			indicates game has ended (player won), from receiver
  *
  * OUTPUTS:
- *  - send_ready_ACK	indicates ACK should be sent over handshake line
+ *  - send_ready     	indicates ACK should be sent over handshake line
  *  - send_game_lost	indicates game end should be sent over handshake line
  *  - game_active		indicates game is in progress, also asserted in ready
  *                      state so ACKs can be sent
@@ -47,9 +47,11 @@ module SenderFSM
 	input  logic top_out,
 	input  logic ACK_received,
 	input  logic game_end,
-	output logic send_ready_ACK,
+	output logic send_ready     ,
 	output logic send_game_lost,
-	output logic game_active
+	output logic game_active,
+    output logic ingame,
+    output logic gamelost
 );
 
 	typedef enum logic [1:0] {
@@ -73,24 +75,32 @@ module SenderFSM
     always_comb begin
     	unique case (state)
     		IDLE: begin
-    			send_ready_ACK = 1'b0;
+    			send_ready     = 1'b0;
     			send_game_lost = 1'b0;
     			game_active    = 1'b0;
+                ingame         = 1'b0;
+                gamelost       = 1'b0;
     		end
     		GAME_READY: begin
-    			send_ready_ACK = 1'b1;
+    			send_ready     = 1'b1;
     			send_game_lost = 1'b0;
     			game_active    = 1'b1;
+                ingame         = 1'b0;
+                gamelost       = 1'b0;
     		end
     		IN_GAME: begin
-    			send_ready_ACK = 1'b0;
+    			send_ready     = 1'b0;
     			send_game_lost = 1'b0;
     			game_active    = 1'b1;
+                ingame         = 1'b1;
+                gamelost       = 1'b0;
     		end
     		GAME_LOST: begin
-    			send_ready_ACK = 1'b0;
+    			send_ready     = 1'b0;
     			send_game_lost = 1'b1;
     			game_active    = 1'b1;
+                ingame         = 1'b0;
+                gamelost       = 1'b1;
     		end
     	endcase // state
     end

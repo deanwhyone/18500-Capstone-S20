@@ -53,6 +53,9 @@ package NetworkPkg;
 	//# cycles before timeout & data resend
 	parameter TIMEOUT_CYCLES = 100;
 
+	//# cycles to wait after initiating ack/ge send for game start/end
+	parameter SYNC_COOLDOWN  = 24;
+
 	//syncword
 	parameter SYNCWORD 		 = 8'hff;
 

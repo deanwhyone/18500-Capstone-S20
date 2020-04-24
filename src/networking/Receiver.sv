@@ -202,7 +202,7 @@ module Receiver
 
 	//Data Packet Logic
 	always_ff @(posedge clk, negedge rst_l) begin
-		if(!rst_l || !game_active) begin
+		if(!rst_l) begin
 			opponent_garbage	 <= 'b0;
 			opponent_hold		 <=  BLANK;
 			opponent_piece_queue <= '{NEXT_PIECES_COUNT{BLANK}};
@@ -212,6 +212,16 @@ module Receiver
 			update_opponent_data <= 'b0;
 			packets_received_cnt <= 'b0;
 		end 
+		else if(!game_active) begin
+			opponent_garbage	 <= 'b0;
+			opponent_hold		 <=  BLANK;
+			opponent_piece_queue <= '{NEXT_PIECES_COUNT{BLANK}};
+			opponent_playfield 	 <= '{PLAYFIELD_ROWS{'{PLAYFIELD_COLS{BLANK}}}};
+			seqNum 				 <= 'b0;
+			send_ACK		     <= 'b0;
+			update_opponent_data <= 'b0;
+			packets_received_cnt <= 'b0;
+		end
 		else if(receive_done_posedge) begin
 			//Sequence number check - if they match, increment seqNum and update outputs
 			if(received_seqNum == seqNum) begin
@@ -239,8 +249,6 @@ module Receiver
         received_seqNum = (seqNum_set_bits >= 2) ? 1'b1 : 1'b0;
     end
 
-	//TODO opponent lost/ready
-
 	//rising edge detector for receive_done_h, used to detect when to update output signals
 	logic receive_done_h_posedge;
 	logic receive_done_h_delay;
@@ -250,12 +258,18 @@ module Receiver
 	assign receive_done_h_posedge = receive_done_h & ~receive_done_h_delay;
 
 	always_ff @(posedge clk, negedge rst_l) begin
-		if(!rst_l || !game_active) begin
+		if(!rst_l) begin
 			ack_received      <= 1'b0;
             opponent_lost     <= 1'b0;
             send_ready        <= 1'b0;
             acks_received_cnt <= 4'b0;
 		end 
+		else if(!game_active) begin
+			ack_received      <= 1'b0;
+            opponent_lost     <= 1'b0;
+            send_ready        <= 1'b0;
+            acks_received_cnt <= 4'b0;
+		end
 		else if(receive_done_h_posedge) begin
 			//check if ack
 			if((hnd_packet.pid == 1'b1) && (hnd_packet.pid_n == 1'b0)) begin
