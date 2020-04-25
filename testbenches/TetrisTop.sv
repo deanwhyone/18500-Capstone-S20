@@ -56,6 +56,7 @@ module TetrisTop
     output logic        VGA_VS
 );
     parameter GLOBAL_INPUT_CD = 15;
+    parameter IS_MASTER = 1;
 
     // abstract clk, rst_l signal for uniformity
     logic  clk, rst_l;
@@ -140,6 +141,7 @@ module TetrisTop
 
     logic [ 3:0]    locked_state            [PLAYFIELD_ROWS][PLAYFIELD_COLS];
 
+    logic           top_out;
     logic           game_start_tetris;
     logic           game_end_tetris;
     logic           opponent_game_end;
@@ -176,9 +178,29 @@ module TetrisTop
 
     logic           network_valid;
     logic [ 9:0]    lines_network_new;
-    logic           receiver_send_ack;
-    logic           receiver_ack_received;
+    logic           send_ready_ACK;
+    logic           ack_received;
     logic           receiver_ack_seqNum;
+
+    logic           clk_gpio;
+    logic           mosi_h;
+    logic           mosi_0;
+    logic           mosi_1;
+    logic           mosi_2;
+    logic           mosi_3;
+    logic           miso_h;
+    logic           miso_0;
+    logic           miso_1;
+    logic           miso_2;
+    logic           miso_3;
+
+    logic           player_ready;
+    logic           opponent_lost_posedge;
+    logic           send_ready;
+    logic           send_game_lost;
+    logic           game_active;
+    logic           win_timeout;
+    logic [ 9:0]    win_timeout_cnt;
 
     tile_type_t     network_hold;
     tile_type_t     network_pq              [NEXT_PIECES_COUNT];
@@ -217,7 +239,7 @@ module TetrisTop
     logic [23:0]    graphics_color;
 
     logic [ 7:0]    frame_count;
-    logic           frame_en;
+    logic           vsync_rising_edge;
     logic           VSYNC_PAST;
 
     // assign abstracted variables
@@ -552,7 +574,7 @@ module TetrisTop
         .ready_withdraw     (move_R || rotate_R),
         .opponent_ready     (opponent_battle_ready), // receive network ready
         .opponent_lost      (opponent_game_end), // receive network top-out
-        .top_out            (), // communicate local user lost to network
+        .top_out            (top_out), // communicate local user lost to network
         .game_start         (game_start_tetris),
         .game_end           (game_end_tetris),
         .current_screen     (tetris_screen),
@@ -838,7 +860,7 @@ module TetrisTop
     ) frame_ctr_inst (
         .clk    (clk),
         .rst_l  (rst_l),
-        .en     (frame_en),
+        .en     (vsync_rising_edge),
         .load   (1'b0),
         .up     (1'b1),
         .D      ('0),
@@ -847,7 +869,7 @@ module TetrisTop
     always_ff @ (posedge clk) begin
         VSYNC_PAST <= VGA_VS;
     end
-    assign frame_en = !VSYNC_PAST && VGA_VS;
+    assign vsync_rising_edge = !VSYNC_PAST && VGA_VS;
 
     // VGA module
     SVGA svga_inst (
@@ -869,7 +891,7 @@ module TetrisTop
         .clk            (clk),
         .rst_l          (rst_l),
         .state_update   (state_update_user),
-        .V_SYNC         (VGA_VS),
+        .VSYNC_REDGE    (vsync_rising_edge),
         .HEX0           (HEX0),
         .HEX1           (HEX1),
         .HEX2           (HEX2),
@@ -895,29 +917,176 @@ module TetrisTop
 
     // networking
     // integrating with Eric's branch
-    Receiver receiver_inst(
-        .clk                    (clk),
-        .rst_l                  (rst_l),
-        .clk_gpio               (GPIO[0]),
-        .game_active            (tetris_screen == MP_MODE),
-        .serial_in_h            (GPIO[1]),
-        .serial_in_0            (GPIO[2]),
-        .serial_in_1            (GPIO[3]),
-        .serial_in_2            (GPIO[4]),
-        .serial_in_3            (GPIO[5]),
-        .send_ready_ACK         (receiver_send_ack),
-        .ack_received           (receiver_ack_received),
-        .ack_seqNum             (receiver_ack_seqNum),
-        .update_opponent_data   (network_valid),
-        .opponent_garbage       (lines_network_new),
-        .opponent_hold          (network_hold),
-        .opponent_piece_queue   (network_pq),
-        .opponent_playfield     (network_playfield),
-        .opponent_ready         (network_ready),
-        .opponent_lost          (network_lost),
-        .receive_done           (),
-        .packets_received_cnt   ()
+    // senderFSM controls both sender and receiver on both master/slave
+    SenderFSM send_fsm_inst (
+        .clk            (clk),
+        .rst_l          (rst_l),
+        .player_ready   (player_ready),
+        .player_unready (!player_ready),
+        .top_out        (top_out),
+        .ACK_received   (ack_received),
+        .game_end       (opponent_lost),
+        .send_ready     (send_ready),
+        .send_game_lost (send_game_lost),
+        .game_active    (game_active),
+        .ingame         (),
+        .gamelost       (),
+        .gameready      (),
+        .timeout        (win_timeout)
     );
+
+    assign player_ready =   (tetris_screen == MP_READY) ||
+                            (tetris_screen == MP_MODE);
+
+    //win timeout counter, handles crosstalk on the lost signal over GPIO
+    counter #(
+        .WIDTH(10)
+    ) win_counter (
+        .clk    (clk_gpio),
+        .rst_l  (rst_l),
+        .en     (opponent_lost),
+        .load   (opponent_lost_posedge),
+        .up     (1'b1),
+        .D      ('0),
+        .Q      (win_timeout_cnt)
+    );
+    assign opponent_lost_posedge    = opponent_lost && ~opponent_lost_delay;
+    assign win_timeout              = win_timeout_cnt >= WIN_TIMEOUT_CYCLES;
+
+    generate
+        if (IS_MASTER) begin
+            ClkDivider clk_gen_gpio_inst (
+                .clk        (clk),
+                .rst_l      (rst_l),
+                .clk_100kHz (clk_gpio)
+            );
+
+            assign GPIO[0]  = clk_gpio;
+
+            Receiver receiver_inst (
+                .clk                    (clk),
+                .rst_l                  (rst_l),
+                .clk_gpio               (clk_gpio),
+                .game_active            (tetris_screen == MP_MODE),
+                .serial_in_h            (miso_h),
+                .serial_in_0            (miso_0),
+                .serial_in_1            (miso_1),
+                .serial_in_2            (miso_2),
+                .serial_in_3            (miso_3),
+                .send_ready_ACK         (send_ready_ACK),
+                .ack_received           (ack_received),
+                .ack_seqNum             (receiver_ack_seqNum),
+                .update_opponent_data   (network_valid),
+                .opponent_garbage       (lines_network_new),
+                .opponent_hold          (network_hold),
+                .opponent_piece_queue   (network_pq),
+                .opponent_playfield     (network_playfield),
+                .opponent_ready         (network_ready),
+                .opponent_lost          (network_lost),
+                .receive_done           (),
+                .packets_received_cnt   ()
+            );
+
+            assign miso_h   = GPIO[6];
+            assign miso_0   = GPIO[7];
+            assign miso_1   = GPIO[8];
+            assign miso_2   = GPIO[9];
+            assign miso_3   = GPIO[10];
+
+            Sender sender_inst (
+                .clk                    (clk),
+                .clk_gpio               (clk_gpio),
+                .rst_l                  (rst_l),
+                .send_game_lost         (send_game_lost),
+                .game_active            (tetris_screen == MP_MODE),
+                .update_data            (network_trigger),
+                .garbage                (garbage_attack),
+                .hold                   (hold_piece_type),
+                .piece_queue            (next_pieces_queue),
+                .playfield              (playfield_data),
+                .ack_received           (ack_received),
+                .ack_seqNum             (1'b1),
+                .serial_out_h           (mosi_h),
+                .serial_out_0           (mosi_0),
+                .serial_out_1           (mosi_1),
+                .serial_out_2           (mosi_2),
+                .serial_out_3           (mosi_3),
+                .send_ready_ACK         (send_ready || send_ready_ACK),
+                .send_done              (),
+                .send_done_h            (),
+                .sender_seqNum          ()
+            );
+
+            assign GPIO[1]  = mosi_h;
+            assign GPIO[2]  = mosi_0;
+            assign GPIO[3]  = mosi_1;
+            assign GPIO[4]  = mosi_2;
+            assign GPIO[5]  = mosi_3;
+
+        end else begin
+            assign clk_gpio = GPIO[0];
+
+            Receiver receiver_inst (
+                .clk                    (clk),
+                .rst_l                  (rst_l),
+                .clk_gpio               (clk_gpio),
+                .game_active            (game_active),
+                .serial_in_h            (mosi_h),
+                .serial_in_0            (mosi_0),
+                .serial_in_1            (mosi_1),
+                .serial_in_2            (mosi_2),
+                .serial_in_3            (mosi_3),
+                .send_ready_ACK         (send_ready_ACK),
+                .ack_received           (ack_received),
+                .ack_seqNum             (receiver_ack_seqNum),
+                .update_opponent_data   (network_valid),
+                .opponent_garbage       (lines_network_new),
+                .opponent_hold          (network_hold),
+                .opponent_piece_queue   (network_pq),
+                .opponent_playfield     (network_playfield),
+                .opponent_ready         (network_ready),
+                .opponent_lost          (network_lost),
+                .receive_done           (),
+                .packets_received_cnt   ()
+            );
+
+            assign mosi_h   = GPIO[1];
+            assign mosi_0   = GPIO[2];
+            assign mosi_1   = GPIO[3];
+            assign mosi_2   = GPIO[4];
+            assign mosi_3   = GPIO[5];
+
+            Sender sender_inst (
+                .clk                    (clk),
+                .clk_gpio               (clk_gpio),
+                .rst_l                  (rst_l),
+                .send_game_lost         (send_game_lost),
+                .game_active            (game_active),
+                .update_data            (network_trigger),
+                .garbage                (garbage_attack),
+                .hold                   (hold_piece_type),
+                .piece_queue            (next_pieces_queue),
+                .playfield              (playfield_data),
+                .ack_received           (ack_received),
+                .ack_seqNum             (1'b1),
+                .serial_out_h           (miso_h),
+                .serial_out_0           (miso_0),
+                .serial_out_1           (miso_1),
+                .serial_out_2           (miso_2),
+                .serial_out_3           (miso_3),
+                .send_ready_ACK         (send_ready || send_ready_ACK),
+                .send_done              (),
+                .send_done_h            (),
+                .sender_seqNum          ()
+            );
+
+            assign GPIO[6]  = miso_h;
+            assign GPIO[7]  = miso_0;
+            assign GPIO[8]  = miso_1;
+            assign GPIO[9]  = miso_2;
+            assign GPIO[10] = miso_3;
+        end
+    endgenerate
 
     always_ff @ (posedge clk) begin
         if (network_valid) begin
