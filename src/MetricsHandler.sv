@@ -19,7 +19,7 @@ module MetricsHandler #(
     input  logic        clk,
     input  logic        rst_l,
     input  logic        state_update,
-    input  logic        V_SYNC,
+    input  logic        VSYNC_REDGE,
     output logic [ 6:0] HEX0,
     output logic [ 6:0] HEX1,
     output logic [ 6:0] HEX2,
@@ -49,7 +49,7 @@ module MetricsHandler #(
     always_comb begin
         if (state_update) begin
             nstate = COUNT;
-        end else if (latency_count >= COMPUTE_DELAY && V_SYNC) begin
+        end else if (latency_count >= COMPUTE_DELAY && VSYNC_REDGE) begin
             nstate = STOP;
         end else begin
             nstate = state;
