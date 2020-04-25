@@ -53,6 +53,9 @@ package NetworkPkg;
 	//# cycles before timeout & data resend
 	parameter TIMEOUT_CYCLES = 100;
 
+	//# cycles to wait after winning multiplayer game
+	parameter WIN_TIMEOUT_CYCLES = 1000;
+
 	//syncword
 	parameter SYNCWORD 		 = 8'hff;
 

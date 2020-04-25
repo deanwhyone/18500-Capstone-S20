@@ -28,6 +28,7 @@ module DataReceiver
 	input  logic 					 clk,
 	input  logic 					 rst_l,
 	input  logic 					 receive_start,
+	input  logic 					 game_active,
 	input  logic					 serial_in,
 	output logic [ENC_DATA_BITS-1:0] data_out,
 	output logic 					 receive_done
@@ -40,6 +41,9 @@ module DataReceiver
 	//set sync_en
 	always_ff @(posedge clk, negedge rst_l) begin
 		if(!rst_l) begin
+			sync_en <= 1'b0;
+		end
+		else if(!game_active) begin
 			sync_en <= 1'b0;
 		end
 		else if(receive_start) begin

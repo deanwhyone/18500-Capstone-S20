@@ -12,6 +12,7 @@
  * KEY[0] is
  *      hard drop when SW[0] is low
  *      hold when SW[0] is high
+ * SW[14] enables the frame counter in the corner
  * SW[15] loads in the VGA testpattern when high, otherwise should run Tetris
  * SW[16] enables the external controller
  * SW[17] is a hard reset.
@@ -28,7 +29,8 @@
 
 module TetrisTop
     import  DisplayPkg::*,
-            GamePkg::*;
+            GamePkg::*,
+            NetworkPkg::*;
 (
     input  logic        CLOCK_50,
 
@@ -55,8 +57,8 @@ module TetrisTop
     output logic        VGA_HS,
     output logic        VGA_VS
 );
-    parameter GLOBAL_INPUT_CD = 15;
-    parameter IS_MASTER = 1;
+    parameter GLOBAL_INPUT_CD   = 15;
+    parameter IS_MASTER         = 0;
 
     // abstract clk, rst_l signal for uniformity
     logic  clk, rst_l;
@@ -209,10 +211,11 @@ module TetrisTop
     tile_type_t     opponent_pq             [NEXT_PIECES_COUNT];
     tile_type_t     opponent_playfield      [PLAYFIELD_ROWS][PLAYFIELD_COLS];
 
-    logic           network_ready; // currently nonfunctional
-    logic           network_lost; // currently nonfunctional
-    logic           opponent_ready; // currently nonfunctional
-    logic           opponent_lost; // currently nonfunctional
+    logic           network_ready;
+    logic           network_lost;
+    logic           opponent_ready;
+    logic           opponent_lost;
+    logic           opponent_lost_delay;
 
     logic [ 4:0]    time_hours;
     logic           time_hours_en;
@@ -950,6 +953,13 @@ module TetrisTop
         .D      ('0),
         .Q      (win_timeout_cnt)
     );
+    always_ff @ (posedge clk, negedge rst_l) begin
+        if (!rst_l) begin
+            opponent_lost_delay <= 1'b0;
+        end else begin
+            opponent_lost_delay <= opponent_lost;
+        end
+    end
     assign opponent_lost_posedge    = opponent_lost && ~opponent_lost_delay;
     assign win_timeout              = win_timeout_cnt >= WIN_TIMEOUT_CYCLES;
 

@@ -23,7 +23,7 @@
  *  - piece_queue		content of player piece queue
  *	- playfield			content of player playfield
  *  - ack_received		indicates an ACK was received, used to reset the 
- *						timeout counter
+ *						timeout counter and increment seqNum
  *  - ack_seqNum 		sequence number to be sent with ACK packet, equivalent
  * 						to received seqNum + 1. Sampled on send_ready_ACK or 
  *						send_game_lost
@@ -36,7 +36,8 @@
  *  - serial_out_3		serial data out for data 3 line
  *  - send_done 		data send complete signal for testbench purposes
  *  - send_done_h		handshake send complete signal for testbench purposes
- *  - sender_seqnum 	sequence number output for testbench purposes
+ *  - sender_seqnum 	sequence number output for testbench purposes. increments
+ * 						on ack_received
  **/
  `default_nettype none
 
@@ -65,7 +66,8 @@ module Sender
 	output logic 	  			serial_out_3,
 	output logic 	  			send_done,
 	output logic 	  			send_done_h,
-	output logic 				sender_seqNum
+	output logic 				sender_seqNum,
+	output logic [3:0] 			acks_sent_cnt
 );
 	//Serial data sender signals
 	logic send_start;
@@ -76,6 +78,7 @@ module Sender
 
 	//Serial handshake sender signals
 	logic send_start_h;
+	logic update_data_done_h;
 	//logic send_done_h;
 
 	//timeout counter
@@ -111,6 +114,15 @@ module Sender
 		.update_data_done(update_data_done),
 		.timeout_cnt_en(timeout_cnt_en),
 		.send_start(send_start)
+	);
+
+	HandshakeSenderFSM   hnd_FSM (
+		.clk(clk_gpio),
+		.rst_l(rst_l),
+		.send_done(send_done_h),
+		.game_active(game_active),
+		.update_data_done(update_data_done_h),
+		.send_start(send_start_h)
 	);
 
 	//Serial senders
@@ -202,12 +214,10 @@ module Sender
 	always_ff @(posedge clk, negedge rst_l) begin
 		if(!rst_l) begin
 			data_packet  	 <= 'b0;
-			seqNum 		 	 <= 'b0;
 			update_data_done <= 'b0;
 		end
 		//update data packet
 		else if(update_data) begin
-			seqNum <= seqNum + 1;
 			data_packet.seqNum <= {4{seqNum}};
 			data_packet.garbage <= garbage;
 			data_packet.hold <= hold;
@@ -224,20 +234,30 @@ module Sender
 	always_ff @(posedge clk, negedge rst_l) begin
 		if(!rst_l) begin
 			hnd_packet <= 'b0;
-			send_start_h <= 'b0;
+			acks_sent_cnt <= 'b0;
 		end
-		//deassert send start so its a 1-cycle pulse
-		else if(send_start_h == 1'b1) begin
-			send_start_h <= 1'b0;
-		end
-		//update handshake packet and assert send start
+		//update handshake packet
 		else if(send_ready_ACK) begin
-			hnd_packet   <= {1'b1, ack_seqNum, 1'b0, ~ack_seqNum};
-			send_start_h <= 1'b1;
+			hnd_packet   <= 4'b1111;
+			update_data_done_h <= 1'b1;
+			acks_sent_cnt <= acks_sent_cnt + 1'b1;
 		end
 		else if(send_game_lost) begin
-			hnd_packet   <= {1'b0, ack_seqNum, 1'b1, ~ack_seqNum};
-			send_start_h <= 1'b1;
+			hnd_packet   <= 4'b0000;
+			update_data_done_h <= 1'b1;
+		end
+		else if(update_data_done_h) begin
+			update_data_done_h <= 1'b0;
+		end
+	end
+
+	//seqNum logic
+	always_ff @(posedge clk, negedge rst_l) begin
+		if(!rst_l) begin
+			seqNum <= 1'b0;
+		end
+		else if(ack_received) begin
+			seqNum <= seqNum + 1'b1;
 		end
 	end
 
