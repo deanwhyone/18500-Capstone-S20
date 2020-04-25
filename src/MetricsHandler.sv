@@ -27,7 +27,8 @@ module MetricsHandler #(
     output logic [ 6:0] HEX4,
     output logic [ 6:0] HEX5
 );
-    localparam HEX_COUNT = 6;
+    localparam RENDER_PF_DELAY  = 486112;
+    localparam HEX_COUNT        = 6;
 
     logic [ 6:0]    HEX_DISPLAYS    [HEX_COUNT];
     logic [ 3:0]    HEX_VALUE       [HEX_COUNT];
@@ -49,7 +50,8 @@ module MetricsHandler #(
     always_comb begin
         if (state_update) begin
             nstate = COUNT;
-        end else if (latency_count >= COMPUTE_DELAY && VSYNC_REDGE) begin
+        end else if (latency_count >= (COMPUTE_DELAY + RENDER_PF_DELAY) &&
+                                      VSYNC_REDGE) begin
             nstate = STOP;
         end else begin
             nstate = state;
