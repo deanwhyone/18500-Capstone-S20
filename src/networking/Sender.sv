@@ -66,7 +66,8 @@ module Sender
 	output logic 	  			serial_out_3,
 	output logic 	  			send_done,
 	output logic 	  			send_done_h,
-	output logic 				sender_seqNum
+	output logic 				sender_seqNum,
+	output logic [3:0] 			acks_sent_cnt
 );
 	//Serial data sender signals
 	logic send_start;
@@ -233,14 +234,16 @@ module Sender
 	always_ff @(posedge clk, negedge rst_l) begin
 		if(!rst_l) begin
 			hnd_packet <= 'b0;
+			acks_sent_cnt <= 'b0;
 		end
 		//update handshake packet
 		else if(send_ready_ACK) begin
-			hnd_packet   <= {1'b1, ack_seqNum, 1'b0, ~ack_seqNum};
+			hnd_packet   <= 4'b1111;
 			update_data_done_h <= 1'b1;
+			acks_sent_cnt <= acks_sent_cnt + 1'b1;
 		end
 		else if(send_game_lost) begin
-			hnd_packet   <= {1'b0, ack_seqNum, 1'b1, ~ack_seqNum};
+			hnd_packet   <= 4'b0000;
 			update_data_done_h <= 1'b1;
 		end
 		else if(update_data_done_h) begin

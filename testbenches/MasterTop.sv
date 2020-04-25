@@ -36,11 +36,12 @@ module MasterTop
     logic send_done, send_done_h;
     logic sender_seqNum;
     tile_type_t playfield_piece;
+    logic [3:0] acks_sent_cnt;
 
     //fsm signals
     logic player_ready, player_unready;
     logic top_out;
-    logic ingame, gamelost, gameready;
+    logic ingame, gamelost, gameready, gamewon, idle;
     logic win_timeout;
 
     //receiver signals
@@ -57,20 +58,25 @@ module MasterTop
     //posedge detector for opponent_lost
     logic opponent_lost_posedge;
     logic opponent_lost_delay;
-    always_ff @(posedge clk) begin
-        opponent_lost_delay <= opponent_lost;
+    always_ff @(posedge clk, negedge rst_l) begin
+        if(!rst_l) begin
+            opponent_lost_delay <= 'b0;
+        end
+        else begin
+            opponent_lost_delay <= opponent_lost;
+        end
     end
     assign opponent_lost_posedge = opponent_lost & ~opponent_lost_delay;
 
-    logic [9:0] win_timeout_cnt;
+    logic [31:0] win_timeout_cnt;
     //win timeout counter
-    counter #(.WIDTH(10)) win_counter (
+    counter #(.WIDTH(32)) win_counter (
         .clk(clk_gpio),
         .rst_l(rst_l),
         .en(opponent_lost),
         .load(opponent_lost_posedge),
         .up(1'b1),
-        .D(10'b0),
+        .D(32'b0),
         .Q(win_timeout_cnt)
     );
     assign win_timeout = (win_timeout_cnt >= WIN_TIMEOUT_CYCLES);
@@ -80,14 +86,16 @@ module MasterTop
                        .ACK_received(ack_received), .game_end(opponent_lost),
                        .send_ready(send_ready), .send_game_lost(send_game_lost),
                        .game_active(game_active), .ingame(ingame), 
-                       .gamelost(gamelost), .gameready(gameready), .timeout(win_timeout));
+                       .gamelost(gamelost), .gameready(gameready), 
+                       .timeout(win_timeout), .gamewon(gamewon), .idle(idle));
 
     Sender sender_inst(.clk(clk), .clk_gpio(clk_gpio), .rst_l(rst_l), .send_game_lost(send_game_lost),
                     .game_active(game_active), .update_data(update_data), .garbage(garbage), .hold(hold),
                     .piece_queue(piece_queue), .playfield(playfield), .ack_received(ack_received), .ack_seqNum(1'b1), 
                     .serial_out_h(mosi_h), .serial_out_0(mosi_0), .serial_out_1(mosi_1),
                     .serial_out_2(mosi_2), .serial_out_3(mosi_3), .send_ready_ACK(send_ready || send_ready_ACK),
-                    .send_done(send_done), .send_done_h(send_done_h), .sender_seqNum(sender_seqNum));
+                    .send_done(send_done), .send_done_h(send_done_h), .sender_seqNum(sender_seqNum),
+                    .acks_sent_cnt(acks_sent_cnt));
 
     Receiver receiver_inst(.clk(clk), .clk_gpio(clk_gpio), .rst_l(rst_l), .game_active(game_active),
                            .send_ready_ACK(send_ready_ACK), .ack_received(ack_received), 
@@ -105,7 +113,7 @@ module MasterTop
                            .serial_in_0(miso_0), .serial_in_1(miso_1), 
                            .serial_in_2(miso_2), .serial_in_3(miso_3), .*);*/
 
-    ClkDivider(.clk(clk), .rst_l(rst_l), .clk_100kHz(clk_gpio));
+    ClkDivider clkdv(.clk(clk), .rst_l(rst_l), .clk_100kHz(clk_gpio));
 
     assign clk          = CLOCK_50;
 
@@ -125,7 +133,7 @@ module MasterTop
 
     always_comb begin
         GPIO[0]  = clk_gpio;
-        GPIO[20]  = mosi_h;
+        GPIO[20] = mosi_h;
         GPIO[2]  = mosi_0;
         GPIO[3]  = mosi_1;
         GPIO[4]  = mosi_2;
@@ -137,8 +145,23 @@ module MasterTop
         miso_3 = GPIO[10];
     end
 
-    assign update_data    = !KEY[3];
-    assign top_out        = !KEY[1];
+    /*DelayedAutoShiftFSM DAS_send_inst (
+        .clk            (clk),
+        .rst_l          (rst_l),
+        .action_user    (!KEY[3]),
+        .action_valid   (1'b1),
+        .action_out     (update_data)
+    );*/
+
+    assign update_data = !KEY[3];
+
+    DelayedAutoShiftFSM DAS_send_gameover (
+        .clk            (clk),
+        .rst_l          (rst_l),
+        .action_user    (!KEY[1]),
+        .action_valid   (1'b1),
+        .action_out     (top_out)
+    );
 
     //assign send_ready     = !KEY[2];
     //assign send_game_lost = !KEY[1];
@@ -147,7 +170,9 @@ module MasterTop
     always_comb begin
         LEDR[17] = 'b0;
         LEDR[16] = game_active;
-        LEDR[15:6] = 'b0;
+        LEDR[15:8] = 'b0;
+        LEDR[7] = idle;
+        LEDR[6] = gamewon;
         LEDR[5] = gameready;
         LEDR[4] = gamelost;
         LEDR[3] = ingame;
@@ -164,6 +189,8 @@ module MasterTop
     BCDtoSevenSegment sevenSeg3(.bcd({3'b0, sender_seqNum}), .seg(HEX3));
     BCDtoSevenSegment sevenseg4(.bcd(opponent_garbage), .seg(HEX4));
     BCDtoSevenSegment sevenseg6(.bcd(garbage), .seg(HEX6));
+
+    BCDtoSevenSegment sevenseg5(.bcd(acks_sent_cnt), .seg(HEX5));
 
 
 endmodule : MasterTop

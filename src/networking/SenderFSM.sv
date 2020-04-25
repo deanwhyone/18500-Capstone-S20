@@ -54,7 +54,9 @@ module SenderFSM
 	output logic game_active,
     output logic ingame,
     output logic gamelost,
-    output logic gameready
+    output logic gameready,
+    output logic gamewon,
+    output logic idle
 );
 
 	typedef enum logic [2:0] {
@@ -85,6 +87,8 @@ module SenderFSM
                 ingame         = 1'b0;
                 gamelost       = 1'b0;
                 gameready      = 1'b0;
+                gamewon        = 1'b0;
+                idle           = 1'b1;
     		end
     		GAME_READY: begin
     			send_ready     = 1'b1;
@@ -93,6 +97,8 @@ module SenderFSM
                 ingame         = 1'b0;
                 gamelost       = 1'b0;
                 gameready      = 1'b1;
+                gamewon        = 1'b0;
+                idle           = 1'b0;
     		end
     		IN_GAME: begin
     			send_ready     = 1'b0;
@@ -101,6 +107,8 @@ module SenderFSM
                 ingame         = 1'b1;
                 gamelost       = 1'b0;
                 gameready      = 1'b0;
+                gamewon        = 1'b0;
+                idle           = 1'b0;
     		end
     		GAME_LOST: begin
     			send_ready     = 1'b0;
@@ -109,6 +117,8 @@ module SenderFSM
                 ingame         = 1'b0;
                 gamelost       = 1'b1;
                 gameready      = 1'b0;
+                gamewon        = 1'b0;
+                idle           = 1'b0;
     		end
             GAME_WON: begin
                 send_ready     = 1'b1;
@@ -117,6 +127,8 @@ module SenderFSM
                 ingame         = 1'b0;
                 gamelost       = 1'b0;
                 gameready      = 1'b0;
+                gamewon        = 1'b1;
+                idle           = 1'b0;
             end
     	endcase // state
     end

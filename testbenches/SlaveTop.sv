@@ -36,11 +36,12 @@ module SlaveTop
     logic send_done, send_done_h;
     logic sender_seqNum;
     tile_type_t playfield_piece;
+    logic [3:0] acks_sent_cnt;
 
     //fsm signals
     logic player_ready, player_unready;
     logic top_out;
-    logic ingame, gamelost, gameready;
+    logic ingame, gamelost, gameready, gamewon, idle;
     logic win_timeout;
 
     //receiver signals
@@ -59,20 +60,25 @@ module SlaveTop
     //posedge detector for opponent_lost
     logic opponent_lost_posedge;
     logic opponent_lost_delay;
-    always_ff @(posedge clk) begin
-        opponent_lost_delay <= opponent_lost;
+    always_ff @(posedge clk, negedge rst_l) begin
+        if(!rst_l) begin
+            opponent_lost_delay <= 'b0;
+        end
+        else begin
+            opponent_lost_delay <= opponent_lost;
+        end
     end
     assign opponent_lost_posedge = opponent_lost & ~opponent_lost_delay;
 
-    logic [9:0] win_timeout_cnt;
+    logic [31:0] win_timeout_cnt;
     //win timeout counter
-    counter #(.WIDTH(10)) win_counter (
+    counter #(.WIDTH(32)) win_counter (
         .clk(clk_gpio),
         .rst_l(rst_l),
         .en(opponent_lost),
         .load(opponent_lost_posedge),
         .up(1'b1),
-        .D(10'b0),
+        .D(32'b0),
         .Q(win_timeout_cnt)
     );
     assign win_timeout = (win_timeout_cnt >= WIN_TIMEOUT_CYCLES);
@@ -82,7 +88,8 @@ module SlaveTop
                        .ACK_received(ack_received), .game_end(opponent_lost),
                        .send_ready(send_ready), .send_game_lost(send_game_lost),
                        .game_active(game_active), .ingame(ingame),
-                       .gamelost(gamelost), .gameready(gameready), .timeout(win_timeout));
+                       .gamelost(gamelost), .gameready(gameready), 
+                       .timeout(win_timeout), .gamewon(gamewon), .idle(idle));
 
     /*Sender sender_inst(.serial_out_h(miso_h), .serial_out_0(miso_0), .serial_out_1(miso_1),
                        .serial_out_2(miso_2), .serial_out_3(miso_3), .send_ready_ACK(send_ready || send_ready_ACK), .*);*/
@@ -92,7 +99,8 @@ module SlaveTop
                     .piece_queue(piece_queue), .playfield(playfield), .ack_received(ack_received), .ack_seqNum(1'b1), 
                     .serial_out_h(miso_h), .serial_out_0(miso_0), .serial_out_1(miso_1),
                     .serial_out_2(miso_2), .serial_out_3(miso_3), .send_ready_ACK(send_ready || send_ready_ACK),
-                    .send_done(send_done), .send_done_h(send_done_h), .sender_seqNum(sender_seqNum));
+                    .send_done(send_done), .send_done_h(send_done_h), .sender_seqNum(sender_seqNum),
+                    .acks_sent_cnt(acks_sent_cnt));
 
     Receiver receiver_inst(.clk(clk), .clk_gpio(clk_gpio), .rst_l(rst_l), .game_active(game_active),
                            .send_ready_ACK(send_ready_ACK), .ack_received(ack_received), 
@@ -135,8 +143,23 @@ module SlaveTop
         mosi_3   = GPIO[5];
     end
 
-    assign update_data    = !KEY[3];
-    assign top_out        = !KEY[1];
+    /*DelayedAutoShiftFSM DAS_send_inst (
+        .clk            (clk),
+        .rst_l          (rst_l),
+        .action_user    (!KEY[3]),
+        .action_valid   (1'b1),
+        .action_out     (update_data)
+    );*/
+
+    assign update_data = !KEY[3];
+
+    DelayedAutoShiftFSM DAS_send_gameover (
+        .clk            (clk),
+        .rst_l          (rst_l),
+        .action_user    (!KEY[1]),
+        .action_valid   (1'b1),
+        .action_out     (top_out)
+    );
 
     //assign send_ready     = !KEY[2];
     //assign send_game_lost = !KEY[1];
@@ -144,13 +167,15 @@ module SlaveTop
     always_comb begin
         LEDR[17] = 'b0;
         LEDR[16] = game_active;
-        LEDR[9:0] = 'b0;
+        LEDR[7:0] = 'b0;
         LEDR[15] = gameready;
         LEDR[14] = gamelost;
         LEDR[13] = ingame;
         LEDR[12] = receive_done;
         LEDR[11] = send_done_h;
         LEDR[10] = send_done;
+        LEDR[9] = gamewon;
+        LEDR[8] = idle;
     end
 
 
@@ -161,6 +186,8 @@ module SlaveTop
     BCDtoSevenSegment sevenSeg3(.bcd({3'b0, sender_seqNum}), .seg(HEX3));
     BCDtoSevenSegment sevenseg4(.bcd(opponent_garbage), .seg(HEX4));
     BCDtoSevenSegment sevenseg6(.bcd(garbage), .seg(HEX6));
+
+    BCDtoSevenSegment sevenseg5(.bcd(acks_sent_cnt), .seg(HEX5));
 
 
 endmodule : SlaveTop

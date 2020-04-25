@@ -25,7 +25,9 @@
  *  - IDLE				idle state, remain here unless game is active
  *  - SEND 				send state, assert send_start upon transition into this
  *						state. Move to wait upon send_done
- *  - WAIT				wait state, move to send upon timeout or ack_received
+ *  - WAIT				wait state, move to send upon update_data
+ *  - WAIT_TO           wait timeout state, move to send upon timeout or update_data,
+ *                      move to wait upon ack_received
  **/
  `default_nettype none
 
@@ -48,7 +50,8 @@
 	typedef enum logic [1:0] {
 		IDLE, 
 		SEND,
-		WAIT
+		WAIT,
+        WAIT_TO
 	} dataSender_states_t;
 
 	dataSender_states_t state, next_state;
@@ -82,7 +85,7 @@
     				send_start     = 1'b0;
     			end
     			else if(send_done) begin
-    				next_state     = WAIT;
+    				next_state     = WAIT_TO;
     				timeout_cnt_en = 1'b1;
     				send_start     = 1'b0;
     			end
@@ -98,22 +101,39 @@
     				timeout_cnt_en = 1'b0;
     				send_start     = 1'b0;
     			end
-    			else if(timeout || update_data_done) begin
+    			else if(update_data_done) begin
     				next_state     = SEND;
     				timeout_cnt_en = 1'b0;
     				send_start     = 1'b1;
     			end
+    			else begin
+    				next_state     = WAIT;
+    				timeout_cnt_en = 1'b0;
+    				send_start     = 1'b0;
+    			end
+    		end
+            WAIT_TO: begin
+                if(!game_active) begin
+                    next_state     = IDLE;
+                    timeout_cnt_en = 1'b0;
+                    send_start     = 1'b0;
+                end
+                else if(timeout || update_data_done) begin
+                    next_state     = SEND;
+                    timeout_cnt_en = 1'b0;
+                    send_start     = 1'b1;
+                end
                 else if(ack_received) begin
                     next_state     = WAIT;
                     timeout_cnt_en = 1'b0;
                     send_start     = 1'b0;
                 end
-    			else begin
-    				next_state     = WAIT;
-    				timeout_cnt_en = 1'b1;
-    				send_start     = 1'b0;
-    			end
-    		end
+                else begin
+                    next_state     = WAIT_TO;
+                    timeout_cnt_en = 1'b1;
+                    send_start     = 1'b0;
+                end
+            end
     	endcase // state
     end
 
