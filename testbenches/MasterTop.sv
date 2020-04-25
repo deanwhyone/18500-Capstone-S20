@@ -40,7 +40,7 @@ module MasterTop
     //fsm signals
     logic player_ready, player_unready;
     logic top_out;
-    logic ingame, gamelost;
+    logic ingame, gamelost, gameready;
     logic win_timeout;
 
     //receiver signals
@@ -80,15 +80,30 @@ module MasterTop
                        .ACK_received(ack_received), .game_end(opponent_lost),
                        .send_ready(send_ready), .send_game_lost(send_game_lost),
                        .game_active(game_active), .ingame(ingame), 
-                       .gamelost(gamelost), .timeout(win_timeout));
+                       .gamelost(gamelost), .gameready(gameready), .timeout(win_timeout));
 
-    Sender sender_inst(.serial_out_h(mosi_h), .serial_out_0(mosi_0), .serial_out_1(mosi_1),
-                       .serial_out_2(mosi_2), .serial_out_3(mosi_3), .send_ready_ACK(send_ready || send_ready_ACK), .*);
+    Sender sender_inst(.clk(clk), .clk_gpio(clk_gpio), .rst_l(rst_l), .send_game_lost(send_game_lost),
+                    .game_active(game_active), .update_data(update_data), .garbage(garbage), .hold(hold),
+                    .piece_queue(piece_queue), .playfield(playfield), .ack_received(ack_received), .ack_seqNum(1'b1), 
+                    .serial_out_h(mosi_h), .serial_out_0(mosi_0), .serial_out_1(mosi_1),
+                    .serial_out_2(mosi_2), .serial_out_3(mosi_3), .send_ready_ACK(send_ready || send_ready_ACK),
+                    .send_done(send_done), .send_done_h(send_done_h), .sender_seqNum(sender_seqNum));
 
-    Receiver receiver_inst(.send_ready_ACK(send_ready_ACK), .ack_received(ack_received), 
+    Receiver receiver_inst(.clk(clk), .clk_gpio(clk_gpio), .rst_l(rst_l), .game_active(game_active),
+                           .send_ready_ACK(send_ready_ACK), .ack_received(ack_received), 
                            .ack_seqNum(ack_seqNum), .serial_in_h(miso_h),
                            .serial_in_0(miso_0), .serial_in_1(miso_1), 
-                           .serial_in_2(miso_2), .serial_in_3(miso_3), .*);
+                           .serial_in_2(miso_2), .serial_in_3(miso_3),
+                           .update_opponent_data(update_opponent_data), .opponent_garbage(opponent_garbage),
+                           .opponent_hold(opponent_hold), .opponent_playfield(opponent_playfield),
+                           .opponent_ready(opponent_ready), .opponent_lost(opponent_lost),
+                           .receive_done(receive_done), .packets_received_cnt(packets_received_cnt),
+                           .acks_received_cnt(acks_received_cnt));
+
+    /*Receiver receiver_inst(.send_ready_ACK(send_ready_ACK), .ack_received(ack_received), 
+                           .ack_seqNum(ack_seqNum), .serial_in_h(miso_h),
+                           .serial_in_0(miso_0), .serial_in_1(miso_1), 
+                           .serial_in_2(miso_2), .serial_in_3(miso_3), .*);*/
 
     ClkDivider(.clk(clk), .rst_l(rst_l), .clk_100kHz(clk_gpio));
 
@@ -97,6 +112,7 @@ module MasterTop
     always_comb begin
         rst_l           = !SW[17];
         player_ready    = SW[16];
+        //game_active     = SW[16];
         garbage[3:0]    = SW[3:0];
         playfield_piece = tile_type_t'(SW[7:4]);
 
@@ -109,25 +125,30 @@ module MasterTop
 
     always_comb begin
         GPIO[0]  = clk_gpio;
-        GPIO[1]  = mosi_h;
+        GPIO[20]  = mosi_h;
         GPIO[2]  = mosi_0;
         GPIO[3]  = mosi_1;
         GPIO[4]  = mosi_2;
         GPIO[5]  = mosi_3;
-        GPIO[6]  = miso_h;
-        GPIO[7]  = miso_0;
-        GPIO[8]  = miso_1;
-        GPIO[9]  = miso_2;
-        GPIO[10] = miso_3;
+        miso_h = GPIO[30];
+        miso_0 = GPIO[7];
+        miso_1 = GPIO[8];
+        miso_2 = GPIO[9];
+        miso_3 = GPIO[10];
     end
 
     assign update_data    = !KEY[3];
     assign top_out        = !KEY[1];
 
+    //assign send_ready     = !KEY[2];
+    //assign send_game_lost = !KEY[1];
+    //assign ack_received   = !KEY[0];
+
     always_comb begin
         LEDR[17] = 'b0;
         LEDR[16] = game_active;
-        LEDR[15:5] = 'b0;
+        LEDR[15:6] = 'b0;
+        LEDR[5] = gameready;
         LEDR[4] = gamelost;
         LEDR[3] = ingame;
         LEDR[2] = receive_done;
