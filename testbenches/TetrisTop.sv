@@ -183,6 +183,7 @@ module TetrisTop
     logic           send_ready_ACK;
     logic           ack_received;
     logic           receiver_ack_seqNum;
+    logic [ 3:0]    packets_received_cnt;
 
     logic           clk_gpio;
     logic           mosi_h;
@@ -575,16 +576,14 @@ module TetrisTop
         .lines_cleared      (lines_cleared),
         .battle_ready       (move_L || rotate_L),
         .ready_withdraw     (move_R || rotate_R),
-        .opponent_ready     (opponent_battle_ready), // receive network ready
-        .opponent_lost      (opponent_game_end), // receive network top-out
+        .opponent_ready     (opponent_ready), // receive network ready
+        .opponent_lost      (opponent_lost), // receive network top-out
         .top_out            (top_out), // communicate local user lost to network
         .game_start         (game_start_tetris),
         .game_end           (game_end_tetris),
         .current_screen     (tetris_screen),
         .randomizer_race    (randomizer_race)
     );
-    assign opponent_battle_ready    = 1'b1; // no network, opponent never ready
-    assign opponent_game_end        = 1'b0; // no network, opponent never ends
 
     // GameStatesFSM
     GameStatesFSM game_states_fsm_inst (
@@ -977,7 +976,7 @@ module TetrisTop
                 .clk                    (clk),
                 .rst_l                  (rst_l),
                 .clk_gpio               (clk_gpio),
-                .game_active            (tetris_screen == MP_MODE),
+                .game_active            (game_active),
                 .serial_in_h            (miso_h),
                 .serial_in_0            (miso_0),
                 .serial_in_1            (miso_1),
@@ -994,7 +993,7 @@ module TetrisTop
                 .opponent_ready         (network_ready),
                 .opponent_lost          (network_lost),
                 .receive_done           (),
-                .packets_received_cnt   ()
+                .packets_received_cnt   (packets_received_cnt)
             );
 
             assign miso_h   = GPIO[6];
@@ -1008,7 +1007,7 @@ module TetrisTop
                 .clk_gpio               (clk_gpio),
                 .rst_l                  (rst_l),
                 .send_game_lost         (send_game_lost),
-                .game_active            (tetris_screen == MP_MODE),
+                .game_active            (game_active),
                 .update_data            (network_trigger),
                 .garbage                (garbage_attack),
                 .hold                   (hold_piece_type),
@@ -1057,7 +1056,7 @@ module TetrisTop
                 .opponent_ready         (network_ready),
                 .opponent_lost          (network_lost),
                 .receive_done           (),
-                .packets_received_cnt   ()
+                .packets_received_cnt   (packets_received_cnt)
             );
 
             assign mosi_h   = GPIO[1];
@@ -1098,20 +1097,33 @@ module TetrisTop
         end
     endgenerate
 
-    always_ff @ (posedge clk) begin
-        if (network_valid) begin
-            opponent_hold           <= network_hold;
-            opponent_pq             <= network_pq;
-            opponent_playfield      <= network_playfield;
-            opponent_ready          <= network_ready;
-            opponent_lost           <= network_lost;
+    always_ff @ (posedge clk, negedge rst_l) begin
+        if (!rst_l) begin
+            opponent_ready      <= 1'b0;
+            opponent_hold       <= BLANK;
+            opponent_pq         <= '{NEXT_PIECES_COUNT{tile_type_t'(BLANK)}};
+            opponent_playfield  <= '{20{'{10{tile_type_t'(BLANK)}}}};
+            opponent_lost       <= 1'b0;
+        end else begin
+            opponent_ready              <= network_ready;
+            opponent_lost               <= network_lost;
+            if (tetris_screen != MP_MODE) begin
+                opponent_hold           <= BLANK;
+                opponent_pq             <= '{NEXT_PIECES_COUNT{
+                                            tile_type_t'(BLANK)}};
+                opponent_playfield      <= '{20{'{10{tile_type_t'(BLANK)}}}};
+            end
+            if (network_valid) begin
+                opponent_hold           <= network_hold;
+                opponent_pq             <= network_pq;
+                opponent_playfield      <= network_playfield;
+            end
         end
     end
 
-    logic received_seqNum;
-    // for debugging: HEX7 shows packet seqnum
+    // for debugging
     SevenSegmentDigit seqnum_display_inst (
-        .bch({3'd0, receiver_ack_seqNum}),
+        .bch(packets_received_cnt),
         .segment(HEX7),
         .blank(1'b0)
     );
