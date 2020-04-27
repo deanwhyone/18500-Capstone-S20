@@ -58,7 +58,7 @@ module TetrisTop
     output logic        VGA_VS
 );
     parameter GLOBAL_INPUT_CD   = 15;
-    parameter IS_MASTER         = 0;
+    parameter IS_MASTER         = 1;
 
     // abstract clk, rst_l signal for uniformity
     logic  clk, rst_l;

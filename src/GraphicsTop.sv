@@ -80,20 +80,60 @@ module GraphicsTop
                 end
                 SPRINT_MODE, MP_MODE: begin
                     // border color
-                    if (VGA_row >= BORDER_USER_VSTART &&
-                        VGA_row <  BORDER_USER_VEND   &&
-                        VGA_col >= BORDER_USER_HSTART &&
-                        VGA_col <  BORDER_USER_HEND) begin
+                    if (VGA_row >= BORDER_USER_PF_VSTART &&
+                        VGA_row <  BORDER_USER_PF_VEND   &&
+                        VGA_col >= BORDER_USER_PF_HSTART &&
+                        VGA_col <  BORDER_USER_PF_HEND) begin
 
                         output_color    = BORDER_COLOR;
                         if (tspin_detected) begin
                             output_color = BORDER_COLOR_ALT;
                         end
                     end
-                    if (VGA_row >= BORDER_LAN_VSTART &&
-                        VGA_row <  BORDER_LAN_VEND   &&
-                        VGA_col >= BORDER_LAN_HSTART &&
-                        VGA_col <  BORDER_LAN_HEND) begin
+                    if (VGA_row >= BORDER_LAN_PF_VSTART &&
+                        VGA_row <  BORDER_LAN_PF_VEND   &&
+                        VGA_col >= BORDER_LAN_PF_HSTART &&
+                        VGA_col <  BORDER_LAN_PF_HEND) begin
+
+                        output_color    = BORDER_COLOR;
+                        if (tspin_detected) begin
+                            output_color = BORDER_COLOR_ALT;
+                        end
+                    end
+                    if (VGA_row >= BORDER_USER_N_VSTART &&
+                        VGA_row <  BORDER_USER_N_VEND   &&
+                        VGA_col >= BORDER_USER_N_HSTART &&
+                        VGA_col <  BORDER_USER_N_HEND) begin
+
+                        output_color    = BORDER_COLOR;
+                        if (tspin_detected) begin
+                            output_color = BORDER_COLOR_ALT;
+                        end
+                    end
+                    if (VGA_row >= BORDER_LAN_N_VSTART &&
+                        VGA_row <  BORDER_LAN_N_VEND   &&
+                        VGA_col >= BORDER_LAN_N_HSTART &&
+                        VGA_col <  BORDER_LAN_N_HEND) begin
+
+                        output_color    = BORDER_COLOR;
+                        if (tspin_detected) begin
+                            output_color = BORDER_COLOR_ALT;
+                        end
+                    end
+                    if (VGA_row >= BORDER_USER_H_VSTART &&
+                        VGA_row <  BORDER_USER_H_VEND   &&
+                        VGA_col >= BORDER_USER_H_HSTART &&
+                        VGA_col <  BORDER_USER_H_HEND) begin
+
+                        output_color    = BORDER_COLOR;
+                        if (tspin_detected) begin
+                            output_color = BORDER_COLOR_ALT;
+                        end
+                    end
+                    if (VGA_row >= BORDER_LAN_H_VSTART  &&
+                        VGA_row <  BORDER_LAN_H_VEND    &&
+                        VGA_col >= BORDER_LAN_H_HSTART  &&
+                        VGA_col <  BORDER_LAN_H_HEND) begin
 
                         output_color    = BORDER_COLOR;
                         if (tspin_detected) begin
