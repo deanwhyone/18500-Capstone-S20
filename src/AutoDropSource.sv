@@ -39,6 +39,7 @@ module AutoDropSource
     input  logic            soft_drop,
     input  logic            soft_drop_valid,
     input  game_screens_t   tetris_screen,
+    input  logic [ 9:0]     lines_cleared,
     output logic            auto_drop
 );
     localparam GRAVITY_LV00 = 40_000_000;
@@ -66,6 +67,50 @@ module AutoDropSource
 
     always_comb begin
         gravity_choice = GRAVITY_LV00;
+        if (tetris_screen == MP_MODE) begin
+            if (lines_cleared > 10'd15) begin
+                gravity_choice = GRAVITY_LV01;
+            end
+            if (lines_cleared > 10'd30) begin
+                gravity_choice = GRAVITY_LV02;
+            end
+            if (lines_cleared > 10'd45) begin
+                gravity_choice = GRAVITY_LV03;
+            end
+            if (lines_cleared > 10'd60) begin
+                gravity_choice = GRAVITY_LV04;
+            end
+            if (lines_cleared > 10'd75) begin
+                gravity_choice = GRAVITY_LV05;
+            end
+            if (lines_cleared > 10'd90) begin
+                gravity_choice = GRAVITY_LV06;
+            end
+            if (lines_cleared > 10'd105) begin
+                gravity_choice = GRAVITY_LV07;
+            end
+            if (lines_cleared > 10'd120) begin
+                gravity_choice = GRAVITY_LV08;
+            end
+            if (lines_cleared > 10'd135) begin
+                gravity_choice = GRAVITY_LV00;
+            end
+            if (lines_cleared > 10'd150) begin
+                gravity_choice = GRAVITY_LV10;
+            end
+            if (lines_cleared > 10'd165) begin
+                gravity_choice = GRAVITY_LV11;
+            end
+            if (lines_cleared > 10'd180) begin
+                gravity_choice = GRAVITY_LV12;
+            end
+            if (lines_cleared > 10'd195) begin
+                gravity_choice = GRAVITY_LV13;
+            end
+            if (lines_cleared > 10'd210) begin
+                gravity_choice = GRAVITY_LV14;
+            end
+        end
     end
 
     always_comb begin

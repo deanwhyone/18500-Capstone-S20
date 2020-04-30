@@ -546,6 +546,7 @@ module TetrisTop
         .soft_drop      (soft_drop),
         .soft_drop_valid(soft_drop_valid),
         .tetris_screen  (tetris_screen),
+        .lines_cleared  (lines_cleared),
         .auto_drop      (auto_drop)
     );
 
