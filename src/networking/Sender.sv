@@ -24,6 +24,8 @@
  *	- playfield			content of player playfield
  *  - ack_received		indicates an ACK was received, used to reset the 
  *						timeout counter and increment seqNum
+ *  - received_seqNum_h sequence number of the received ACK, equal to expected
+ * 						seqNum of next packet. Discard ACK if equal to seqNum
  *  - ack_seqNum 		sequence number to be sent with ACK packet, equivalent
  * 						to received seqNum + 1. Sampled on send_ready_ACK or 
  *						send_game_lost
@@ -49,6 +51,7 @@ module Sender
 	input  logic 	  			clk,
 	input  logic 	  			clk_gpio,
 	input  logic 	 			rst_l,
+	input  logic 				init_seqNum,
 	input  logic 				send_ready_ACK,
 	input  logic				send_game_lost,
 	input  logic		  		game_active,
@@ -58,6 +61,7 @@ module Sender
 	input  tile_type_t 			piece_queue	[NEXT_PIECES_COUNT],
 	input  tile_type_t 			playfield 	[PLAYFIELD_ROWS][PLAYFIELD_COLS],
 	input  logic 				ack_received,
+	input  logic 				received_seqNum_h,
 	input  logic 				ack_seqNum,
 	output logic 	  			serial_out_h,
 	output logic 	  			serial_out_0,
@@ -230,6 +234,19 @@ module Sender
 		end
 	end
 
+	logic ack_seqNum_reg, send_ready_ACK_delay;
+	always_ff @(posedge clk) begin
+		send_ready_ACK_delay <= send_ready_ACK;
+	end
+	always_ff @(posedge clk, negedge rst_l) begin
+		if(!rst_l) begin
+			ack_seqNum_reg <= 'b0;
+		end
+		else if(send_ready_ACK) begin
+			ack_seqNum_reg <= ack_seqNum;
+		end
+	end
+
 	//handshake packet logic
 	always_ff @(posedge clk, negedge rst_l) begin
 		if(!rst_l) begin
@@ -237,13 +254,13 @@ module Sender
 			acks_sent_cnt <= 'b0;
 		end
 		//update handshake packet
-		else if(send_ready_ACK) begin
-			hnd_packet   <= 4'b1111;
+		else if(send_ready_ACK_delay) begin
+			hnd_packet   <= {{4{ack_seqNum_reg}}, 4'b1111};
 			update_data_done_h <= 1'b1;
 			acks_sent_cnt <= acks_sent_cnt + 1'b1;
 		end
 		else if(send_game_lost) begin
-			hnd_packet   <= 4'b0000;
+			hnd_packet   <= {{4{ack_seqNum_reg}}, 4'b0000};
 			update_data_done_h <= 1'b1;
 		end
 		else if(update_data_done_h) begin
@@ -254,9 +271,9 @@ module Sender
 	//seqNum logic
 	always_ff @(posedge clk, negedge rst_l) begin
 		if(!rst_l) begin
-			seqNum <= 1'b0;
+			seqNum <= init_seqNum;
 		end
-		else if(ack_received) begin
+		else if(ack_received && (received_seqNum_h != seqNum)) begin
 			seqNum <= seqNum + 1'b1;
 		end
 	end

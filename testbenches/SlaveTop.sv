@@ -37,6 +37,7 @@ module SlaveTop
     logic sender_seqNum;
     tile_type_t playfield_piece;
     logic [3:0] acks_sent_cnt;
+    logic received_seqNum_h;
 
     //fsm signals
     logic player_ready, player_unready;
@@ -83,24 +84,36 @@ module SlaveTop
     );
     assign win_timeout = (win_timeout_cnt >= WIN_TIMEOUT_CYCLES);
 
+    //lose timeout counter
+    logic [31:0] lose_timeout_cnt;
+    logic lose_timeout, lose_timeout_en;
+    counter #(.WIDTH(32)) lose_counter (
+        .clk(clk_gpio),
+        .rst_l(rst_l),
+        .en(lose_timeout_en),
+        .load(!lose_timeout_en),
+        .up(1'b1),
+        .D(32'b0),
+        .Q(lose_timeout_cnt)
+    );
+    assign lose_timeout = (lose_timeout_cnt >= LOSE_TIMEOUT_CYCLES);
+
     SenderFSM send_fsm(.clk(clk), .rst_l(rst_l), .player_ready(player_ready), 
                        .player_unready(player_unready), .top_out(top_out), 
                        .ACK_received(ack_received), .game_end(opponent_lost),
                        .send_ready(send_ready), .send_game_lost(send_game_lost),
-                       .game_active(game_active), .ingame(ingame),
+                       .game_active(game_active), .ingame(ingame), 
                        .gamelost(gamelost), .gameready(gameready), 
-                       .timeout(win_timeout), .gamewon(gamewon), .idle(idle));
-
-    /*Sender sender_inst(.serial_out_h(miso_h), .serial_out_0(miso_0), .serial_out_1(miso_1),
-                       .serial_out_2(miso_2), .serial_out_3(miso_3), .send_ready_ACK(send_ready || send_ready_ACK), .*);*/
+                       .timeout(win_timeout), .gamewon(gamewon), .idle(idle), 
+                       .lose_timeout(lose_timeout), .lose_timeout_en(lose_timeout_en));
 
     Sender sender_inst(.clk(clk), .clk_gpio(clk_gpio), .rst_l(rst_l), .send_game_lost(send_game_lost),
                     .game_active(game_active), .update_data(update_data), .garbage(garbage), .hold(hold),
-                    .piece_queue(piece_queue), .playfield(playfield), .ack_received(ack_received), .ack_seqNum(1'b1), 
+                    .piece_queue(piece_queue), .playfield(playfield), .ack_received(ack_received), .ack_seqNum(ack_seqNum), 
                     .serial_out_h(miso_h), .serial_out_0(miso_0), .serial_out_1(miso_1),
                     .serial_out_2(miso_2), .serial_out_3(miso_3), .send_ready_ACK(send_ready || send_ready_ACK),
                     .send_done(send_done), .send_done_h(send_done_h), .sender_seqNum(sender_seqNum),
-                    .acks_sent_cnt(acks_sent_cnt));
+                    .acks_sent_cnt(acks_sent_cnt), .received_seqNum_h(received_seqNum_h), .init_seqNum(1'b0));
 
     Receiver receiver_inst(.clk(clk), .clk_gpio(clk_gpio), .rst_l(rst_l), .game_active(game_active),
                            .send_ready_ACK(send_ready_ACK), .ack_received(ack_received), 
@@ -111,7 +124,7 @@ module SlaveTop
                            .opponent_hold(opponent_hold), .opponent_playfield(opponent_playfield),
                            .opponent_ready(opponent_ready), .opponent_lost(opponent_lost),
                            .receive_done(receive_done), .packets_received_cnt(packets_received_cnt),
-                           .acks_received_cnt(acks_received_cnt));
+                           .acks_received_cnt(acks_received_cnt), .received_seqNum_h(received_seqNum_h), .init_seqNum(1'b1));
 
     assign clk          = CLOCK_50;
 
@@ -143,15 +156,15 @@ module SlaveTop
         mosi_3   = GPIO[5];
     end
 
-    /*DelayedAutoShiftFSM DAS_send_inst (
+    DelayedAutoShiftFSM DAS_send_inst (
         .clk            (clk),
         .rst_l          (rst_l),
         .action_user    (!KEY[3]),
         .action_valid   (1'b1),
         .action_out     (update_data)
-    );*/
+    );
 
-    assign update_data = !KEY[3];
+    //assign update_data = !KEY[3];
 
     DelayedAutoShiftFSM DAS_send_gameover (
         .clk            (clk),
@@ -176,6 +189,7 @@ module SlaveTop
         LEDR[10] = send_done;
         LEDR[9] = gamewon;
         LEDR[8] = idle;
+        LEDR[5] = received_seqNum_h;
     end
 
 
