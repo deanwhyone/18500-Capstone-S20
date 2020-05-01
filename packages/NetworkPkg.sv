@@ -15,7 +15,7 @@ package NetworkPkg;
 	parameter NUM_DATA_LINES = 4;
 
 	//# header bits before encoding
-	parameter HEAD_BITS 	 = 4;
+	parameter HEAD_BITS 	 = 8;
 
 	//# header bits after hamming encoding (pid + sequence #), 4 parity bits
 	parameter ENC_HEAD_BITS  = HEAD_BITS + 4;
@@ -51,10 +51,13 @@ package NetworkPkg;
 	parameter HND_PKT_BITS   = ENC_HEAD_BITS + SYNC_BITS;
 
 	//# cycles before timeout & data resend
-	parameter TIMEOUT_CYCLES = 100;
+	parameter TIMEOUT_CYCLES = 200;
 
 	//# cycles to wait after winning multiplayer game
 	parameter WIN_TIMEOUT_CYCLES = 1000;
+
+	//# cycles to wait after losing multiplayer game and receiving an ack
+	parameter LOSE_TIMEOUT_CYCLES = 1000;
 
 	//syncword
 	parameter SYNCWORD 		 = 8'hff;
@@ -66,10 +69,8 @@ package NetworkPkg;
 
 	// Handshake header, pid and sequence number and their bitwise complement
 	typedef struct packed {
-		pid_t pid;
-		logic seqNum;
-		logic pid_n;
-		logic seqNum_n;
+		logic [3:0] seqNum;
+		logic [3:0] pid;
 	} hnd_head_t;
 
 	// Handshake packet

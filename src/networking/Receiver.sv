@@ -24,6 +24,8 @@
  *  - send_ready_ACK		indicates ACK should be sent over handshake line
  *  - send_game_lost		indicates game end should be sent over handshake line
  *  - ack_received			indicates an ACK was received
+ *  - received_seqNum_h 	sequence number of the received ACK, provided for sender
+ * 							to determine whether or not to discard ACK
  *  - ack_seqNum			sequence number of received data packet + 1, provided 
  *							for sender to include with handshake packet
  *  - update_opponent_data	1-cycle pulse, indicates there is fresh data on garbage, 
@@ -49,6 +51,7 @@ module Receiver
 	input  logic 	   			clk,
 	input  logic		   		clk_gpio,
 	input  logic 	   			rst_l,
+	input  logic 				init_seqNum,
 	input  logic 				game_active,
 	input  logic 	   			serial_in_h,
 	input  logic 	   			serial_in_0,
@@ -57,6 +60,7 @@ module Receiver
 	input  logic 	   			serial_in_3,
 	output logic 				send_ready_ACK,
 	output logic 				ack_received,
+	output logic 				received_seqNum_h,
 	output logic 				ack_seqNum,
 	output logic	   			update_opponent_data,
 	output logic [GBG_BITS-1:0] opponent_garbage,
@@ -226,7 +230,7 @@ module Receiver
 			opponent_hold		 <=  BLANK;
 			opponent_piece_queue <= '{NEXT_PIECES_COUNT{BLANK}};
 			opponent_playfield 	 <= '{PLAYFIELD_ROWS{'{PLAYFIELD_COLS{BLANK}}}};
-			seqNum 				 <= 'b0;
+			seqNum 				 <= init_seqNum;
 			send_ACK		     <= 'b0;
 			update_opponent_data <= 'b0;
 			packets_received_cnt <= 'b0;
@@ -238,7 +242,7 @@ module Receiver
 			opponent_hold		 <=  BLANK;
 			opponent_piece_queue <= '{NEXT_PIECES_COUNT{BLANK}};
 			opponent_playfield 	 <= '{PLAYFIELD_ROWS{'{PLAYFIELD_COLS{BLANK}}}};
-			seqNum 				 <= 'b0;
+			seqNum 				 <= init_seqNum;
 			send_ACK		     <= 'b0;
 			update_opponent_data <= 'b0;
 			packets_received_cnt <= 'b0;
@@ -313,12 +317,20 @@ module Receiver
         seqNum_set_bits = data_packet.seqNum[0] + data_packet.seqNum[1] + data_packet.seqNum[2] + data_packet.seqNum[3];
         received_seqNum = (seqNum_set_bits >= 2) ? 1'b1 : 1'b0;
     end
+    
+    //seqNum_h decoder
+    logic [2:0] seqNum_h_set_bits;
+    logic seqNum_h;
+    always_comb begin
+    	seqNum_h_set_bits = hnd_packet[7] + hnd_packet[6] + hnd_packet[5] + hnd_packet[4];
+    	seqNum_h = (seqNum_h_set_bits >= 2) ? 1'b1 : 1'b0;
+    end
 
     //pid decoder
     logic [2:0] pid_set_bits;
     logic pid;
     always_comb begin
-        pid_set_bits = hnd_packet[0] + hnd_packet[1] + hnd_packet[2] + hnd_packet[3];
+        pid_set_bits = hnd_packet[3] + hnd_packet[2] + hnd_packet[1] + hnd_packet[0];
         pid = (pid_set_bits >= 1) ? 1'b1 : 1'b0;
     end
 
@@ -336,18 +348,21 @@ module Receiver
             opponent_lost     <= 1'b0;
             send_ready        <= 1'b0;
             acks_received_cnt <= 4'b0;
+            received_seqNum_h <= 1'b0;
 		end 
 		else if(!game_active) begin
 			ack_received      <= 1'b0;
             opponent_lost     <= 1'b0;
             send_ready        <= 1'b0;
             acks_received_cnt <= 4'b0;
+            received_seqNum_h <= 1'b0;
 		end
 		else if(receive_done_h_posedge) begin
 			//check if ack
 			if(pid == 1'b1) begin
 				ack_received <= 1'b1;
 				acks_received_cnt <= acks_received_cnt + 1'b1;
+				received_seqNum_h <= seqNum_h;
 			end
             //check if game end
             else if(pid == 1'b0) begin

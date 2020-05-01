@@ -3,7 +3,7 @@
  * Eric Chen, Alton Olsen, Deanyone Su
  * 
  *								SenderFSM.sv
- * Control FSM for the sender. Interfaces with game logic, receiver, sender.
+ * Control FSM for the sender and receiver. Interfaces with game logic, receiver, sender.
  * Tracks game state and game start/end synchronization.
  *
  * INPUTS:
@@ -30,8 +30,10 @@
  *						is received from the opponent, then start the game
  *  - IN_GAME			in-progress game state, assert game_active
  *  - GAME_LOST 		game over state, send GAME END over handshake line 
- *						until an ACK is received from the opponent, then return
- *						to IDLE
+ *						until an ACK is received from the opponent, then go to
+ *                      GAME_LOST_TO and assert lose_timeout_en
+ *  - GAME_LOST_TO      continue sending GAME END over handshake line until
+ *                      LOSE_TIMEOUT_CYCLES have passed, then return to idle
  *  - GAME_WON          game won state, wait WIN_TIMEOUT_CYCLES then return to idle
  **/
  `default_nettype none
@@ -49,8 +51,10 @@ module SenderFSM
 	input  logic ACK_received,
 	input  logic game_end,
     input  logic timeout,
+    input  logic lose_timeout,
 	output logic send_ready,
 	output logic send_game_lost,
+    output logic lose_timeout_en,
 	output logic game_active,
     output logic ingame,
     output logic gamelost,
@@ -64,6 +68,7 @@ module SenderFSM
 		GAME_READY, 
 		IN_GAME, 
 		GAME_LOST,
+        GAME_LOST_TO,
         GAME_WON
 	} sender_states_t;
 
@@ -83,6 +88,7 @@ module SenderFSM
     		IDLE: begin
     			send_ready     = 1'b0;
     			send_game_lost = 1'b0;
+                lose_timeout_en = 1'b0;
     			game_active    = 1'b0;
                 ingame         = 1'b0;
                 gamelost       = 1'b0;
@@ -93,6 +99,7 @@ module SenderFSM
     		GAME_READY: begin
     			send_ready     = 1'b1;
     			send_game_lost = 1'b0;
+                lose_timeout_en = 1'b0;
     			game_active    = 1'b1;
                 ingame         = 1'b0;
                 gamelost       = 1'b0;
@@ -103,6 +110,7 @@ module SenderFSM
     		IN_GAME: begin
     			send_ready     = 1'b0;
     			send_game_lost = 1'b0;
+                lose_timeout_en = 1'b0;
     			game_active    = 1'b1;
                 ingame         = 1'b1;
                 gamelost       = 1'b0;
@@ -113,6 +121,7 @@ module SenderFSM
     		GAME_LOST: begin
     			send_ready     = 1'b0;
     			send_game_lost = 1'b1;
+                lose_timeout_en = 1'b0;
     			game_active    = 1'b1;
                 ingame         = 1'b0;
                 gamelost       = 1'b1;
@@ -120,9 +129,21 @@ module SenderFSM
                 gamewon        = 1'b0;
                 idle           = 1'b0;
     		end
+            GAME_LOST_TO: begin
+                send_ready     = 1'b0;
+                send_game_lost = 1'b1;
+                lose_timeout_en = 1'b1;
+                game_active    = 1'b1;
+                ingame         = 1'b0;
+                gamelost       = 1'b1;
+                gameready      = 1'b0;
+                gamewon        = 1'b0;
+                idle           = 1'b0;
+            end
             GAME_WON: begin
                 send_ready     = 1'b1;
                 send_game_lost = 1'b0;
+                lose_timeout_en = 1'b0;
                 game_active    = 1'b1;
                 ingame         = 1'b0;
                 gamelost       = 1'b0;
@@ -164,6 +185,12 @@ module SenderFSM
     			else
     				next_state = GAME_LOST;
     		end
+            GAME_LOST_TO: begin
+                if(lose_timeout)
+                    next_state = IDLE;
+                else
+                    next_state = GAME_LOST_TO;
+            end
             GAME_WON: begin
                 if(timeout)
                     next_state = IDLE;
