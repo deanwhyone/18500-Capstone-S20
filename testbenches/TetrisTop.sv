@@ -58,7 +58,7 @@ module TetrisTop
     output logic        VGA_VS
 );
     parameter GLOBAL_INPUT_CD   = 15;
-    parameter IS_MASTER         = 1;
+    parameter IS_MASTER         = 0;
 
     // abstract clk, rst_l signal for uniformity
     logic  clk, rst_l;
@@ -204,6 +204,9 @@ module TetrisTop
     logic           game_active;
     logic           win_timeout;
     logic [ 9:0]    win_timeout_cnt;
+    logic [ 9:0]    lose_timeout_cnt;
+    logic           lose_timeout;
+    logic           lose_timeout_en;
 
     tile_type_t     network_hold;
     tile_type_t     network_pq              [NEXT_PIECES_COUNT];
@@ -935,15 +938,17 @@ module TetrisTop
         .ingame         (),
         .gamelost       (),
         .gameready      (),
-        .timeout        (win_timeout)
+        .timeout        (win_timeout),
+        .lose_timeout   (lose_timeout),
+        .lose_timeout_en(lose_timeout_en)
     );
 
     assign player_ready =   (tetris_screen == MP_READY) ||
                             (tetris_screen == MP_MODE);
 
-    //win timeout counter, handles crosstalk on the lost signal over GPIO
+    // win timeout counter, handles crosstalk on the lost signal over GPIO
     counter #(
-        .WIDTH(10)
+        .WIDTH($bits(win_timeout_cnt))
     ) win_counter (
         .clk    (clk_gpio),
         .rst_l  (rst_l),
@@ -960,8 +965,22 @@ module TetrisTop
             opponent_lost_delay <= opponent_lost;
         end
     end
-    assign opponent_lost_posedge    = opponent_lost && ~opponent_lost_delay;
+    assign opponent_lost_posedge    = opponent_lost && !opponent_lost_delay;
     assign win_timeout              = win_timeout_cnt >= WIN_TIMEOUT_CYCLES;
+
+    // lose timeout counter
+    counter #(
+        .WIDTH($bits(lose_timeout_cnt))
+    ) lose_counter (
+        .clk    (clk_gpio),
+        .rst_l  (rst_l),
+        .en     (lose_timeout_en),
+        .load   (!lose_timeout_en),
+        .up     (1'b1),
+        .D      (32'b0),
+        .Q      (lose_timeout_cnt)
+    );
+    assign lose_timeout             = lose_timeout_cnt >= LOSE_TIMEOUT_CYCLES;
 
     generate
         if (IS_MASTER) begin
@@ -994,7 +1013,8 @@ module TetrisTop
                 .opponent_ready         (network_ready),
                 .opponent_lost          (network_lost),
                 .receive_done           (),
-                .packets_received_cnt   (packets_received_cnt)
+                .packets_received_cnt   (packets_received_cnt),
+                .init_seqNum            (1'b0)
             );
 
             assign miso_h   = GPIO[6];
@@ -1024,7 +1044,8 @@ module TetrisTop
                 .send_ready_ACK         (send_ready || send_ready_ACK),
                 .send_done              (),
                 .send_done_h            (),
-                .sender_seqNum          ()
+                .sender_seqNum          (),
+                .init_seqNum            (1'b0)
             );
 
             assign GPIO[1]  = mosi_h;
@@ -1057,7 +1078,8 @@ module TetrisTop
                 .opponent_ready         (network_ready),
                 .opponent_lost          (network_lost),
                 .receive_done           (),
-                .packets_received_cnt   (packets_received_cnt)
+                .packets_received_cnt   (packets_received_cnt),
+                .init_seqNum            (1'b0)
             );
 
             assign mosi_h   = GPIO[1];
@@ -1087,7 +1109,8 @@ module TetrisTop
                 .send_ready_ACK         (send_ready || send_ready_ACK),
                 .send_done              (),
                 .send_done_h            (),
-                .sender_seqNum          ()
+                .sender_seqNum          (),
+                .init_seqNum            (1'b0)
             );
 
             assign GPIO[6]  = miso_h;
