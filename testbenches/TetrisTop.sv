@@ -182,7 +182,7 @@ module TetrisTop
     logic [ 9:0]    lines_network_new;
     logic           send_ready_ACK;
     logic           ack_received;
-    logic           receiver_ack_seqNum;
+    logic           ack_seqNum;
     logic [ 3:0]    packets_received_cnt;
 
     logic           clk_gpio;
@@ -1005,7 +1005,7 @@ module TetrisTop
                 .serial_in_3            (miso_3),
                 .send_ready_ACK         (send_ready_ACK),
                 .ack_received           (ack_received),
-                .ack_seqNum             (receiver_ack_seqNum),
+                .ack_seqNum             (ack_seqNum),
                 .update_opponent_data   (network_valid),
                 .opponent_garbage       (lines_network_new),
                 .opponent_hold          (network_hold),
@@ -1037,7 +1037,7 @@ module TetrisTop
                 .piece_queue            (next_pieces_queue),
                 .playfield              (playfield_data),
                 .ack_received           (ack_received),
-                .ack_seqNum             (1'b1),
+                .ack_seqNum             (ack_seqNum),
                 .serial_out_h           (mosi_h),
                 .serial_out_0           (mosi_0),
                 .serial_out_1           (mosi_1),
@@ -1072,7 +1072,7 @@ module TetrisTop
                 .serial_in_3            (mosi_3),
                 .send_ready_ACK         (send_ready_ACK),
                 .ack_received           (ack_received),
-                .ack_seqNum             (receiver_ack_seqNum),
+                .ack_seqNum             (ack_seqNum),
                 .update_opponent_data   (network_valid),
                 .opponent_garbage       (lines_network_new),
                 .opponent_hold          (network_hold),
@@ -1104,7 +1104,7 @@ module TetrisTop
                 .piece_queue            (next_pieces_queue),
                 .playfield              (playfield_data),
                 .ack_received           (ack_received),
-                .ack_seqNum             (1'b1),
+                .ack_seqNum             (ack_seqNum),
                 .serial_out_h           (miso_h),
                 .serial_out_0           (miso_0),
                 .serial_out_1           (miso_1),
