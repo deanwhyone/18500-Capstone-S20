@@ -58,7 +58,7 @@ module TetrisTop
     output logic        VGA_VS
 );
     parameter GLOBAL_INPUT_CD   = 15;
-    parameter IS_MASTER         = 0;
+    parameter IS_MASTER         = 1;
 
     // abstract clk, rst_l signal for uniformity
     logic  clk, rst_l;
@@ -207,6 +207,7 @@ module TetrisTop
     logic [ 9:0]    lose_timeout_cnt;
     logic           lose_timeout;
     logic           lose_timeout_en;
+    logic           received_seqNum_h;
 
     tile_type_t     network_hold;
     tile_type_t     network_pq              [NEXT_PIECES_COUNT];
@@ -977,7 +978,7 @@ module TetrisTop
         .en     (lose_timeout_en),
         .load   (!lose_timeout_en),
         .up     (1'b1),
-        .D      (32'b0),
+        .D      ('0),
         .Q      (lose_timeout_cnt)
     );
     assign lose_timeout             = lose_timeout_cnt >= LOSE_TIMEOUT_CYCLES;
@@ -1014,6 +1015,7 @@ module TetrisTop
                 .opponent_lost          (network_lost),
                 .receive_done           (),
                 .packets_received_cnt   (packets_received_cnt),
+                .received_seqNum_h      (received_seqNum_h),
                 .init_seqNum            (1'b0)
             );
 
@@ -1045,6 +1047,7 @@ module TetrisTop
                 .send_done              (),
                 .send_done_h            (),
                 .sender_seqNum          (),
+                .received_seqNum_h      (received_seqNum_h),
                 .init_seqNum            (1'b0)
             );
 
@@ -1079,6 +1082,7 @@ module TetrisTop
                 .opponent_lost          (network_lost),
                 .receive_done           (),
                 .packets_received_cnt   (packets_received_cnt),
+                .received_seqNum_h      (received_seqNum_h),
                 .init_seqNum            (1'b0)
             );
 
@@ -1110,6 +1114,7 @@ module TetrisTop
                 .send_done              (),
                 .send_done_h            (),
                 .sender_seqNum          (),
+                .received_seqNum_h      (received_seqNum_h),
                 .init_seqNum            (1'b0)
             );
 
