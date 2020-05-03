@@ -103,7 +103,7 @@ package DisplayPkg;
 
     parameter PENDING_HSTART        = BORDER_USER_PF_HSTART - 30;
     parameter PENDING_HEND          = BORDER_USER_PF_HSTART;
-    parameter PENDING_VSTART        = HOLD_USER_VEND + 2;
+    parameter PENDING_VSTART        = BORDER_USER_H_VEND;
     parameter PENDING_VEND          = TIMER_VSTART - 10;
     parameter PENDING_HEIGHT        = PENDING_VEND - PENDING_VSTART;
     parameter PENDING_TICK          = PENDING_HEIGHT / 20;
