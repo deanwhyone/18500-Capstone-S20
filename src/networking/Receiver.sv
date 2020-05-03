@@ -1,10 +1,10 @@
 /**
  * 18500 Capstone S20
  * Eric Chen, Alton Olsen, Deanyone Su
- * 
+ *
  *								Receiver.sv
  * Overall receiver module to decode and receive data serially across 5 wires.
- * Takes inputs from GPIO, control FSM. Outputs to game logic and sender. 
+ * Takes inputs from GPIO, control FSM. Outputs to game logic and sender.
  * When game is active, listens for syncword on transmission wires. Decodes
  * and reconstructs received packets. On completion, asserts a send signal for
  * the sender, or update_opponent_data for the game logic.
@@ -19,16 +19,16 @@
  *	- serial_in_1			serial data in for data 1 line
  *	- serial_in_2			serial data in for data 2 line
  *	- serial_in_3 			serial data in for data 3 line
- * 
+ *
  * OUTPUTS:
  *  - send_ready_ACK		indicates ACK should be sent over handshake line
  *  - send_game_lost		indicates game end should be sent over handshake line
  *  - ack_received			indicates an ACK was received
  *  - received_seqNum_h 	sequence number of the received ACK, provided for sender
  * 							to determine whether or not to discard ACK
- *  - ack_seqNum			sequence number of received data packet + 1, provided 
+ *  - ack_seqNum			sequence number of received data packet + 1, provided
  *							for sender to include with handshake packet
- *  - update_opponent_data	1-cycle pulse, indicates there is fresh data on garbage, 
+ *  - update_opponent_data	1-cycle pulse, indicates there is fresh data on garbage,
  *							hold, piece_queue, playfield.
  *  - opponent_garbage		number of garbage lines being sent
  *  - opponent_hold			content of opponent's hold register
@@ -39,7 +39,7 @@
  *  - receive_done 			data receive complete signal for testbench purposes
  *  - packets_received_cnt	received packets counter for testbench purposes
  *  - acks_received_cnt		received acks counter for testbench purposes
- * 
+ *
  **/
  `default_nettype none
 
@@ -77,7 +77,7 @@ module Receiver
 	logic receive_start;
 	//logic receive_done;
 	logic receive_done_0, receive_done_1, receive_done_2, receive_done_3;
-	assign receive_done = receive_done_0 & receive_done_1 & receive_done_2 & receive_done_3;
+	assign receive_done = receive_done_0 || receive_done_1 || receive_done_2 || receive_done_3;
 
 	logic [ENC_DATA_BITS-1:0] enc_data_0, enc_data_1, enc_data_2, enc_data_3;
 
@@ -178,7 +178,7 @@ module Receiver
 	logic [PAR_DATA_BITS-1:0] dec_data_0, dec_data_1, dec_data_2, dec_data_3;
 	logic [HEAD_BITS-1:0] dec_data_h;
 	data_pkt_t data_packet;
-	hnd_head_t hnd_packet;	
+	hnd_head_t hnd_packet;
 
     logic send_ACK, send_ready;
     assign send_ready_ACK = send_ACK || send_ready;
@@ -236,7 +236,7 @@ module Receiver
 			packets_received_cnt <= 'b0;
 
 			load_timeout_cnt     <= 'b0;
-		end 
+		end
 		else if(!game_active) begin
 			opponent_garbage	 <= 'b0;
 			opponent_hold		 <=  BLANK;
@@ -317,7 +317,7 @@ module Receiver
         seqNum_set_bits = data_packet.seqNum[0] + data_packet.seqNum[1] + data_packet.seqNum[2] + data_packet.seqNum[3];
         received_seqNum = (seqNum_set_bits >= 2) ? 1'b1 : 1'b0;
     end
-    
+
     //seqNum_h decoder
     logic [2:0] seqNum_h_set_bits;
     logic seqNum_h;
@@ -349,7 +349,7 @@ module Receiver
             send_ready        <= 1'b0;
             acks_received_cnt <= 4'b0;
             received_seqNum_h <= 1'b0;
-		end 
+		end
 		else if(!game_active) begin
 			ack_received      <= 1'b0;
             opponent_lost     <= 1'b0;
