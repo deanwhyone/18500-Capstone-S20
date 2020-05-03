@@ -36,6 +36,7 @@ module LinesManager
     logic [ 9:0]    combo_incr;
 
     logic [ 9:0]    b2b_incr;
+    logic [ 9:0]    modifier;
 
     logic [ 9:0]    lines_sent_new;
     logic [ 9:0]    lines_to_send_pipe;
@@ -146,7 +147,9 @@ module LinesManager
             end
         end
 
-        lines_to_send_pipe = lines_to_send_pipe + combo_incr + b2b_incr;
+        modifier = (lines_cleared_en) ? combo_incr + b2b_incr : '0;
+
+        lines_to_send_pipe = lines_to_send_pipe + modifier;
     end
 
     assign lines_sent_new       = lines_sent + lines_to_send_pipe;
