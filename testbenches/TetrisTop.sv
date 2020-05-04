@@ -1026,13 +1026,7 @@ module TetrisTop
                 .received_seqNum_h      (received_seqNum_h),
                 .init_seqNum            (1'b0)
             );
-            // original assignment
-            // assign miso_h   = GPIO[6];
-            // assign miso_0   = GPIO[7];
-            // assign miso_1   = GPIO[8];
-            // assign miso_2   = GPIO[9];
-            // assign miso_3   = GPIO[10];
-            // moving pins away
+
             assign miso_h   = GPIO[10];
             assign miso_0   = GPIO[11];
             assign miso_1   = GPIO[12];
@@ -1064,13 +1058,7 @@ module TetrisTop
                 .received_seqNum_h      (received_seqNum_h),
                 .init_seqNum            (1'b0)
             );
-            // original assignment
-            // assign GPIO[1]  = mosi_h;
-            // assign GPIO[2]  = mosi_0;
-            // assign GPIO[3]  = mosi_1;
-            // assign GPIO[4]  = mosi_2;
-            // assign GPIO[5]  = mosi_3;
-            // moving pins away
+
             assign GPIO[8]  = mosi_h;
             assign GPIO[6]  = mosi_0;
             assign GPIO[4]  = mosi_1;
@@ -1130,13 +1118,7 @@ module TetrisTop
                 .received_seqNum_h      (received_seqNum_h),
                 .init_seqNum            (1'b0)
             );
-            // original assignment
-            // assign mosi_h   = GPIO[1];
-            // assign mosi_0   = GPIO[2];
-            // assign mosi_1   = GPIO[3];
-            // assign mosi_2   = GPIO[4];
-            // assign mosi_3   = GPIO[5];
-            // moving pins away
+
             assign mosi_h   = GPIO[8];
             assign mosi_0   = GPIO[6];
             assign mosi_1   = GPIO[4];
@@ -1167,13 +1149,7 @@ module TetrisTop
                 .received_seqNum_h      (received_seqNum_h),
                 .init_seqNum            (1'b0)
             );
-            // original assignment
-            // assign GPIO[6]  = miso_h;
-            // assign GPIO[7]  = miso_0;
-            // assign GPIO[8]  = miso_1;
-            // assign GPIO[9]  = miso_2;
-            // assign GPIO[10] = miso_3;
-            // moving pins away
+
             assign GPIO[10]  = miso_h;
             assign GPIO[11]  = miso_0;
             assign GPIO[12]  = miso_1;
