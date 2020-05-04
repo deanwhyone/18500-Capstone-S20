@@ -39,6 +39,7 @@ module TetrisTop
     // controller GPIO pins
     inout        [35:0] GPIO,
     output logic [17:0] LEDR,
+    output logic [ 7:0] LEDG,
     output logic [ 6:0] HEX0,
     output logic [ 6:0] HEX1,
     output logic [ 6:0] HEX2,
@@ -58,7 +59,6 @@ module TetrisTop
     output logic        VGA_VS
 );
     parameter GLOBAL_INPUT_CD   = 15;
-    parameter IS_MASTER         = 1;
 
     // abstract clk, rst_l signal for uniformity
     logic  clk, rst_l;
@@ -186,6 +186,9 @@ module TetrisTop
     logic [ 3:0]    packets_received_cnt;
 
     logic           clk_gpio;
+    logic           clk_gpio_sync;
+    logic           clk_gpio_read0;
+    logic           clk_gpio_read1;
     logic           mosi_h;
     logic           mosi_0;
     logic           mosi_1;
@@ -527,6 +530,9 @@ module TetrisTop
         garbage_line = '{10{GARBAGE}};
         garbage_line[random_src%10] = BLANK;
     end
+    // monitor lines from network
+    assign LEDG[7]      = network_valid;
+    assign LEDG[3:0]    = lines_network_new[3:0];
 
     // LinesManager module manages lines cleared and lines sent
     LinesManager lm_inst (
@@ -983,15 +989,17 @@ module TetrisTop
     );
     assign lose_timeout             = lose_timeout_cnt >= LOSE_TIMEOUT_CYCLES;
 
+    parameter IS_MASTER             = 1;
     generate
         if (IS_MASTER) begin
             ClkDivider clk_gen_gpio_inst (
                 .clk        (clk),
                 .rst_l      (rst_l),
+                .align      (1'b0),
                 .clk_100kHz (clk_gpio)
             );
 
-            assign GPIO[0]  = clk_gpio;
+            assign GPIO[31]  = clk_gpio;
 
             Receiver receiver_inst (
                 .clk                    (clk),
@@ -1018,12 +1026,18 @@ module TetrisTop
                 .received_seqNum_h      (received_seqNum_h),
                 .init_seqNum            (1'b0)
             );
-
-            assign miso_h   = GPIO[6];
-            assign miso_0   = GPIO[7];
-            assign miso_1   = GPIO[8];
-            assign miso_2   = GPIO[9];
-            assign miso_3   = GPIO[10];
+            // original assignment
+            // assign miso_h   = GPIO[6];
+            // assign miso_0   = GPIO[7];
+            // assign miso_1   = GPIO[8];
+            // assign miso_2   = GPIO[9];
+            // assign miso_3   = GPIO[10];
+            // moving pins away
+            assign miso_h   = GPIO[10];
+            assign miso_0   = GPIO[11];
+            assign miso_1   = GPIO[12];
+            assign miso_2   = GPIO[13];
+            assign miso_3   = GPIO[14];
 
             Sender sender_inst (
                 .clk                    (clk),
@@ -1050,15 +1064,46 @@ module TetrisTop
                 .received_seqNum_h      (received_seqNum_h),
                 .init_seqNum            (1'b0)
             );
+            // original assignment
+            // assign GPIO[1]  = mosi_h;
+            // assign GPIO[2]  = mosi_0;
+            // assign GPIO[3]  = mosi_1;
+            // assign GPIO[4]  = mosi_2;
+            // assign GPIO[5]  = mosi_3;
+            // moving pins away
+            assign GPIO[8]  = mosi_h;
+            assign GPIO[6]  = mosi_0;
+            assign GPIO[4]  = mosi_1;
+            assign GPIO[2]  = mosi_2;
+            assign GPIO[0]  = mosi_3;
 
-            assign GPIO[1]  = mosi_h;
-            assign GPIO[2]  = mosi_0;
-            assign GPIO[3]  = mosi_1;
-            assign GPIO[4]  = mosi_2;
-            assign GPIO[5]  = mosi_3;
-
+            // grounding out unused wires
+            assign GPIO[1]  = 1'b0;
+            assign GPIO[3]  = 1'b0;
+            assign GPIO[5]  = 1'b0;
+            assign GPIO[7]  = 1'b0;
+            assign GPIO[9]  = 1'b0;
+            assign GPIO[30] = 1'b0;
         end else begin
-            assign clk_gpio = GPIO[0];
+            // synchronizer chain for clock
+            always_ff @ (posedge clk, negedge rst_l) begin
+                if (!rst_l) begin
+                    clk_gpio_sync   <= 1'b0;
+                    clk_gpio_read0  <= 1'b0;
+                    clk_gpio_read1  <= 1'b0;
+                end else begin
+                    clk_gpio_sync   <= GPIO[31];
+                    clk_gpio_read0  <= clk_gpio_sync;
+                    clk_gpio_read1  <= clk_gpio_read0;
+                end
+            end
+
+            ClkDivider clk_gen_gpio_inst (
+                .clk        (clk),
+                .rst_l      (rst_l),
+                .align      (!clk_gpio_read0 && clk_gpio_read1),
+                .clk_100kHz (clk_gpio)
+            );
 
             Receiver receiver_inst (
                 .clk                    (clk),
@@ -1085,13 +1130,18 @@ module TetrisTop
                 .received_seqNum_h      (received_seqNum_h),
                 .init_seqNum            (1'b0)
             );
-
-            assign mosi_h   = GPIO[1];
-            assign mosi_0   = GPIO[2];
-            assign mosi_1   = GPIO[3];
-            assign mosi_2   = GPIO[4];
-            assign mosi_3   = GPIO[5];
-
+            // original assignment
+            // assign mosi_h   = GPIO[1];
+            // assign mosi_0   = GPIO[2];
+            // assign mosi_1   = GPIO[3];
+            // assign mosi_2   = GPIO[4];
+            // assign mosi_3   = GPIO[5];
+            // moving pins away
+            assign mosi_h   = GPIO[8];
+            assign mosi_0   = GPIO[6];
+            assign mosi_1   = GPIO[4];
+            assign mosi_2   = GPIO[2];
+            assign mosi_3   = GPIO[0];
             Sender sender_inst (
                 .clk                    (clk),
                 .clk_gpio               (clk_gpio),
@@ -1117,12 +1167,26 @@ module TetrisTop
                 .received_seqNum_h      (received_seqNum_h),
                 .init_seqNum            (1'b0)
             );
+            // original assignment
+            // assign GPIO[6]  = miso_h;
+            // assign GPIO[7]  = miso_0;
+            // assign GPIO[8]  = miso_1;
+            // assign GPIO[9]  = miso_2;
+            // assign GPIO[10] = miso_3;
+            // moving pins away
+            assign GPIO[10]  = miso_h;
+            assign GPIO[11]  = miso_0;
+            assign GPIO[12]  = miso_1;
+            assign GPIO[13]  = miso_2;
+            assign GPIO[14]  = miso_3;
 
-            assign GPIO[6]  = miso_h;
-            assign GPIO[7]  = miso_0;
-            assign GPIO[8]  = miso_1;
-            assign GPIO[9]  = miso_2;
-            assign GPIO[10] = miso_3;
+            // grounding out unused wires
+            assign GPIO[1]  = 1'b0;
+            assign GPIO[3]  = 1'b0;
+            assign GPIO[5]  = 1'b0;
+            assign GPIO[7]  = 1'b0;
+            assign GPIO[9]  = 1'b0;
+            assign GPIO[30] = 1'b0;
         end
     endgenerate
 
